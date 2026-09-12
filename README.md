@@ -105,7 +105,7 @@ traces, 300 s on synthetic):
   standardisation (real-trace cells identical to three decimals; coefficient
   cosine ≥ 0.98), so it is not an artefact of the preprocessing.
 
-## 6. Decision: Research 1 continues with a changed target
+## 6. Decision after Phase 0.75: Research 1 continues with a changed target
 
 Under the gate fixed before the run (`oracle_binary` closure ≥ 0.7 → signal
 problem, ≤ 0.3 → objective problem, between → decompose further), the answer is
@@ -124,6 +124,37 @@ outside this repository's plan and are not a dependency of anything here.
 
 Details, tables, and the Confirmed / Refuted / Unresolved lists are in
 `docs/predictability-retention-gap.md`.
+
+## 7. Phase 0.9 result: the target change helps, and does not close the gap
+
+`scripts/run_target_change.py`, `docs/target-change-findings.md`. Same
+features, ranker, penalty, training window, deployment path, eviction, seeds;
+only the target changes: binary at 60 / 300 / 600 s, log reuse count within
+60 / 600 s, negative log next-use time, and a parameter-free arm that picks the
+binary horizon nearest the cache's Little's-law residence time.
+
+HeadroomClosure of the best causal target against the Phase 0.5 target and
+LFU, five seeds:
+
+| budget | conversation: 600 s → best target | LFU | tool-agent: 600 s → best target | LFU |
+|---|---|---:|---|---:|
+| 0.25% | 0.06 → 0.15 (count 600 s) | 0.19 | 0.14 → 0.25 (next use) | 0.27 |
+| 1% | 0.19 → 0.25 (next use) | 0.22 | 0.20 → 0.24 (next use) | 0.21 |
+| 2% | 0.25 → 0.27 (binary 60 s) | 0.16 | 0.25 → 0.26 (binary 60 s) | 0.15 |
+| 5% | 0.08 → 0.09 (binary 60 s, within CI) | −0.21 | 0.13 (600 s stays best) | −0.27 |
+
+- **Confirmed:** below 1% the count and next-use targets recover 0.07–0.11
+  more headroom than the 600 s label (outside the seed CIs); next-use time is
+  the best causal target at 1% on both real traces; the horizon ordering of
+  the oracle sweep carries over to the causal ranker.
+- **Refuted:** that the target change closes the gap. Below 1% the best causal
+  arm is still under LFU; it reaches 16–37% of its own count oracle and
+  8–29% of its own next-use oracle at ≤ 1% on conversation; the best cell
+  over all budgets from 0.25% up moves from 0.253 to 0.270. The Little's-law
+  matched arm selects 60 s at every budget ≤ 2% and adds nothing.
+- **What remains** is a signal gap on the new target: once the target is
+  right, the history features cannot rank it on the eviction candidates. The
+  synthetic trace stays unlearnable (≤ 0.09) under every target.
 
 ## Repository layout
 
@@ -144,6 +175,7 @@ python3 scripts/run_cross_workload.py data/raw/*_trace.jsonl
 python3 scripts/run_predictability_gap.py data/raw/*_trace.jsonl --seeds 5
 # needs scikit-learn; see scripts/README.md for the virtualenv
 .venv/bin/python scripts/run_candidate_models.py data/raw/*_trace.jsonl
+python3 scripts/run_target_change.py data/raw/*_trace.jsonl --seeds 5
 ```
 
 Dependencies: NumPy and Matplotlib; scikit-learn only for the candidate-model check.
@@ -200,7 +232,7 @@ and greedy leaf eviction; it is a headroom estimate, not a proven optimum.
 - SSD / GDS / PCIe bandwidth optimisation as the main contribution
 - restore-vs-recompute crossover as the main result
 - storage-engine redesign
-- semantic embedding prediction (Research 2, gated)
+- semantic embedding prediction (Research 2, a separate experiment)
 - approximate KV reuse
 - improving model answer quality via caching
 - vLLM / LMCache integration before the retention objective is settled

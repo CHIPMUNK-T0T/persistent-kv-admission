@@ -369,10 +369,10 @@ unrepeatable across processes.
 
 ### Unresolved
 
-- **Whether a causal ranker fitted to the short-horizon, count, or next-use
-  targets recovers more headroom in replay.** Its decision-population AUC for
-  the 60 s label is 0.66–0.76 at small budgets (§5b); what that buys in
-  avoided tokens is the next measurement (`scripts/run_target_change.py`).
+- ~~Whether a causal ranker fitted to the short-horizon, count, or next-use
+  targets recovers more headroom in replay.~~ Measured in Phase 0.9
+  (`docs/target-change-findings.md`): +0.07 to +0.11 below 1%, next-use best
+  at 1%, still below LFU below 1%, best cell 0.253 → 0.270.
 - **Which budget regime a real persistent tier sits in.** The traces span 59
   minutes. A fixed capacity is a smaller fraction of a longer trace's working
   set, which argues that persistent tiers are usually in the small-budget
@@ -404,7 +404,8 @@ change of what is predicted, not a new policy. It is measured in two steps:
 2. replay of the same causal ranker fitted to each alternative target,
    through the same eviction machinery, over the same seeds and budgets.
 
-The large-budget signal gap is recorded as a bound on what history-based
+Both steps were run; step 2 is `docs/target-change-findings.md`. The
+large-budget signal gap is recorded as a bound on what history-based
 selection can reach there (oracle 0.72–0.96 against ~0.6 decision-population
 AUC). Semantic or contextual signals (Research 2) are a separate experiment
 outside this repository's plan and are not gated on anything here.

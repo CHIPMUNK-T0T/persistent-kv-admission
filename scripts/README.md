@@ -46,3 +46,17 @@ python3 -m venv --system-site-packages .venv && .venv/bin/pip install scikit-lea
 
 Outputs `results/paper/candidate_model_check.csv`, `fig9_candidate_model_check.png`,
 and `candidate_model_run_config.json`; the full dump goes to `results/candidate_models/`.
+
+Run the Phase 0.9 target change (same ranker, features, hyperparameters, and
+eviction as Phase 0.5; only the prediction target changes):
+
+```bash
+python3 scripts/run_target_change.py data/raw/*_trace.jsonl --seeds 5 --workers 24
+python3 scripts/run_target_change.py --figure-only   # redraw fig10 from the saved summary
+```
+
+Controls are `--budgets`, `--seeds`, `--workers`, `--snapshots`, and
+`--oracle-csv` (the Phase 0.75 summary drawn as reference lines). Outputs
+`results/paper/target_change.csv`, `target_change_config.json` (fit metadata
+and standardised coefficients), and `fig10_target_change.png`; per-seed rows
+and raw JSONL go to `results/target_change/` (untracked).

@@ -74,11 +74,16 @@ Research 1 does **not** use semantic embeddings. Semantic-locality-aware
 prediction (Research 2) is a separate experiment outside this repository's
 plan; nothing here depends on it and nothing here gates it.
 
-## Next step inside Research 1
+## Target change inside Research 1 (Phase 0.9, done)
 
-Change the prediction target, keep everything else. The gap decomposition
-showed that the fixed 600 s binary label is the wrong objective at small
-budgets (its perfect oracle recovers 5–21% of the headroom) and that the best
-label horizon grows with the budget. The next measurements are the causal
-predictability of residence-time-matched, count, and next-use targets on the
-decision population, and the replay of the same ranker fitted to each.
+The prediction target was changed with everything else held fixed. The gap
+decomposition had shown that the fixed 600 s binary label is the wrong
+objective at small budgets (its perfect oracle recovers 5–21% of the headroom)
+and that the best label horizon grows with the budget. The same causal ranker
+fitted to the reuse count or the next-use time recovers 0.07–0.11 more of the
+headroom below 1% and is the best causal arm at 1%, but stays below LFU below
+1% and reaches at most 42% of its own count oracle and 29% of its own
+next-use oracle at 0.25–1%
+(`docs/target-change-findings.md`). What remains is a signal gap on the new
+target, on the eviction-candidate population. The next measurement inside
+Research 1 is listed in `docs/experiment-plan.md`.

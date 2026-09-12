@@ -41,6 +41,7 @@ from persistent_kv_admission.characterize import write_csv
 from persistent_kv_admission.crossworkload import HYPERPARAMETERS, fit_fixed_model
 from persistent_kv_admission.gap import add_closure, aggregate_replay, run_arm, target_arm_specs
 from persistent_kv_admission.replay import _occurrence_groups
+from persistent_kv_admission.temporal import FEATURE_NAMES
 from persistent_kv_admission.trace import load_mooncake_trace
 
 DEFAULT_BUDGETS = (0.001, 0.0025, 0.01, 0.02, 0.05)
@@ -50,7 +51,7 @@ _SHARED: dict[str, object] = {}
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("traces", nargs="+", type=Path)
+    parser.add_argument("traces", nargs="*", type=Path, help="trace files (required unless --figure-only)")
     parser.add_argument("--output-dir", type=Path, default=Path("results/target_change"))
     parser.add_argument("--paper-dir", type=Path, default=Path("results/paper"))
     parser.add_argument("--budgets", default=",".join(str(v) for v in DEFAULT_BUDGETS))
@@ -59,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--snapshots", type=int, default=24)
     parser.add_argument("--oracle-csv", type=Path, default=Path("results/paper/oracle_replay.csv"),
                         help="Phase 0.75 summary, drawn as reference lines in the figure")
+    parser.add_argument("--figure-only", action="store_true",
+                        help="redraw the figure from <output-dir>/target_change.csv without replaying")
     return parser.parse_args()
 
 
@@ -103,6 +106,13 @@ def main() -> None:
     seeds = tuple(range(args.seeds))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     args.paper_dir.mkdir(parents=True, exist_ok=True)
+    if args.figure_only:
+        summary = list(csv.DictReader((args.output_dir / "target_change.csv").open(encoding="utf-8")))
+        make_figure(args.paper_dir, summary, args.oracle_csv)
+        print("figure redrawn", flush=True)
+        return
+    if not args.traces:
+        raise SystemExit("at least one trace file is required unless --figure-only is given")
     context = mp.get_context("fork")
 
     traces = {}
@@ -131,7 +141,9 @@ def main() -> None:
             continue
         rankers[fit["trace"]][key] = fit["ranker"]
         splits[fit["trace"]] = fit["split_ms"]
-        fit_meta[fit["trace"]].append({k: v for k, v in fit.items() if k != "ranker"})
+        meta = {k: v for k, v in fit.items() if k != "ranker"}
+        meta["coefficients"] = dict(fit["ranker"].standardized_coefficients(FEATURE_NAMES))
+        fit_meta[fit["trace"]].append(meta)
         print(f"  fitted {fit['trace']} {key} (requested {fit['requested_horizon']}s) in {fit['seconds']:.0f}s", flush=True)
     _SHARED.update(rankers=rankers, splits=splits,
                    groups={name: _occurrence_groups(trace) for name, trace in traces.items()})
@@ -177,11 +189,21 @@ def main() -> None:
 def make_figure(paper_dir: Path, summary, oracle_csv: Path) -> None:
     traces = sorted({r["trace"] for r in summary})
     oracle = list(csv.DictReader(oracle_csv.open())) if oracle_csv.exists() else []
-    arms = [
-        ("lfu", "LFU", "0.5", "-"), ("learned_binary_h600", "learned: binary 600 s (Phase 0.5 target)", "tab:blue", "-"),
-        ("learned_binary_h300", "learned: binary 300 s", "tab:green", "-"), ("learned_binary_h60", "learned: binary 60 s", "tab:red", "-"),
-        ("learned_count_h60", "learned: count 60 s", "tab:orange", "-"), ("learned_count_h600", "learned: count 600 s", "tab:brown", "-"),
-        ("learned_next_use_h600", "learned: next use", "tab:purple", "-"), ("learned_matched", "learned: horizon matched (Little's law)", "black", "-"),
+    # Fit horizons are clipped per trace (600 s becomes 300 s on the synthetic
+    # trace), so every key that a trace can produce is listed; absent ones are
+    # skipped.
+    arms = [("lfu", "LFU", "0.5", "-")] + [
+        (f"learned_{key}", label, color, "-") for key, label, color in (
+            ("binary_h600", "learned: binary 600 s (Phase 0.5 target)", "tab:blue"),
+            ("binary_h300", "learned: binary 300 s", "tab:green"),
+            ("binary_h60", "learned: binary 60 s", "tab:red"),
+            ("count_h60", "learned: count 60 s", "tab:orange"),
+            ("count_h600", "learned: count 600 s", "tab:brown"),
+            ("count_h300", "learned: count 300 s (600 s clipped)", "tab:brown"),
+            ("next_use_h600", "learned: next use 600 s", "tab:purple"),
+            ("next_use_h300", "learned: next use 300 s (600 s clipped)", "tab:purple"),
+            ("matched", "learned: horizon matched (Little's law)", "black"),
+        )
     ]
     oracle_arms = [("oracle_binary_h60", "oracle 60 s", "tab:red"), ("oracle_binary", "oracle fit horizon", "tab:blue"),
                    ("oracle_next_use_sampled", "oracle next use", "black")]

@@ -48,3 +48,16 @@ The real traces are about 59 minutes long and timestamp-bucketed. Structural sig
 The full per-seed dumps, the raw JSONL of every replay, and a sample of
 candidate-level eviction decisions are written to `results/predictability_gap/`
 and are not tracked.
+- `candidate_model_check.csv`, `fig9_candidate_model_check.png`, `candidate_model_run_config.json`
+  (`scripts/run_candidate_models.py`): within-decision ranking quality of single-feature,
+  linear, and gradient-boosted models fitted on the same 23 history features over the
+  logged eviction candidate sets, time-split with a horizon embargo.
+
+## Phase 0.9 artifacts (`scripts/run_target_change.py`)
+
+- `target_change.csv`: seed-averaged avoided tokens and HeadroomClosure (mean, std, 95% CI) for the same causal ranker fitted to each target (binary 60 / 300 / 600 s, count 60 / 600 s, next-use 600 s, Little's-law horizon-matched), with LRU, LFU, and the heap comparator re-run on the same seeds and budgets.
+- `target_change_config.json`: budgets, seeds, fit metadata per target (rows, positives, horizon actually used) and the standardised coefficient vectors.
+- `fig10_target_change.png`: closure by budget per target, with the same-target oracles of Phase 0.75 dotted.
+
+Per-seed rows and the raw JSONL are written to `results/target_change/` and
+are not tracked.
