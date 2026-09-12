@@ -5,11 +5,31 @@ from __future__ import annotations
 import bisect
 import heapq
 import math
+import random
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import Protocol
 
 from .trace import Request, Trace
 
+
+class StateScorer(Protocol):
+    """Supplies a retention priority for a cached state at a point in time.
+
+    Higher means more valuable. `time_varying` tells the cache whether a stored
+    heap key can go stale between touches and therefore needs re-evaluation on
+    the eviction path.
+    """
+
+    time_varying: bool
+
+    def observe(self, requests: list[Request], timestamp_ms: float) -> None: ...
+
+    def score(self, state_id: str, timestamp_ms: float) -> float: ...
+
+
+# Maximum re-insertions allowed while searching for one eviction victim.
+RESCORE_LIMIT = 64
 
 POLICIES = (
     "lru",
@@ -36,6 +56,7 @@ class ReplayResult:
     requested_tokens: int
     requested_blocks: int
     hit_blocks: int
+    measured_requests: int = 0
 
 
 class _PrefixClosedCache:
@@ -47,6 +68,10 @@ class _PrefixClosedCache:
         policy: str,
         occurrence_groups: dict[str, list[int]],
         size_model: str,
+        scorer: StateScorer | None = None,
+        eviction: str = "heap",
+        sample_width: int = 16,
+        seed: int = 0,
     ) -> None:
         self.trace = trace
         self.capacity_bytes = capacity_bytes
@@ -65,6 +90,17 @@ class _PrefixClosedCache:
         self.heap: list[tuple[tuple[float, ...], int, int, str]] = []
         self.serial = 0
         self.group_index = -1
+        self.scorer = scorer
+        self.timestamp_ms = 0.0
+        self.rescored_pops = 0
+        self.eviction = eviction
+        self.sample_width = sample_width
+        self.rng = random.Random(seed)
+        self.leaves: set[str] = set()
+        if scorer is not None and hasattr(scorer, "attach"):
+            # Lets a learning scorer draw training examples from the population
+            # it actually makes decisions over, rather than every state ever seen.
+            scorer.attach(self)
 
     def _state_bytes(self, state_id: str) -> int:
         tokens = (
@@ -77,6 +113,8 @@ class _PrefixClosedCache:
     def _score(self, state_id: str) -> tuple[float, ...]:
         meta = self.trace.states[state_id]
         last = self.last_group[state_id]
+        if self.scorer is not None:
+            return (self.scorer.score(state_id, self.timestamp_ms), float(last))
         if self.policy in {"lru", "lru_2hit"}:
             return (float(last),)
         if self.policy == "lfu":
@@ -104,8 +142,13 @@ class _PrefixClosedCache:
             (self._score(state_id), self.serial, self.versions[state_id], state_id),
         )
 
-    def update_history(self, requests: list[Request], group_index: int) -> None:
+    def update_history(
+        self, requests: list[Request], group_index: int, timestamp_ms: float = 0.0
+    ) -> None:
         self.group_index = group_index
+        self.timestamp_ms = timestamp_ms
+        if self.scorer is not None:
+            self.scorer.observe(requests, timestamp_ms)
         touched: set[str] = set()
         for request in requests:
             terminal = request.hash_ids[-1]
@@ -147,29 +190,77 @@ class _PrefixClosedCache:
                 self.current_bytes += self._state_bytes(state_id)
                 if parent is not None:
                     self.cached_children[parent] += 1
+                    self.leaves.discard(parent)
                 self.cached_children.setdefault(state_id, 0)
-                self._push(state_id)
+                self.leaves.add(state_id)
+                if self.eviction == "heap":
+                    self._push(state_id)
         while self.current_bytes > self.capacity_bytes and self.cached:
-            self._evict_one_leaf()
+            if self.eviction == "sampled":
+                self._evict_one_leaf_sampled()
+            else:
+                self._evict_one_leaf()
 
     def _evict_one_leaf(self) -> None:
+        rescores = 0
         while self.heap:
-            _, _, version, state_id = heapq.heappop(self.heap)
+            key, _, version, state_id = heapq.heappop(self.heap)
             if state_id not in self.cached:
                 continue
             if version != self.versions[state_id]:
                 continue
             if self.cached_children[state_id] != 0:
                 continue
-            self.cached.remove(state_id)
-            self.current_bytes -= self._state_bytes(state_id)
-            parent = self.trace.states[state_id].parent_id
-            if parent is not None and parent in self.cached:
-                self.cached_children[parent] -= 1
-                if self.cached_children[parent] == 0:
-                    self._push(parent)
+            if self.scorer is not None and self.scorer.time_varying:
+                # Heap keys are stale between touches for time-varying scores.
+                # Re-evaluate the candidate and reinsert it when it is worth
+                # more now than the stored key claimed. The budget bounds the
+                # worst case; beyond it the current candidate is evicted.
+                current = self._score(state_id)
+                if current > key and rescores < RESCORE_LIMIT:
+                    rescores += 1
+                    self.rescored_pops += 1
+                    self.serial += 1
+                    heapq.heappush(
+                        self.heap, (current, self.serial, self.versions[state_id], state_id)
+                    )
+                    continue
+            self._remove(state_id, push_parent=True)
             return
         raise RuntimeError("no evictable leaf found in non-empty prefix-closed cache")
+
+    def _remove(self, state_id: str, push_parent: bool) -> None:
+        self.cached.remove(state_id)
+        self.leaves.discard(state_id)
+        self.current_bytes -= self._state_bytes(state_id)
+        parent = self.trace.states[state_id].parent_id
+        if parent is not None and parent in self.cached:
+            self.cached_children[parent] -= 1
+            if self.cached_children[parent] == 0:
+                self.leaves.add(parent)
+                if push_parent:
+                    self._push(parent)
+
+    def _evict_one_leaf_sampled(self) -> None:
+        """Evict the worst of a small random sample of retained leaves.
+
+        Heap keys are written when a state is touched, so with a time-varying
+        score they describe the state as it looked then, not now. A stale key
+        keeps an old state ranked as highly as when it was fresh, which inverts
+        the policy. Sampling re-scores every candidate at the moment of the
+        decision, so the score is always current. This is the approximation real
+        caches use, and it costs O(sample_width) per eviction instead of a full
+        re-ranking.
+        """
+        if not self.leaves:
+            raise RuntimeError("no evictable leaf found in non-empty prefix-closed cache")
+        leaves = self.leaves
+        if len(leaves) <= self.sample_width:
+            candidates = list(leaves)
+        else:
+            candidates = self.rng.sample(tuple(leaves), self.sample_width)
+        victim = min(candidates, key=self._score)
+        self._remove(victim, push_parent=False)
 
 
 def _occurrence_groups(trace: Trace) -> dict[str, list[int]]:
@@ -191,32 +282,44 @@ def replay(
     bytes_per_token: int,
     size_model: str = "packed",
     occurrence_groups: dict[str, list[int]] | None = None,
+    scorer: StateScorer | None = None,
+    measure_from_ms: float | None = None,
+    eviction: str = "heap",
+    sample_width: int = 16,
+    seed: int = 0,
 ) -> ReplayResult:
-    if policy not in POLICIES:
+    if scorer is None and policy not in POLICIES:
         raise ValueError(f"unknown policy {policy!r}")
     if size_model not in {"packed", "fixed_block"}:
         raise ValueError(f"unknown size model {size_model!r}")
     groups = occurrence_groups or _occurrence_groups(trace)
     cache = _PrefixClosedCache(
-        trace, capacity_bytes, bytes_per_token, policy, groups, size_model
+        trace, capacity_bytes, bytes_per_token, policy, groups, size_model, scorer,
+        eviction, sample_width, seed,
     )
     requested_tokens = 0
     requested_blocks = 0
     hit_blocks = 0
     reused_tokens = 0
     request_hits = 0
+    measured_requests = 0
 
-    for group_index, (_, requests) in enumerate(trace.timestamp_groups()):
+    for group_index, (timestamp_ms, requests) in enumerate(trace.timestamp_groups()):
+        # Requests before measure_from_ms still warm the cache but are excluded
+        # from the reported metrics, so every policy is scored on one window.
+        measured = measure_from_ms is None or timestamp_ms >= measure_from_ms
         # All requests with the same timestamp observe the pre-batch cache.
         for request in requests:
             hits = cache.hit_prefix_blocks(request)
-            hit_blocks += hits
-            requested_blocks += len(request.hash_ids)
-            requested_tokens += request.input_length
-            tokens = min(request.input_length, hits * trace.block_size)
-            reused_tokens += tokens
-            request_hits += hits > 0
-        cache.update_history(requests, group_index)
+            if measured:
+                measured_requests += 1
+                hit_blocks += hits
+                requested_blocks += len(request.hash_ids)
+                requested_tokens += request.input_length
+                tokens = min(request.input_length, hits * trace.block_size)
+                reused_tokens += tokens
+                request_hits += hits > 0
+        cache.update_history(requests, group_index, timestamp_ms)
         cache.insert_requests(requests)
 
     return ReplayResult(
@@ -226,10 +329,11 @@ def replay(
         capacity_fraction=capacity_fraction,
         avoided_prefill_tokens=reused_tokens,
         reused_prefix_tokens=reused_tokens,
-        block_hit_rate=hit_blocks / requested_blocks,
-        request_hit_rate=request_hits / len(trace.requests),
+        block_hit_rate=hit_blocks / max(requested_blocks, 1),
+        request_hit_rate=request_hits / max(measured_requests, 1),
         avoided_tokens_per_cache_byte=reused_tokens / max(capacity_bytes, 1),
         requested_tokens=requested_tokens,
         requested_blocks=requested_blocks,
         hit_blocks=hit_blocks,
+        measured_requests=measured_requests,
     )
