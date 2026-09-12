@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use or reference this research, software, or findings, please cite it as below."
+authors:
+  - name: "CHIPMUNK"
+title: "Persistent KV Admission: Retention under Finite Capacity for Persistent LLM KV Caches"
+date-released: 2026-09-12
+url: "https://github.com/CHIPMUNK-T0T/persistent-kv-admission"
+repository-code: "https://github.com/CHIPMUNK-T0T/persistent-kv-admission"
+license: MIT

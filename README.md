@@ -236,3 +236,17 @@ and greedy leaf eviction; it is a headroom estimate, not a proven optimum.
 - approximate KV reuse
 - improving model answer quality via caching
 - vLLM / LMCache integration before the retention objective is settled
+
+## Citation
+
+If you use or reference this research, design, or implementation in your work, please cite it as:
+
+```bibtex
+@software{chipmunk2026persistent_kv,
+  author = {CHIPMUNK},
+  title = {Persistent KV Admission: Retention under Finite Capacity for Persistent LLM KV Caches},
+  year = {2026},
+  url = {https://github.com/CHIPMUNK-T0T/persistent-kv-admission}
+}
+```
+

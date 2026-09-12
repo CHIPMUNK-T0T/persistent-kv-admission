@@ -10,3 +10,6 @@ results/*
 !results/paper/**
 data/raw/
 NOTE/
+AGENTS.md
+CLAUDE.md
+RULES.md
