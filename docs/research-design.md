@@ -27,7 +27,7 @@ Key dimensions:
 
 ### RQ2 — Can we select future-useful KV states better than generic policies?
 
-Compare proposed policies against LRU, LFU, 2-hit, and an offline oracle under the same cache budget.
+Compare causal policies against LRU, LFU, and 2-hit under the same cache budget. Use the approximate offline-next-use comparator separately to estimate headroom; do not present it as a proven optimum.
 
 ### RQ3 — Does better selection reduce recomputation under the same budget?
 

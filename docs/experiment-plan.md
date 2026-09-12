@@ -9,9 +9,9 @@
 - compute fan-out / branch diversity
 - analyze prefix length vs reuse value
 - sweep virtual cache budgets
-- compare LRU/LFU/oracle headroom
+- compare causal online policies and estimate LRU headroom with approximate offline-next-use
 
-Decision gate: if generic policies are already near oracle, revise the hypothesis before implementing a new policy.
+Decision gate: if generic policies are already near the approximate offline-next-use comparator, tighten the offline method and revise the hypothesis before implementing a new policy.
 
 Operational rule: if the approximate offline-next-use comparator improves avoided prefill tokens over LRU by less than 5% at every measured cache budget, revisit selection-policy research before Phase 1. Because the comparator is not a proven dependency-aware optimum, borderline outcomes require a tighter offline formulation before stopping.
 
@@ -24,7 +24,7 @@ Policies:
 - 2-hit
 - structural-aware
 - value-aware
-- oracle
+- approximate offline-next-use comparator (headroom only)
 
 Metrics:
 

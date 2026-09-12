@@ -12,6 +12,6 @@ Run the full characterization and fixed-budget replay:
 python3 scripts/run_characterization.py data/raw/*_trace.jsonl
 ```
 
-Useful controls are `--snapshots`, `--precision-k`, `--budgets`, `--block-size`, `--bytes-per-token`, and `--output-dir`. Run `python3 scripts/run_characterization.py --help` for details. Dependencies are NumPy and Matplotlib.
+Useful controls are `--snapshots`, `--precision-k`, `--ridge`, `--budgets`, `--block-size`, `--bytes-per-token`, `--output-dir`, and `--paper-dir`. Run `python3 scripts/run_characterization.py --help` for details. Dependencies are NumPy and Matplotlib; the ridge linear ranking implementation does not require scikit-learn.
 
 The script validates the input schema before producing results. It does not implement or integrate a new vLLM/LMCache policy.

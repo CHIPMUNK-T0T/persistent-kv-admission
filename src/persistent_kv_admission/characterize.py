@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 
 from .ranking import ranking_metrics
-from .replay import POLICIES, replay
+from .replay import POLICIES, _occurrence_groups, replay
 from .trace import Trace, unique_timestamps
 
 
@@ -41,7 +41,9 @@ def write_csv(path: Path, rows: list[dict[str, object]], fieldnames: list[str] |
             raise ValueError(f"fieldnames required for empty CSV {path}")
         fieldnames = list(rows[0])
     with path.open("w", newline="", encoding="utf-8") as destination:
-        writer = csv.DictWriter(destination, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            destination, fieldnames=fieldnames, lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -293,18 +295,132 @@ def predictive_power_rows(
 
 
 def replay_rows(
-    trace: Trace, budget_fractions: tuple[float, ...], bytes_per_token: int
+    trace: Trace,
+    budget_fractions: tuple[float, ...],
+    bytes_per_token: int,
+    size_models: tuple[str, ...] = ("packed", "fixed_block"),
 ) -> list[dict[str, object]]:
-    working_set_bytes = sum(
+    rows = []
+    occurrence_groups = _occurrence_groups(trace)
+    reference_working_set_bytes = sum(
         meta.block_tokens * bytes_per_token for meta in trace.states.values()
     )
-    rows = []
-    for fraction in budget_fractions:
-        capacity = max(1, round(working_set_bytes * fraction))
-        for policy in POLICIES:
-            result = replay(trace, policy, capacity, fraction, bytes_per_token)
-            row = asdict(result)
-            row["trace"] = trace.name
-            row["working_set_bytes"] = working_set_bytes
-            rows.append(row)
+    for size_model in size_models:
+        working_set_bytes = sum(
+            (meta.block_tokens if size_model == "packed" else trace.block_size)
+            * bytes_per_token
+            for meta in trace.states.values()
+        )
+        for fraction in budget_fractions:
+            # Hold physical capacity constant across size models. Fractions are
+            # defined against the packed working set used by the original run.
+            capacity = max(1, round(reference_working_set_bytes * fraction))
+            for policy in POLICIES:
+                result = replay(
+                    trace,
+                    policy,
+                    capacity,
+                    fraction,
+                    bytes_per_token,
+                    size_model=size_model,
+                    occurrence_groups=occurrence_groups,
+                )
+                row = asdict(result)
+                row["trace"] = trace.name
+                row["working_set_bytes"] = working_set_bytes
+                row["reference_working_set_bytes"] = reference_working_set_bytes
+                row["effective_capacity_fraction"] = capacity / working_set_bytes
+                rows.append(row)
     return rows
+
+
+def replay_comparison_rows(
+    replayed: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
+    """Separate causal online comparisons, offline headroom, and size sensitivity."""
+    online_rows: list[dict[str, object]] = []
+    headroom_rows: list[dict[str, object]] = []
+    sensitivity_rows: list[dict[str, object]] = []
+    grouped: dict[tuple[str, float], dict[str, dict[str, object]]] = defaultdict(dict)
+    for row in replayed:
+        grouped[(str(row["size_model"]), float(row["capacity_fraction"]))][str(row["policy"])] = row
+
+    online_policies = [policy for policy in POLICIES if policy != "offline_next_use"]
+    for (size_model, fraction), values in sorted(grouped.items()):
+        best_online = max(int(values[policy]["avoided_prefill_tokens"]) for policy in online_policies)
+        lru = int(values["lru"]["avoided_prefill_tokens"])
+        offline = int(values["offline_next_use"]["avoided_prefill_tokens"])
+        ordered = sorted(
+            online_policies,
+            key=lambda policy: int(values[policy]["avoided_prefill_tokens"]),
+            reverse=True,
+        )
+        for rank, policy in enumerate(ordered, 1):
+            row = dict(values[policy])
+            avoided = int(row["avoided_prefill_tokens"])
+            row.update(
+                {
+                    "online_rank": rank,
+                    "gap_to_best_online_fraction": (best_online - avoided) / max(best_online, 1),
+                    "gain_vs_lru_fraction": (avoided - lru) / max(lru, 1),
+                }
+            )
+            online_rows.append(row)
+        headroom_rows.append(
+            {
+                "trace": values["lru"]["trace"],
+                "size_model": size_model,
+                "capacity_fraction": fraction,
+                "lru_avoided_prefill_tokens": lru,
+                "offline_next_use_avoided_prefill_tokens": offline,
+                "headroom_vs_lru_fraction": (offline - lru) / max(lru, 1),
+            }
+        )
+
+    trace_name = str(replayed[0]["trace"]) if replayed else ""
+    for fraction in sorted({float(row["capacity_fraction"]) for row in replayed}):
+        for policy in POLICIES:
+            packed = grouped[("packed", fraction)][policy]
+            fixed = grouped[("fixed_block", fraction)][policy]
+            packed_value = int(packed["avoided_prefill_tokens"])
+            fixed_value = int(fixed["avoided_prefill_tokens"])
+            sensitivity_rows.append(
+                {
+                    "trace": trace_name,
+                    "capacity_fraction": fraction,
+                    "policy": policy,
+                    "packed_avoided_prefill_tokens": packed_value,
+                    "fixed_block_avoided_prefill_tokens": fixed_value,
+                    "fixed_vs_packed_change_fraction": (fixed_value - packed_value)
+                    / max(packed_value, 1),
+                }
+            )
+    return online_rows, headroom_rows, sensitivity_rows
+
+
+def longest_online_comparison_rows(
+    online_rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    """Make Longest-first pairwise comparisons explicit without offline rows."""
+    grouped: dict[tuple[str, str, float], dict[str, dict[str, object]]] = defaultdict(dict)
+    for row in online_rows:
+        key = (str(row["trace"]), str(row["size_model"]), float(row["capacity_fraction"]))
+        grouped[key][str(row["policy"])] = row
+    comparators = ("lru", "lru_2hit", "lfu", "frequency_x_prefix_length", "structural")
+    result = []
+    for (trace_name, size_model, fraction), values in sorted(grouped.items()):
+        longest = int(values["longest_first"]["avoided_prefill_tokens"])
+        row: dict[str, object] = {
+            "trace": trace_name,
+            "size_model": size_model,
+            "capacity_fraction": fraction,
+            "longest_first_avoided_prefill_tokens": longest,
+        }
+        for comparator in comparators:
+            comparator_value = int(values[comparator]["avoided_prefill_tokens"])
+            row[f"{comparator}_avoided_prefill_tokens"] = comparator_value
+            row[f"longest_minus_{comparator}_fraction"] = (
+                longest - comparator_value
+            ) / max(comparator_value, 1)
+        result.append(row)
+    return result

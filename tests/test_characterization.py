@@ -6,7 +6,13 @@ from pathlib import Path
 
 import numpy as np
 
-from persistent_kv_admission.characterize import trace_summary
+from persistent_kv_admission.characterize import (
+    longest_online_comparison_rows,
+    replay_comparison_rows,
+    replay_rows,
+    trace_summary,
+    write_csv,
+)
 from persistent_kv_admission.ranking import ranking_metrics
 from persistent_kv_admission.replay import POLICIES, replay
 from persistent_kv_admission.trace import load_mooncake_trace
@@ -47,6 +53,41 @@ class CharacterizationTests(unittest.TestCase):
             result = replay(trace, policy, 2 * 512, 2 / 3, bytes_per_token=1)
             self.assertLessEqual(result.hit_blocks, result.requested_blocks)
 
+    def test_two_hit_delays_admission_until_after_second_observation(self):
+        temporary, trace = self.make_trace()
+        self.addCleanup(temporary.cleanup)
+        lru = replay(trace, "lru", 3 * 512, 1.0, bytes_per_token=1)
+        delayed = replay(trace, "lru_2hit", 3 * 512, 1.0, bytes_per_token=1)
+        self.assertEqual(lru.avoided_prefill_tokens, 1024)
+        self.assertEqual(delayed.avoided_prefill_tokens, 512)
+
+    def test_fixed_block_charges_partial_node_at_full_block_size(self):
+        records = [
+            {"timestamp": 0, "input_length": 513, "output_length": 1, "hash_ids": [1, 2]},
+            {"timestamp": 1000, "input_length": 513, "output_length": 1, "hash_ids": [1, 2]},
+        ]
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        path = Path(temporary.name) / "partial.jsonl"
+        path.write_text("".join(json.dumps(record) + "\n" for record in records))
+        trace = load_mooncake_trace(path)
+        packed = replay(trace, "lru", 513, 1.0, bytes_per_token=1, size_model="packed")
+        fixed = replay(trace, "lru", 513, 1.0, bytes_per_token=1, size_model="fixed_block")
+        self.assertEqual(packed.avoided_prefill_tokens, 513)
+        self.assertEqual(fixed.avoided_prefill_tokens, 512)
+
+    def test_online_comparison_excludes_offline_next_use(self):
+        temporary, trace = self.make_trace()
+        self.addCleanup(temporary.cleanup)
+        replayed = replay_rows(trace, (1.0,), bytes_per_token=1)
+        online, headroom, sensitivity = replay_comparison_rows(replayed)
+        self.assertNotIn("offline_next_use", {row["policy"] for row in online})
+        self.assertEqual(len(headroom), 2)
+        self.assertTrue(sensitivity)
+        longest = longest_online_comparison_rows(online)
+        self.assertEqual(len(longest), 2)
+        self.assertTrue(all("longest_minus_lfu_fraction" in row for row in longest))
+
     def test_two_hit_loss_is_idealized_first_reuse(self):
         temporary, trace = self.make_trace()
         self.addCleanup(temporary.cleanup)
@@ -63,6 +104,15 @@ class CharacterizationTests(unittest.TestCase):
         self.assertAlmostEqual(ap, 5 / 6)
         self.assertAlmostEqual(precision, 0.75)
         self.assertTrue(math.isfinite(auc))
+
+    def test_csv_writer_uses_lf_line_endings(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        path = Path(temporary.name) / "rows.csv"
+        write_csv(path, [{"value": 1}, {"value": 2}])
+        content = path.read_bytes()
+        self.assertNotIn(b"\r", content)
+        self.assertEqual(content, b"value\n1\n2\n")
 
 
 if __name__ == "__main__":

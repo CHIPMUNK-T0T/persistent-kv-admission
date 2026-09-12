@@ -54,7 +54,7 @@ Candidate signals:
 - frequency + recency
 - structural-aware policy
 - value-aware policy
-- offline oracle
+- approximate offline-next-use comparator (headroom only)
 
 ## Evaluation
 
@@ -88,11 +88,11 @@ Potential invalidation factors include model weights, tokenizer, RoPE configurat
 1. **Trace characterization**
    - Reconstruct prefix chains from public traces such as Mooncake.
    - Measure reuse count, recency, inter-arrival, fan-out, branch diversity, and prefix length.
-   - Compare LRU/LFU against an oracle under synthetic cache budgets.
+   - Compare causal online policies separately, then measure LRU headroom against an approximate offline-next-use comparator.
 
 2. **Policy simulator**
    - Replay traces under a fixed cache budget.
-   - Compare LRU, LFU, 2-hit, structural-aware, value-aware, and oracle policies.
+   - Compare LRU, LFU, 2-hit, Longest-first, frequency × prefix length, and a simple structural baseline.
 
 3. **Online prototype**
    - Integrate the policy into vLLM / LMCache or an equivalent KV persistence layer.
@@ -123,7 +123,7 @@ The repository now contains a reproducible characterization pipeline. It deliber
 python3 scripts/run_characterization.py data/raw/*_trace.jsonl
 ```
 
-Outputs are written below `results/characterization/<trace>/`: state and reuse CSVs, causal horizon-ranking metrics, fixed-budget replay results, four required plots, the exact run configuration, and a short `INTERPRETATION.md` stating what the figures do and do not support.
+Raw generated outputs are written below `results/characterization/<trace>/`: state and reuse CSVs, causal horizon-ranking metrics, fixed-budget replay results, required plots, the exact run configuration, and a short `INTERPRETATION.md`. Lightweight review artifacts are tracked under `results/paper/`.
 
 ### Input schema and validated assumptions
 
@@ -144,8 +144,12 @@ The state-size proxy is `incremental block tokens × bytes_per_token` (default 2
 
 At sampled timestamp boundaries, every previously seen state is ranked using one causal signal at a time: recency, frequency, prefix length, observed direct fan-out, or observed terminal-branch diversity. The binary label is whether the exact state appears strictly after the boundary and within the horizon. AUC, threshold-based average precision, and tie-aware expected precision@100 are macro-averaged across snapshots. Windows extending past trace end are excluded; 6-hour and 1-day claims cannot be made from an approximately one-hour trace.
 
+Structural incrementality is tested with two simple ridge linear rankers implemented with NumPy: `Base = log1p(frequency) + -log1p(age_seconds) + log1p(prefix_length)` and `Extended = Base + log1p(fan_out) + log1p(branch_diversity)`. The first 60% of sampled snapshots are training candidates, the final 40% are held out, and a full future-horizon embargo removes training labels that would not be known at the first test snapshot. This avoids a scikit-learn dependency and keeps fitting deterministic. Snapshot-state observations are weighted equally. The pipeline also reports transformed-feature Pearson correlations and structural-signal ranking within separate frequency and recency quantile strata.
+
 ### Replay protocol
 
-All retained states form a prefix-closed forest. A child is useful only while its full ancestor chain is retained, and eviction considers leaves so it cannot strand a child. Replay compares LRU, LFU, Longest-first, frequency × prefix length, the deliberately simple `fan-out + branch diversity` score, and an offline-next-use comparator. The offline comparator has future knowledge but uses greedy leaf eviction, so it is an approximate upper comparator rather than a proven optimum for weighted prefix caching.
+All retained states form a prefix-closed forest. A child is useful only while its full ancestor chain is retained, and eviction considers leaves so it cannot strand a child. Causal online replay compares LRU, 2-hit admission with LRU eviction, LFU, Longest-first, frequency × prefix length, and the deliberately simple `fan-out + branch diversity` score. Equal-timestamp observations can satisfy the 2-hit gate only after the batch and cannot hit within that batch. The approximate offline-next-use comparator is excluded from online rankings and used only to estimate headroom. It has future knowledge and greedy leaf eviction, so it is not a proven optimum for weighted prefix caching.
 
-Cache budgets are fractions of the trace's unique incremental-state bytes. Exact-prefix hit tokens, avoided prefill tokens, block and request hit rates, and avoided tokens per capacity byte are reported. This trace-only estimate does not measure FLOPs, GPU time, restore cost, SSD/GDS/PCIe throughput, or a restore/recompute crossover.
+Cache budgets are fixed byte capacities expressed as fractions of the packed unique-state working set. The same absolute capacity is used for both models: `packed` charges actual incremental block tokens, while `fixed_block` charges all states as a full 512-token block, including partial final blocks. Both models run every trace, budget, and policy; `effective_capacity_fraction` records the resulting fraction of each model's working set. Exact-prefix hit tokens, avoided prefill tokens, block and request hit rates, and avoided tokens per capacity byte are reported. This trace-only estimate does not measure FLOPs, GPU time, restore cost, SSD/GDS/PCIe throughput, or a restore/recompute crossover.
+
+The current evidence shows that structural signals can rank reuse within some frequency/recency strata, but Extended does not improve Base consistently across all traces and horizons. Structure-aware selection is therefore not promoted to the main research direction. Structural signal can predict reuse, but whether its relative advantage increases at persistent-cache timescales remains unresolved.
