@@ -131,23 +131,72 @@ clock and the wall clock coincide (Spearman 0.99), and the victim event log
 records distinct competing bytes until reuse directly. It is kept here as a
 possible appendix, not as a planned phase.
 
-## Next step inside Research 1 (to be decided)
+## Phase 0.97 — Decision-population-matched retention learning (current)
 
-The room a persistent tier leaves over generic policies is 25–80% of the
-offline gain on the L1 victim stream, and prefix dependency does not
-explain it. Candidates that stay inside Research 1 and introduce no policy:
+Question, fixed before the run: does training on the actual
+retention-decision population convert global reuse predictability into
+retention utility? Phases 0.5–0.95 showed that the same 23-feature causal
+history representation loses predictive power as the population narrows
+(observed → cached → eviction candidates → L1 victims) and that its
+global-trained ranking does not beat LRU / LFU under a byte budget. This
+phase separates two explanations, representation versus training
+distribution, by changing only the training population.
 
-- a predictability check on the lower tier's decision population rather
-  than on the victim stream as a whole: log each L2 decision as the arriving
-  victim together with the L2 residents it would displace, with the same
-  causal fields (lifetime count, seconds since last use, prior evictions,
-  depth, retained siblings) on both sides, and measure whether those fields
-  rank the arriving victim against the residents by future reuse (time
-  split, horizon embargo). An AUC over all victims would repeat the
-  population mismatch of Phase 0.5;
-- longer or rate-varying traces, which are the only way to test which L1 / L2
-  regime a persistent tier sits in and whether the byte and time clocks
-  separate.
+Fixed: the two-tier setting of Phase 0.95 (heap LRU L1 at 0.25 / 1 / 2% of
+the working set, every L1 eviction offered to an exclusive L2, L2 = 1 × and
+4 × L1), the 23 causal features, the linear ranker and its standardisation,
+the targets already evaluated in Phase 0.9 (600 s binary, reuse count,
+next-use time), the train / test split and horizon embargo, sampled-leaf
+candidate width 16, the state-size model, five seeds. Every L2 arm that
+needs a time-varying score runs through one sampled-eviction mechanism: the
+decision set is the arriving victim plus a uniform sample of 16 residents,
+the lowest score leaves (the victim itself may be rejected). Generic L2
+policies run through the same mechanism; their heap versions and the heap
+offline comparator of Phase 0.95 are kept as references.
+
+Varied: the training population only, with the same features, target, and
+model:
+
+- **A. global / observed** — the existing Phase 0.5 / 0.9 training set
+  (control);
+- **B. L1 victims** — victim events of the training split, features at
+  eviction;
+- **C. L2 decision candidates** — decision sets logged while a causal
+  behaviour policy (sampled L2-LRU, sampled L2-LFU, and their union) runs on
+  the training split; no future-aware policy generates training data, and
+  the behaviour policy's identity is not a feature.
+
+Metrics: primary is L2 replay utility, extra avoided prefill tokens over L1
+alone and headroom closure = (arm − sampled L2-LRU) / (heap offline −
+sampled L2-LRU), mean over seeds. Secondary are predictive metrics on the
+test split of each population (observed, victims, candidates): AUC for the
+binary target, Spearman for the graded targets, and inside each logged
+decision set the pairwise concordance between score and label and the share
+of decisions whose evicted state has the lowest label. The central figure
+follows one target from global → victim → candidate predictive quality to
+global-trained → victim-trained → candidate-trained replay utility on the
+same budget axis, against LRU, LFU, 2-hit, and the offline comparator.
+
+Interpretation, fixed before the run, per target on the two real traces:
+
+- **Case A (mismatch was the problem):** candidate-trained closure exceeds
+  global-trained closure by ≥ 0.10 and is at least the best generic L2's
+  closure in ≥ 4 of the 6 real-trace cells.
+- **Case B (prediction improves, retention does not):** the candidate
+  population ranking metric improves by ≥ 0.05 over the global-trained model
+  while closure improves by < 0.05 in most cells.
+- **Case C (representation is the limit):** the candidate population ranking
+  metric improves by < 0.05 even when fitted on that population. Only this
+  case justifies adding non-history signal later; even then the claim is
+  limited to "the evaluated causal per-state history representation does not
+  provide sufficient ranking signal on the actual retention-decision
+  population", not "history is useless".
+
+Not done here: new temporal features, byte-clock or time studies, prefix
+dependency, new candidate-search algorithms, semantic or embedding features,
+neural rankers, result-driven heuristics. Pipeline:
+`scripts/run_decision_population.py`. Findings:
+`docs/decision-population-findings.md`.
 
 ## Phase 1 — Policy simulator (planned; contents depend on the step above)
 
