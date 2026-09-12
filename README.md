@@ -113,3 +113,39 @@ Potential invalidation factors include model weights, tokenizer, RoPE configurat
 ## Repository status
 
 Early-stage research. Problem formulation, policy design, datasets, and evaluation methodology are expected to evolve as characterization results and prior-work review progress.
+
+## Research 1: trace characterization
+
+The repository now contains a reproducible characterization pipeline. It deliberately stops before implementing a new online policy.
+
+```bash
+./scripts/download_mooncake_traces.sh
+python3 scripts/run_characterization.py data/raw/*_trace.jsonl
+```
+
+Outputs are written below `results/characterization/<trace>/`: state and reuse CSVs, causal horizon-ranking metrics, fixed-budget replay results, four required plots, the exact run configuration, and a short `INTERPRETATION.md` stating what the figures do and do not support.
+
+### Input schema and validated assumptions
+
+The loader expects the official Mooncake FAST'25 JSONL fields `timestamp`, `input_length`, `output_length`, and ordered `hash_ids`.
+
+Data source: [Mooncake FAST'25 trace release](https://github.com/kvcache-ai/Mooncake/tree/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces), pinned by the download script to commit `3cca71daccf2a7afb8fe3f0295358f70e3a69fdb`. Schema semantics are also described in the [FAST'25 paper](https://www.usenix.org/system/files/fast25-qin.pdf), Appendix A.
+
+- `timestamp` is relative arrival time in milliseconds and must be nondecreasing.
+- One `hash_id` is a cumulative prefix hash through one 512-token block. Equality means exact prefix reuse through that depth; it is not a hash of an independent block.
+- `len(hash_ids)` must equal `ceil(input_length / 512)`. The final node can therefore contain fewer than 512 tokens.
+- A repeated hash must always have the same depth, parent hash, prefix length, and incremental block length. The loader rejects inconsistent traces.
+- File order is preserved, but requests with an equal timestamp are treated as simultaneous. They observe the cache before that timestamp's batch and cannot create within-batch hits.
+- No session ID is present. The analysis therefore reports `request-level fan-out` and `branch diversity`, never cross-session reuse.
+
+The state-size proxy is `incremental block tokens × bytes_per_token` (default 2048). It is only a capacity-normalization proxy, not a measured model-specific KV layout. A state's `prefix_tokens` is cumulative, while storage charges only its incremental final block. `potential_reuses × prefix_tokens` is reported as a cumulative-prefix value proxy; `potential_reuses × block_tokens` avoids double-counting ancestors and is reported as estimated avoided prefill tokens in the unbounded idealization.
+
+### Prediction protocol
+
+At sampled timestamp boundaries, every previously seen state is ranked using one causal signal at a time: recency, frequency, prefix length, observed direct fan-out, or observed terminal-branch diversity. The binary label is whether the exact state appears strictly after the boundary and within the horizon. AUC, threshold-based average precision, and tie-aware expected precision@100 are macro-averaged across snapshots. Windows extending past trace end are excluded; 6-hour and 1-day claims cannot be made from an approximately one-hour trace.
+
+### Replay protocol
+
+All retained states form a prefix-closed forest. A child is useful only while its full ancestor chain is retained, and eviction considers leaves so it cannot strand a child. Replay compares LRU, LFU, Longest-first, frequency × prefix length, the deliberately simple `fan-out + branch diversity` score, and an offline-next-use comparator. The offline comparator has future knowledge but uses greedy leaf eviction, so it is an approximate upper comparator rather than a proven optimum for weighted prefix caching.
+
+Cache budgets are fractions of the trace's unique incremental-state bytes. Exact-prefix hit tokens, avoided prefill tokens, block and request hit rates, and avoided tokens per capacity byte are reported. This trace-only estimate does not measure FLOPs, GPU time, restore cost, SSD/GDS/PCIe throughput, or a restore/recompute crossover.

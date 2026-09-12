@@ -13,6 +13,8 @@
 
 Decision gate: if generic policies are already near oracle, revise the hypothesis before implementing a new policy.
 
+Operational rule: if the approximate offline-next-use comparator improves avoided prefill tokens over LRU by less than 5% at every measured cache budget, revisit selection-policy research before Phase 1. Because the comparator is not a proven dependency-aware optimum, borderline outcomes require a tighter offline formulation before stopping.
+
 ## Phase 1 — Policy simulator
 
 Policies:

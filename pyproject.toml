@@ -7,6 +7,10 @@ name = "persistent-kv-admission"
 version = "0.1.0"
 description = "Research code for value-aware persistent KV admission and retention policies"
 requires-python = ">=3.10"
+dependencies = ["matplotlib>=3.7", "numpy>=1.24"]
+
+[project.scripts]
+persistent-kv-characterize = "persistent_kv_admission.cli:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
