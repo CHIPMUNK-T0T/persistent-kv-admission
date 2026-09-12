@@ -1,0 +1,46 @@
+{
+  "gbm_params": {
+    "max_iter": 300,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 31,
+    "min_samples_leaf": 40,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 0
+  },
+  "budgets": [
+    0.0025,
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "horizons": [
+    60,
+    300,
+    600
+  ],
+  "max_decisions": 40000,
+  "seed": 0,
+  "fits": {
+    "conversation_trace": {
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "train_rows": 142484,
+      "train_positives": 21910
+    },
+    "toolagent_trace": {
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "train_rows": 142417,
+      "train_positives": 20426
+    },
+    "synthetic_trace": {
+      "fit_horizon_seconds": 300,
+      "split_ms": 613215.0,
+      "train_rows": 131615,
+      "train_positives": 42003
+    }
+  },
+  "note": "One hyperparameter set for every trace, budget, and horizon."
+}

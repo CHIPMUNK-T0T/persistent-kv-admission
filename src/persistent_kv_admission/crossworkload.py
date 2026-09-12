@@ -26,7 +26,7 @@ import math
 import numpy as np
 
 from .online import OnlineAdaptiveScorer
-from .predictors import LogisticRanker
+from .predictors import LogisticRanker, RidgeRanker
 from .replay import _occurrence_groups, replay
 from .temporal import FEATURE_NAMES, PopulationNormalizer, TemporalHistory, model_indices
 from .trace import Request, Trace
@@ -240,6 +240,40 @@ def _row(trace: Trace, result, working_set_bytes: int, eviction: str) -> dict[st
 
 STANDARDIZATIONS = ("per_decision", "train_global", "none")
 
+# What the fitted ranker predicts. `binary` is the Phase 0.5 target. The other
+# two are the graded alternatives the gap decomposition pointed at; changing
+# the target changes nothing else (features, standardisation, penalty).
+TARGETS = ("binary", "count", "next_use")
+
+
+def target_values(trace: Trace, state_ids: list[str], now_ms: float, horizon_seconds: float, target: str) -> np.ndarray:
+    """Per-state label for one decision point.
+
+    * `binary`: 1 if the state is used again within the horizon.
+    * `count`: log1p(number of uses within the horizon).
+    * `next_use`: -log1p(seconds to the next use), floored at the horizon, so a
+      state not used within the horizon gets the floor. Everything is censored
+      at the horizon, which is what the embargo guarantees is observable.
+    """
+    import bisect
+
+    if target not in TARGETS:
+        raise ValueError(f"unknown target {target!r}")
+    horizon_ms = horizon_seconds * 1000.0
+    out = np.empty(len(state_ids), dtype=float)
+    for position, state_id in enumerate(state_ids):
+        occurrences = trace.occurrences_ms[state_id]
+        start = bisect.bisect_right(occurrences, now_ms)
+        if target == "binary":
+            out[position] = float(start < len(occurrences) and occurrences[start] <= now_ms + horizon_ms)
+        elif target == "count":
+            end = bisect.bisect_right(occurrences, now_ms + horizon_ms)
+            out[position] = math.log1p(end - start)
+        else:
+            delta = (occurrences[start] - now_ms) / 1000.0 if start < len(occurrences) else math.inf
+            out[position] = -math.log1p(min(delta, horizon_seconds))
+    return out
+
 
 def _normalize(matrix: np.ndarray, standardization: str) -> np.ndarray:
     """Apply the decision-point normalisation a standardisation variant asks for.
@@ -270,15 +304,22 @@ def fit_fixed_model(
     train_fraction: float = HYPERPARAMETERS["train_fraction"],
     seed: int = 0,
     standardization: str = "per_decision",
+    target: str = "binary",
 ):
     """Fit one ranker on the trace's training window only.
 
     Returns the ranker, the horizon actually used, and the split timestamp. The
     requested horizon is clipped to what the trace can support on both sides of
-    the split; that is a property of the trace, not a tuned choice.
+    the split; that is a property of the trace, not a tuned choice. `target`
+    picks what is predicted (see `target_values`); a graded target is fitted
+    by ridge regression with the same features, standardisation, and penalty
+    scale as the logistic ranker.
     """
-    from .phase05 import split_design, _labels
+    from .phase05 import split_design
     from .predictors import case_control_sample
+
+    if target not in TARGETS:
+        raise ValueError(f"unknown target {target!r}")
 
     usable, _, train_snapshots, split_ms, _ = split_design(
         trace, (10, 60, 300, 600, 1800), train_fraction, snapshot_count
@@ -305,10 +346,14 @@ def fit_fixed_model(
         normalized = _normalize(
             history.feature_matrix(state_ids, timestamp_ms), standardization
         )
-        labels = _labels(trace, state_ids, timestamp_ms, horizon)
-        sampled_features, sampled_labels = case_control_sample(
-            normalized, labels, negatives_per_positive, rng
-        )
+        labels = target_values(trace, state_ids, timestamp_ms, horizon, target)
+        if target == "binary":
+            sampled_features, sampled_labels = case_control_sample(
+                normalized, labels.astype(np.int8), negatives_per_positive, rng
+            )
+        else:
+            # Graded targets keep every row; the quota below bounds the size.
+            sampled_features, sampled_labels = normalized, labels
         if len(sampled_labels) > quota:
             keep = np.sort(rng.choice(len(sampled_labels), size=quota, replace=False))
             sampled_features, sampled_labels = sampled_features[keep], sampled_labels[keep]
@@ -317,10 +362,17 @@ def fit_fixed_model(
 
     stacked_features = np.vstack(features_buffer)
     stacked_labels = np.concatenate(labels_buffer)
-    ranker = LogisticRanker(
-        indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
-    ).fit(stacked_features, stacked_labels)
-    return ranker, horizon, split_ms, int(stacked_labels.sum()), len(stacked_labels)
+    if target == "binary":
+        ranker = LogisticRanker(
+            indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
+        ).fit(stacked_features, stacked_labels)
+        positives = int(stacked_labels.sum())
+    else:
+        ranker = RidgeRanker(
+            indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
+        ).fit(stacked_features, stacked_labels)
+        positives = int((stacked_labels > stacked_labels.min()).sum())
+    return ranker, horizon, split_ms, positives, len(stacked_labels)
 
 
 def transfer_metrics(

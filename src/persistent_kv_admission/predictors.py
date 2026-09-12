@@ -121,3 +121,61 @@ def case_control_sample(
     chosen = rng.choice(negative_indices, size=keep, replace=False)
     order = np.sort(np.concatenate((np.flatnonzero(positive_mask), chosen)))
     return features[order], labels[order]
+
+
+@dataclass
+class RidgeRanker:
+    """L2 linear regression on standardised features, closed form.
+
+    Used for graded targets (log reuse count, negative log next-use time) so
+    that a target change is only a target change: the feature set, the
+    standardisation, and the penalty scale match `LogisticRanker`.
+    """
+
+    indices: tuple[int, ...]
+    l2: float = 1.0
+    standardize: bool = True
+    mean: np.ndarray | None = None
+    scale: np.ndarray | None = None
+    coefficients: np.ndarray | None = None
+    intercept: float = 0.0
+    converged: bool = True
+    iterations: int = 1
+
+    def fit(self, features: np.ndarray, targets: np.ndarray) -> "RidgeRanker":
+        selected = features[:, self.indices].astype(float)
+        targets = targets.astype(float)
+        if self.standardize:
+            self.mean = selected.mean(axis=0)
+            scale = selected.std(axis=0)
+            scale[scale < 1e-12] = 1.0
+        else:
+            self.mean = np.zeros(selected.shape[1])
+            scale = np.ones(selected.shape[1])
+        self.scale = scale
+        design = (selected - self.mean) / scale
+        centred_target = targets - targets.mean()
+        penalty = self.l2 * len(design) * np.eye(design.shape[1])
+        gram = design.T @ design + penalty
+        self.coefficients = np.linalg.solve(gram, design.T @ centred_target)
+        self.intercept = float(targets.mean())
+        return self
+
+    def score(self, features: np.ndarray) -> np.ndarray:
+        if self.coefficients is None or self.mean is None or self.scale is None:
+            raise ValueError("ranker is not fitted")
+        selected = features[:, self.indices].astype(float)
+        return ((selected - self.mean) / self.scale) @ self.coefficients + self.intercept
+
+    def score_row(self, row: list[float]) -> float:
+        if self.coefficients is None or self.mean is None or self.scale is None:
+            raise ValueError("ranker is not fitted")
+        total = self.intercept
+        for position, index in enumerate(self.indices):
+            total += self.coefficients[position] * (row[index] - self.mean[position]) / self.scale[position]
+        return total
+
+    def standardized_coefficients(self, names: tuple[str, ...]) -> list[tuple[str, float]]:
+        if self.coefficients is None:
+            raise ValueError("ranker is not fitted")
+        return [(names[index], float(value)) for index, value in zip(self.indices, self.coefficients)]

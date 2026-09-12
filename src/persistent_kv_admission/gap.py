@@ -30,6 +30,7 @@ and `PopulationLadder` measures the same scorer on nested populations
 from __future__ import annotations
 
 import bisect
+import json
 import math
 import random
 from collections import defaultdict
@@ -468,11 +469,140 @@ def arm_specs(fit_horizon_seconds: float, extra_horizons: tuple[int, ...] = (60,
     return arms
 
 
-def build_scorer(spec: ArmSpec, trace: Trace, ranker: LogisticRanker | None, seed: int):
+class HorizonMatchedScorer:
+    """One fitted ranker per label horizon; the horizon follows the cache's residence time.
+
+    The gap decomposition showed the best label horizon grows with the budget:
+    the cache needs to know about reuse within roughly the time a state can
+    survive in it. That time is observable online without any parameter, by
+    Little's law: residence ≈ capacity / byte-insertion rate, with the rate
+    taken as the cumulative average since the start of the run. At each
+    decision the ranker whose horizon is nearest (in log space) to the current
+    residence estimate is used. Nothing else differs from `FixedModelScorer`:
+    same history, same population normalisation, same features.
+    """
+
+    time_varying = True
+
+    def __init__(
+        self,
+        trace: Trace,
+        rankers: dict[float, LogisticRanker],
+        refresh_every: int = 16,
+        sample_size: int = 512,
+        seed: int = 0,
+        bytes_per_token: int = HYPERPARAMETERS["bytes_per_token"],
+        size_model: str = HYPERPARAMETERS["size_model"],
+    ) -> None:
+        if not rankers:
+            raise ValueError("at least one horizon ranker is required")
+        self.base = FixedModelScorer(
+            trace, next(iter(rankers.values())), refresh_every, sample_size, seed, normalize_on="cached"
+        )
+        self.trace = trace
+        self.rankers = dict(sorted(rankers.items()))
+        self.horizons = np.log(np.array(list(self.rankers), dtype=float))
+        self.bytes_per_token = bytes_per_token
+        self.size_model = size_model
+        self.cache = None
+        self.start_ms: float | None = None
+        self.inserted_bytes = 0
+        self.current_horizon = float(next(iter(self.rankers)))
+        self.horizon_groups: dict[float, int] = defaultdict(int)
+
+    def attach(self, cache) -> None:
+        self.cache = cache
+        self.base.attach(cache)
+
+    def _state_bytes(self, state_id: str) -> int:
+        meta = self.trace.states[state_id]
+        tokens = meta.block_tokens if self.size_model == "packed" else self.trace.block_size
+        return tokens * self.bytes_per_token
+
+    def residence_seconds(self, timestamp_ms: float) -> float:
+        if self.cache is None or self.start_ms is None or self.inserted_bytes == 0:
+            return math.inf
+        elapsed = max((timestamp_ms - self.start_ms) / 1000.0, 1.0)
+        rate = self.inserted_bytes / elapsed
+        return self.cache.capacity_bytes / rate if rate > 0 else math.inf
+
+    def observe(self, requests: list[Request], timestamp_ms: float) -> None:
+        if self.start_ms is None:
+            self.start_ms = timestamp_ms
+        if self.cache is not None:
+            # observe() runs before insertion, so a state absent from the cache
+            # now is one this group will insert.
+            new_states = {
+                state_id
+                for request in requests
+                for state_id in request.hash_ids
+                if state_id not in self.cache.cached
+            }
+            self.inserted_bytes += sum(self._state_bytes(state_id) for state_id in new_states)
+        self.base.observe(requests, timestamp_ms)
+        residence = self.residence_seconds(timestamp_ms)
+        if math.isfinite(residence) and residence > 0:
+            position = int(np.argmin(np.abs(self.horizons - math.log(residence))))
+            self.current_horizon = float(list(self.rankers)[position])
+        self.horizon_groups[self.current_horizon] += 1
+
+    def score(self, state_id: str, timestamp_ms: float) -> float:
+        row = self.base.history.feature_vector(state_id, timestamp_ms)
+        return self.rankers[self.current_horizon].score_row(self.base.normalizer.apply_row(row))
+
+
+def target_arm_specs(available: dict[str, LogisticRanker]) -> list[ArmSpec]:
+    """Arms for the target-change replay: one per fitted target, plus references."""
+    arms = [
+        ArmSpec("lru", "sampled", scorer="baseline:lru"),
+        ArmSpec("lfu", "sampled", scorer="baseline:lfu"),
+        ArmSpec("offline_next_use", "heap", policy="offline_next_use", deterministic=True),
+    ]
+    for key in available:
+        arms.append(ArmSpec(f"learned_{key}", "sampled", scorer=f"fixed:{key}"))
+    binary_keys = [key for key in available if key.startswith("binary_h")]
+    if len(binary_keys) >= 2:
+        arms.append(ArmSpec("learned_matched", "sampled", scorer="matched"))
+    return arms
+
+
+def build_scorer(
+    spec: ArmSpec,
+    trace: Trace,
+    ranker: LogisticRanker | None,
+    seed: int,
+    rankers: dict[str, LogisticRanker] | None = None,
+):
     if spec.scorer is None:
         return None
     if spec.scorer.startswith("oracle:"):
         return OracleScorer(trace, spec.scorer.split(":", 1)[1], spec.horizon_seconds)
+    if spec.scorer.startswith("fixed:"):
+        key = spec.scorer.split(":", 1)[1]
+        if rankers is None or key not in rankers:
+            raise ValueError(f"no fitted ranker for {key!r}")
+        return FixedModelScorer(
+            trace,
+            rankers[key],
+            refresh_every=HYPERPARAMETERS["normalizer_refresh_every"],
+            sample_size=HYPERPARAMETERS["normalizer_sample"],
+            seed=seed,
+        )
+    if spec.scorer == "matched":
+        if rankers is None:
+            raise ValueError("matched scorer needs per-horizon rankers")
+        by_horizon = {
+            float(key.split("_h", 1)[1]): value
+            for key, value in rankers.items()
+            if key.startswith("binary_h")
+        }
+        return HorizonMatchedScorer(
+            trace,
+            by_horizon,
+            refresh_every=HYPERPARAMETERS["normalizer_refresh_every"],
+            sample_size=HYPERPARAMETERS["normalizer_sample"],
+            seed=seed,
+        )
     factories = scorer_factories(
         trace, {"fixed_self": ranker} if ranker is not None else {}, seed=seed
     )
@@ -525,12 +655,13 @@ def run_arm(
     bytes_per_token: int = HYPERPARAMETERS["bytes_per_token"],
     size_model: str = HYPERPARAMETERS["size_model"],
     sample_width: int = HYPERPARAMETERS["eviction_sample_width"],
+    rankers: dict[str, LogisticRanker] | None = None,
 ) -> dict[str, object]:
     """Replay one arm at one budget and seed, with logging where it applies."""
     groups = occurrence_groups or _occurrence_groups(trace)
     total_bytes = working_set_bytes(trace, bytes_per_token, size_model)
     capacity = max(1, round(total_bytes * fraction))
-    scorer = build_scorer(spec, trace, ranker, seed)
+    scorer = build_scorer(spec, trace, ranker, seed, rankers)
     logger = None
     ladder = None
     if spec.eviction == "sampled" and spec.name in LOGGED_ARMS:
@@ -571,6 +702,12 @@ def run_arm(
         measured_requests=result.measured_requests,
         oracle_horizon_seconds=spec.horizon_seconds if spec.horizon_seconds else "",
     )
+    if isinstance(scorer, HorizonMatchedScorer):
+        total_groups = max(sum(scorer.horizon_groups.values()), 1)
+        replay_row["matched_horizon_shares"] = json.dumps(
+            {str(int(h)): round(c / total_groups, 3) for h, c in sorted(scorer.horizon_groups.items())}
+        )
+        replay_row["matched_final_residence_seconds"] = scorer.residence_seconds(trace.end_ms)
     usable_horizons = tuple(
         horizon for horizon in log_horizons if split_ms + horizon * 1000.0 <= trace.end_ms
     )

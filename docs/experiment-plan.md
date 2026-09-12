@@ -60,12 +60,32 @@ decompose further before deciding.
 Pipeline: `scripts/run_predictability_gap.py`. Findings:
 `docs/predictability-retention-gap.md`.
 
-## Phase 1 — Policy simulator (planned; contents depend on Phase 0.75)
+## Phase 0.9 — Target change inside Research 1 (current)
+
+Keep the ranker, the features, the hyperparameters, and the eviction machinery;
+change only what is predicted.
+
+- **Decision-population predictability.** On the logged eviction candidate
+  sets, fit single-feature, linear, and gradient-boosted models to the 60 s,
+  300 s, and 600 s labels with a time split and a horizon embargo
+  (`scripts/run_candidate_models.py`). This says which target a causal model
+  can rank on the population that matters, and whether model capacity is the
+  limit.
+- **Replay with alternative targets.** Fit the same linear ranker to the
+  binary label at 60 s / 300 s / 600 s, to the reuse count, and to the
+  next-use time; replay each through the sampled-leaf eviction over five seeds
+  and seven budgets, against the oracle arms of Phase 0.75
+  (`scripts/run_target_change.py`).
+
+Gate: a causal target that recovers materially more headroom than the 600 s
+binary target at the budgets where the oracle said the target was the problem.
+
+## Phase 1 — Policy simulator (planned; contents depend on Phase 0.9)
 
 Policies to compare under the corrected objective:
 
 - LRU, LFU, 2-hit
-- the retention objective that the decomposition identifies
+- the retention objective that Phase 0.9 identifies
 - approximate offline-next-use comparator (headroom only)
 
 Metrics: hit rate, admission precision / recall, reused tokens, avoided

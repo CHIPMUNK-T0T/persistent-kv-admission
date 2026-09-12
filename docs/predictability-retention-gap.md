@@ -233,6 +233,59 @@ The synthetic trace is different in kind: the learned model is at or below
 chance on its own candidates (0.48 / 0.67 / 0.49) and LFU's small-budget win
 there comes from candidates that are 88% positive.
 
+## 5b. Model capacity is not the limit on the decision population
+
+Concluding from one linear model that history features cannot separate live
+states would be weak. `scripts/run_candidate_models.py` replays the
+`learned_history` arm once per trace and budget, logs every sampled eviction
+decision with the raw 23 features of its candidates (reservoir of 40,000
+decisions over the whole run), and fits, on those candidate sets, models of
+increasing capacity: recency alone, frequency alone, the linear ranker
+refitted on the candidate population, histogram gradient boosting (300 trees,
+one parameter set for everything), and gradient boosting with each feature's
+rank inside its own decision added as context. Training uses decisions before
+the Phase 0.5 split with a horizon embargo; testing uses the evaluation window.
+Within-decision AUC on the test decisions (`candidate_model_check.csv`, `fig9`):
+
+| label / budget | recency | frequency | deployed arm | linear, refit | gradient boosting | GB + context |
+|---|---:|---:|---:|---:|---:|---:|
+| conversation 600 s, 0.25% | 0.37 | 0.68 | 0.57 | **0.68** | 0.66 | 0.66 |
+| conversation 600 s, 1% | 0.47 | 0.60 | 0.57 | **0.61** | 0.56 | 0.56 |
+| conversation 600 s, 5% | 0.61 | 0.52 | 0.63 | **0.66** | 0.62 | 0.62 |
+| conversation 600 s, 10% | 0.70 | 0.47 | 0.63 | **0.74** | 0.71 | 0.71 |
+| tool-agent 600 s, 0.25% | 0.35 | 0.73 | 0.63 | **0.73** | 0.71 | 0.72 |
+| tool-agent 600 s, 1% | 0.45 | 0.62 | 0.59 | **0.62** | 0.57 | 0.58 |
+| tool-agent 600 s, 5% | 0.61 | 0.53 | 0.63 | 0.66 | 0.66 | **0.66** |
+| tool-agent 600 s, 10% | 0.68 | 0.48 | 0.63 | 0.74 | 0.74 | **0.75** |
+| conversation 60 s, 0.25% | 0.35 | 0.68 | 0.56 | **0.72** | 0.64 | 0.66 |
+| conversation 60 s, 1% | 0.44 | 0.61 | 0.57 | **0.66** | 0.62 | 0.63 |
+| tool-agent 60 s, 0.25% | 0.42 | 0.74 | 0.64 | **0.76** | 0.71 | 0.70 |
+| tool-agent 60 s, 1% | 0.46 | 0.63 | 0.58 | **0.67** | 0.62 | 0.63 |
+
+Three things follow.
+
+**Gradient boosting never beats the linear model on the real traces** at any
+budget or horizon (it ties within 0.01 at 5–10% on tool-agent and is 0.02–0.08
+worse elsewhere). Adding within-decision rank context changes nothing. On the
+same 23 features the information is not there for a higher-capacity model to
+find; the ~0.6 ceiling at 1–2% is a property of the features on this
+population, not of the linear model.
+
+**Refitting on the decision population helps, but modestly.** The linear
+model refitted on candidates gains +0.03 to +0.11 over the deployed arm; at
+0.25% it is frequency alone (0.68 / 0.73 vs 0.68 / 0.73), and at 10% it is
+mostly recency (0.70 / 0.68). The regret rate of the refit is 0.23–0.28 at
+0.25–1% against 0.30–0.32 for the deployed arm and 0.00 for the oracle.
+
+**The short label is more separable where it matters.** For the 60 s label
+at 0.25–1%, the linear refit reaches 0.66–0.76, against 0.61–0.73 for the
+600 s label on the same decisions, and its regret is 0.04–0.07. That is the
+causal side of §4: the target the oracle said a small cache needs is also the
+one history features rank best there.
+
+Synthetic is unstable in this check (0.35–0.64 with no consistent ordering)
+and is not used for the conclusions above.
+
 ## 6. Standardisation robustness of the transfer result
 
 Concern C-2 from Phase 0.5 was that the cross-workload transfer might be
@@ -291,6 +344,12 @@ unrepeatable across processes.
 - **Sampled eviction is not why causal arms fail** (search gap 0.00–0.18).
 - **The cross-workload transfer survives every standardisation variant** (real-trace cells unchanged to three decimals; cosine ≥ 0.98).
 - **Results are seed-stable** (median CI half-width 0.002 over 224 cells).
+- **Model capacity is not the limit.** Gradient boosting on the same 23
+  features, fitted on the decision population, never beats the linear ranker
+  on the real traces; the ceiling on the decision population is 0.57–0.68 for
+  the 600 s label at 0.25–2% and 0.74 at 10%, for every model.
+- **The 60 s label is more separable on the decision population at small
+  budgets** (linear refit 0.66–0.76 at 0.25–1%, regret 0.04–0.07).
 
 ### Refuted
 
@@ -298,8 +357,8 @@ unrepeatable across processes.
   below 1%: the perfect label recovers ≤ 0.21 there.
 - "The learned score's poor closure is a modelling failure on the global task."
   Refuted: the global task is solved (0.86–0.94); the decision task is not
-  (0.57–0.63), and the online learner fitted on the decision population does no
-  better.
+  (0.57–0.63), and neither the online learner fitted on the decision population
+  nor gradient boosting on the same features does better.
 - "The headroom is in value per byte." Refuted at every budget ≥ 0.5%.
 - "The headroom is in the eviction search width." Refuted as the main term.
 - "Transfer between the real workloads is an artefact of per-decision
@@ -310,10 +369,10 @@ unrepeatable across processes.
 
 ### Unresolved
 
-- **Whether a causal predictor can approach the short-horizon or next-use
-  oracles on the live population.** Phase 0.5 measured the 60 s label at AUC
-  0.90 / 0.94 on observed states, but that is the global task; its
-  decision-population AUC is not yet measured.
+- **Whether a causal ranker fitted to the short-horizon, count, or next-use
+  targets recovers more headroom in replay.** Its decision-population AUC for
+  the 60 s label is 0.66–0.76 at small budgets (§5b); what that buys in
+  avoided tokens is the next measurement (`scripts/run_target_change.py`).
 - **Which budget regime a real persistent tier sits in.** The traces span 59
   minutes. A fixed capacity is a smaller fraction of a longer trace's working
   set, which argues that persistent tiers are usually in the small-budget
@@ -328,29 +387,27 @@ unrepeatable across processes.
 
 ### Research decision
 
-The gate returned different cases in different budget regimes, so the decision
-is stated per regime and in order.
+The gate returned different cases in different budget regimes. The decision
+for this repository is:
 
-1. **Research 1 continues, with the target changed.** This is the first step
-   regardless of regime, because the fixed-horizon binary label is the wrong
-   objective wherever the cache's residence time is short, and the count and
-   next-use oracles are at least as good as the binary oracle everywhere except
-   5%. The target moves from "reused within 600 s" to a residence-time-matched
-   horizon, a reuse count, or the next-use time. This is a change of what is
-   predicted, not a new policy; the first measurement is the causal
-   predictability of those targets **on the decision population**, using the
-   candidate logs this phase produces.
-2. **Research 2 now has grounds, in the large-budget regime.** At 2–10% on the
-   real traces the label is right (oracle 0.72–0.96) and the history-based
-   predictor's decision-population AUC is ~0.6, unchanged by training on that
-   population or by the normalisation control. The information the eviction
-   decision needs among live states is not in single-state reuse history. The
-   target for Research 2 is precise: raise within-decision AUC for the
-   long-horizon label above the ~0.6 that history features reach, with the
-   oracle closure as the ceiling.
-3. **Order.** Step 1 before step 2. The target definition determines what a
-   semantic signal would have to predict, and step 1 is measurable from
-   existing logs in hours.
+**Research 1 continues, with the target changed.** The fixed-horizon binary
+label is the wrong objective wherever the cache's residence time is short, and
+the count and next-use oracles are at least as good as the binary oracle
+everywhere except 5%. The target moves from "reused within 600 s" to a
+residence-time-matched horizon, a reuse count, or the next-use time. This is a
+change of what is predicted, not a new policy. It is measured in two steps:
+
+1. the causal predictability of the alternative targets **on the decision
+   population**, from the candidate logs this phase produced (model capacity
+   on the same 23 features is checked at the same time, so that "history
+   cannot separate live states" does not rest on one linear model);
+2. replay of the same causal ranker fitted to each alternative target,
+   through the same eviction machinery, over the same seeds and budgets.
+
+The large-budget signal gap is recorded as a bound on what history-based
+selection can reach there (oracle 0.72–0.96 against ~0.6 decision-population
+AUC). Semantic or contextual signals (Research 2) are a separate experiment
+outside this repository's plan and are not gated on anything here.
 
 ## 9. Method limits
 

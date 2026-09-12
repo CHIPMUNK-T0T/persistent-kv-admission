@@ -105,22 +105,22 @@ traces, 300 s on synthetic):
   standardisation (real-trace cells identical to three decimals; coefficient
   cosine ≥ 0.98), so it is not an artefact of the preprocessing.
 
-## 6. Research 1 / Research 2 decision
+## 6. Decision: Research 1 continues with a changed target
 
 Under the gate fixed before the run (`oracle_binary` closure ≥ 0.7 → signal
 problem, ≤ 0.3 → objective problem, between → decompose further), the answer is
-regime-dependent, so the decision is stated per regime and in order:
+regime-dependent. What follows from it for this repository is one thing:
 
-1. **Research 1 continues with a changed target.** The fixed-horizon binary
-   label is replaced by a residence-time-matched horizon, a reuse count, or the
-   next-use time. This changes what is predicted, not the policy, and applies
-   first because it is needed in every regime and is measurable from the
-   existing candidate logs.
-2. **Research 2 has grounds in the large-budget regime.** There, single-state
-   reuse history does not contain what the eviction decision needs among live
-   states (decision-population AUC ~0.6, unchanged by training on that
-   population). Its target is precise: raise within-decision AUC for the
-   long-horizon label above ~0.6, with the oracle closure as ceiling.
+**Research 1 continues, with the prediction target changed.** The fixed
+600 s binary label is replaced by targets the oracle arms showed to be the
+right objective: a reuse label whose horizon matches the cache's residence
+time, the reuse count within the horizon, or the next-use time. This changes
+what is predicted, not the policy, and it is measured first on the decision
+population using the candidate logs this phase produced, then in replay with
+the same causal model and the same eviction machinery.
+
+Semantic or embedding-based signals (Research 2) are a separate experiment
+outside this repository's plan and are not a dependency of anything here.
 
 Details, tables, and the Confirmed / Refuted / Unresolved lists are in
 `docs/predictability-retention-gap.md`.
@@ -142,9 +142,11 @@ Details, tables, and the Confirmed / Refuted / Unresolved lists are in
 python3 scripts/run_characterization.py data/raw/*_trace.jsonl
 python3 scripts/run_cross_workload.py data/raw/*_trace.jsonl
 python3 scripts/run_predictability_gap.py data/raw/*_trace.jsonl --seeds 5
+# needs scikit-learn; see scripts/README.md for the virtualenv
+.venv/bin/python scripts/run_candidate_models.py data/raw/*_trace.jsonl
 ```
 
-Dependencies: NumPy and Matplotlib.
+Dependencies: NumPy and Matplotlib; scikit-learn only for the candidate-model check.
 
 ## Reference: data and protocol
 

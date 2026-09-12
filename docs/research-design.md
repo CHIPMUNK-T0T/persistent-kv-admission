@@ -71,5 +71,14 @@ TTFT, and energy are still out of scope.
 ## Important design constraint
 
 Research 1 does **not** use semantic embeddings. Semantic-locality-aware
-prediction is deferred to Research 2, and the decision to move there is gated
-on the decomposition above, not on the negative result alone.
+prediction (Research 2) is a separate experiment outside this repository's
+plan; nothing here depends on it and nothing here gates it.
+
+## Next step inside Research 1
+
+Change the prediction target, keep everything else. The gap decomposition
+showed that the fixed 600 s binary label is the wrong objective at small
+budgets (its perfect oracle recovers 5–21% of the headroom) and that the best
+label horizon grows with the budget. The next measurements are the causal
+predictability of residence-time-matched, count, and next-use targets on the
+decision population, and the replay of the same ranker fitted to each.
