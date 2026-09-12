@@ -81,7 +81,16 @@ class BaselineScorer:
 
 
 class FixedModelScorer:
-    """A ranker fitted offline, applied unchanged during the run."""
+    """A ranker fitted offline, applied unchanged during the run.
+
+    `normalize_on` picks the population whose feature statistics standardise
+    the row before the fitted coefficients are applied. "cached" uses the
+    retained set (the population the eviction ranks); "observed" uses every
+    state seen so far, which is the population the ranker was fitted and
+    evaluated on. The two are not ranking-equivalent for a linear model: the
+    effective weight of feature i is w_i / scale_i, so a different scale
+    vector is a different ranking. Both are measured.
+    """
 
     time_varying = True
 
@@ -92,7 +101,10 @@ class FixedModelScorer:
         refresh_every: int = 16,
         sample_size: int = 512,
         seed: int = 0,
+        normalize_on: str = "cached",
     ) -> None:
+        if normalize_on not in {"cached", "observed"}:
+            raise ValueError(f"unknown normalisation population {normalize_on!r}")
         self.history = TemporalHistory(trace)
         self.ranker = ranker
         self.normalizer = PopulationNormalizer(len(FEATURE_NAMES))
@@ -101,6 +113,7 @@ class FixedModelScorer:
         self.rng = np.random.default_rng(seed)
         self.groups_seen = 0
         self.cache = None
+        self.normalize_on = normalize_on
 
     def attach(self, cache) -> None:
         self.cache = cache
@@ -109,7 +122,7 @@ class FixedModelScorer:
         self.history.observe_requests(requests, timestamp_ms)
         if self.groups_seen % self.refresh_every == 0:
             population = self.history.observed_state_ids()
-            if self.cache is not None and self.cache.cached:
+            if self.normalize_on == "cached" and self.cache is not None and self.cache.cached:
                 population = list(self.cache.cached)
             if len(population) >= 2:
                 if len(population) > self.sample_size:
@@ -123,8 +136,12 @@ class FixedModelScorer:
         return self.ranker.score_row(self.normalizer.apply_row(row))
 
 
-def scorer_factories(trace: Trace, fixed_models: dict[str, LogisticRanker]):
-    """Name -> zero-argument factory. Scorers are stateful, so each run needs a fresh one."""
+def scorer_factories(trace: Trace, fixed_models: dict[str, LogisticRanker], seed: int = 0):
+    """Name -> zero-argument factory. Scorers are stateful, so each run needs a fresh one.
+
+    `seed` reaches every random draw a scorer makes (normaliser samples, online
+    training samples), so one seed fixes one complete replay.
+    """
     factories = {
         kind: (lambda kind=kind: BaselineScorer(trace, kind)) for kind in BASELINE_SCORERS
     }
@@ -136,6 +153,7 @@ def scorer_factories(trace: Trace, fixed_models: dict[str, LogisticRanker]):
         learning_rate=HYPERPARAMETERS["online_learning_rate"],
         refresh_every=HYPERPARAMETERS["normalizer_refresh_every"],
         normalizer_sample=HYPERPARAMETERS["normalizer_sample"],
+        seed=seed,
     )
     for name, ranker in fixed_models.items():
         factories[name] = lambda ranker=ranker: FixedModelScorer(
@@ -143,6 +161,7 @@ def scorer_factories(trace: Trace, fixed_models: dict[str, LogisticRanker]):
             ranker,
             refresh_every=HYPERPARAMETERS["normalizer_refresh_every"],
             sample_size=HYPERPARAMETERS["normalizer_sample"],
+            seed=seed,
         )
     return factories
 
@@ -219,6 +238,26 @@ def _row(trace: Trace, result, working_set_bytes: int, eviction: str) -> dict[st
     }
 
 
+STANDARDIZATIONS = ("per_decision", "train_global", "none")
+
+
+def _normalize(matrix: np.ndarray, standardization: str) -> np.ndarray:
+    """Apply the decision-point normalisation a standardisation variant asks for.
+
+    * `per_decision`: z-score inside the decision point (the default protocol).
+    * `train_global`: no per-point normalisation; the ranker standardises with
+      its own training-set statistics, so a transferred model carries the
+      *source* workload's feature scales onto the target.
+    * `none`: no normalisation anywhere; the ranker is fitted on raw features
+      with the L2 penalty acting on raw-unit coefficients.
+    """
+    from .temporal import standardize_rows
+
+    if standardization not in STANDARDIZATIONS:
+        raise ValueError(f"unknown standardization {standardization!r}")
+    return standardize_rows(matrix) if standardization == "per_decision" else matrix
+
+
 def fit_fixed_model(
     trace: Trace,
     horizon_seconds: float,
@@ -230,6 +269,7 @@ def fit_fixed_model(
     negatives_per_positive: float = 10.0,
     train_fraction: float = HYPERPARAMETERS["train_fraction"],
     seed: int = 0,
+    standardization: str = "per_decision",
 ):
     """Fit one ranker on the trace's training window only.
 
@@ -239,7 +279,6 @@ def fit_fixed_model(
     """
     from .phase05 import split_design, _labels
     from .predictors import case_control_sample
-    from .temporal import standardize_rows
 
     usable, _, train_snapshots, split_ms, _ = split_design(
         trace, (10, 60, 300, 600, 1800), train_fraction, snapshot_count
@@ -263,7 +302,9 @@ def fit_fixed_model(
         if len(state_ids) > candidate_cap:
             picks = np.sort(rng.choice(len(state_ids), size=candidate_cap, replace=False))
             state_ids = [state_ids[int(position)] for position in picks]
-        normalized = standardize_rows(history.feature_matrix(state_ids, timestamp_ms))
+        normalized = _normalize(
+            history.feature_matrix(state_ids, timestamp_ms), standardization
+        )
         labels = _labels(trace, state_ids, timestamp_ms, horizon)
         sampled_features, sampled_labels = case_control_sample(
             normalized, labels, negatives_per_positive, rng
@@ -276,9 +317,9 @@ def fit_fixed_model(
 
     stacked_features = np.vstack(features_buffer)
     stacked_labels = np.concatenate(labels_buffer)
-    ranker = LogisticRanker(indices=model_indices(model_name), l2=l2).fit(
-        stacked_features, stacked_labels
-    )
+    ranker = LogisticRanker(
+        indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
+    ).fit(stacked_features, stacked_labels)
     return ranker, horizon, split_ms, int(stacked_labels.sum()), len(stacked_labels)
 
 
@@ -291,12 +332,12 @@ def transfer_metrics(
     precision_k: int = 100,
     train_fraction: float = HYPERPARAMETERS["train_fraction"],
     seed: int = 0,
+    standardization: str = "per_decision",
 ) -> list[dict[str, object]]:
     """Score externally fitted rankers on this trace's held-out test snapshots."""
     from collections import defaultdict
 
     from .phase05 import _labels, fast_ranking_metrics, split_design
-    from .temporal import standardize_rows
 
     usable, test_snapshots, _, _, _ = split_design(
         trace, tuple(horizons), train_fraction, snapshot_count
@@ -317,7 +358,9 @@ def transfer_metrics(
         if len(state_ids) > candidate_cap:
             picks = np.sort(rng.choice(len(state_ids), size=candidate_cap, replace=False))
             state_ids = [state_ids[int(position)] for position in picks]
-        normalized = standardize_rows(history.feature_matrix(state_ids, timestamp_ms))
+        normalized = _normalize(
+            history.feature_matrix(state_ids, timestamp_ms), standardization
+        )
         for horizon in usable:
             labels = _labels(trace, state_ids, timestamp_ms, horizon)
             counts[horizon].append((int(labels.sum()), len(labels)))
@@ -335,6 +378,7 @@ def transfer_metrics(
                 {
                     "evaluated_on": trace.name,
                     "fitted_on": name,
+                    "standardization": standardization,
                     "horizon_seconds": horizon,
                     "auc": float(np.mean([v[0] for v in values])) if values else math.nan,
                     "auc_std": float(np.std([v[0] for v in values], ddof=1))

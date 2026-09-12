@@ -4,35 +4,72 @@
 
 **Value-Aware Persistent KV Selection for Specialized and Agentic LLM Serving**
 
-## Hypothesis
+## Fixed research objective
 
-Persistent KV states are not equally valuable. Structural and temporal signals can identify states with higher future reuse value than generic recency/frequency-only policies.
+Given a finite persistent KV cache, how should states with high future reuse
+value be selected so that the limited capacity is used best. This objective does
+not change with results. What changes is where the evidence says the answer is.
 
-## Research questions
+## Hypothesis 0 (superseded by evidence; kept for the record)
+
+*Persistent KV states are not equally valuable. Structural and temporal signals
+can identify states with higher future reuse value than generic
+recency/frequency-only policies.*
+
+Status after Phase 0 and Phase 0.5:
+
+- **Structural signals** (fan-out, branch diversity) carry real but small
+  incremental information (+0.004 to +0.006 AUC over frequency + recency +
+  prefix length on the real traces), and branch diversity is nearly collinear
+  with frequency. Not the main direction. (`docs/characterization-findings.md`)
+- **Temporal-history signals** predict future reuse well (AUC 0.86–0.94 at
+  300–600 s on the real traces), but a history-based learned scorer does not
+  beat parameterless LRU/LFU under a byte budget: the best causal arm recovers
+  at most 0.25 of the LRU-to-offline headroom, and the online learner is never
+  the best arm. (`docs/temporal-prediction-findings.md`)
+
+Hypothesis 0 is therefore not supported as stated. Reuse prediction is
+possible; better retention did not follow from it.
+
+## Current question
+
+**Why does accurate future-reuse prediction fail to translate into effective KV
+retention under a finite cache budget?**
+
+The decomposition experiment (`docs/predictability-retention-gap.md`) separates
+three candidate causes with the same eviction machinery for every arm:
+
+- **Signal gap**: the causal predictor does not know the label well enough
+  (`oracle_binary − learned_history`).
+- **Objective gap**: the label itself is the wrong target
+  (`oracle_next_use_sampled − oracle_binary`, `oracle_binary_per_byte −
+  oracle_binary`, `oracle_count − oracle_binary`).
+- **Candidate-search gap**: sampled leaf eviction cannot reach what the
+  exact comparator reaches (`offline_next_use − oracle_next_use_sampled`).
+
+Prefix dependency is a constraint shared by every arm, including the offline
+comparator, and is not treated as a separate policy factor here.
+
+## Research questions (as they now stand)
 
 ### RQ1 — Which KV states are valuable to retain?
 
-Characterize reuse distributions before designing the policy.
-
-Key dimensions:
-
-- reuse count
-- recency / inter-arrival
-- prefix length
-- fan-out / branch diversity
-- prefix-tree ancestry
-- state size
-- lifetime / stability
-- avoided recomputation
+Answered descriptively by Phase 0: reuse is heavy-tailed, most states are
+never reused, and recency/frequency/window features carry most of the
+predictable signal.
 
 ### RQ2 — Can we select future-useful KV states better than generic policies?
 
-Compare causal policies against LRU, LFU, and 2-hit under the same cache budget. Use the approximate offline-next-use comparator separately to estimate headroom; do not present it as a proven optimum.
+Phase 0.5 answer: not with single-state reuse history as the score. The gap
+experiment says why (see the findings document for the decision).
 
 ### RQ3 — Does better selection reduce recomputation under the same budget?
 
-Measure avoided prefill work, reused tokens, compute savings, and end-to-end effects.
+Measured as avoided prefill tokens in trace replay. End-to-end GPU time,
+TTFT, and energy are still out of scope.
 
 ## Important design constraint
 
-Research 1 does **not** use semantic embeddings. Semantic-locality-aware prediction is deferred to Research 2.
+Research 1 does **not** use semantic embeddings. Semantic-locality-aware
+prediction is deferred to Research 2, and the decision to move there is gated
+on the decomposition above, not on the negative result alone.

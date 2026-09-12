@@ -1,0 +1,75 @@
+{
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "budget_fractions": [
+    0.001,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "snapshots": 24,
+  "precision_k": 100,
+  "log_horizons_seconds": [
+    60,
+    300,
+    600
+  ],
+  "max_logged_decisions": 20000,
+  "fits": {
+    "conversation_trace": {
+      "trace": "conversation_trace",
+      "standardization": "per_decision",
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "train_rows": 142484,
+      "train_positives": 21910,
+      "seconds": 4.818442106246948
+    },
+    "toolagent_trace": {
+      "trace": "toolagent_trace",
+      "standardization": "per_decision",
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "train_rows": 142417,
+      "train_positives": 20426,
+      "seconds": 4.813922882080078
+    },
+    "synthetic_trace": {
+      "trace": "synthetic_trace",
+      "standardization": "per_decision",
+      "fit_horizon_seconds": 300,
+      "split_ms": 613215.0,
+      "train_rows": 131615,
+      "train_positives": 42003,
+      "seconds": 1.6904857158660889
+    }
+  },
+  "standardizations": [
+    "per_decision",
+    "train_global",
+    "none"
+  ],
+  "note": "One hyperparameter set for every workload; no per-trace tuning. Oracle arms use each trace's own fit horizon. Closure uses the same seed's sampled LRU as floor and the heap offline-next-use comparator as ceiling."
+}

@@ -41,7 +41,13 @@ comparator, not an oracle or an upper bound**: offline caching with variable ite
 sizes and prefix dependency is NP-hard, and this comparator additionally uses
 greedy leaf eviction.
 
-## 2. The learned value function transfers across workloads for free
+## 2. A simple temporal ranking structure transfers between the two real workloads
+
+*(Wording revised after Phase 0.75. The fitted coefficient vectors at 300–600 s
+are dominated by log frequency and negative log recency with near-equal weight,
+so what transfers between conversation and tool-agent is close to an LFU/LRU
+blend, not a rich value function. The standardisation-robustness check is in
+`docs/predictability-retention-gap.md`.)*
 
 Cross-workload transfer AUC at the 300 s horizon (`fig5`, rows = fitted on,
 columns = evaluated on):
@@ -67,9 +73,11 @@ The same holds in replay: `fixed_cross` is within noise of `fixed_self` at almos
 every trace and budget, and beats it on synthetic at every budget
 (e.g. 1% budget: `fixed_cross_toolagent` +0.040 vs `fixed_self` −0.037).
 
-So on the axis the pivot asked about, the answer is positive and unambiguous:
-**nothing in these traces requires a workload-specific value function.** The
-premise that temporal-feature work leads to per-workload tuning is not supported.
+So on the axis the pivot asked about: **nothing in these traces required a
+workload-specific model**, and the premise that temporal-feature work leads to
+per-workload tuning is not supported. The claim stops there. Two real traces
+from one deployment family, sharing a frequency-plus-recency structure, do not
+establish that a general value function transfers across workloads.
 
 Caveat: synthetic is fitted at 300 s and the real traces at 600 s, so the
 synthetic column is not a perfectly matched comparison. The conversation ↔
@@ -118,13 +126,14 @@ Meanwhile the same features rank future reuse well: AUC 0.86–0.94 and precisio
 of 0.66–0.74 at the 300–600 s horizons in the real traces. **On tool-agent, AUC 0.94
 coexists with a best-over-all-budgets HeadroomClosure of 0.25.**
 
-The mechanism is a population mismatch, not a modelling failure. The prediction
-task ranks ~40,000 observed states of which 3–5% are positive, so most of its
-measured skill is in separating dead one-time states from live ones. The eviction
-decision ranks only the **retained live leaves under a byte budget** — a population
-the cache has already filtered to be recent and alive, where that easy separation
-is already made. What remains is value *per byte* among live candidates, plus
-prefix dependency. Single-state reuse history carries much less signal there.
+The mechanism proposed here was a population mismatch, not a modelling failure:
+the prediction task ranks ~40,000 observed states of which 3–5% are positive, so
+most of its measured skill is in separating dead one-time states from live ones,
+whereas the eviction decision ranks only the **retained live leaves under a byte
+budget**. At the time of writing this was a hypothesis. It is measured directly
+in `docs/predictability-retention-gap.md` (candidate-set prediction and the
+population ladder), which also separates it from the objective and
+candidate-search explanations.
 
 ## 5. No policy wins across budgets, and the online learner never wins
 
@@ -151,10 +160,12 @@ including synthetic where 600 s is longer than the usable horizon.
 
 **何が確認できたか (what was confirmed)**
 
-- A value function learned from reuse history **transfers across workloads at
-  essentially zero cost**. Coefficient cosine between the two real workloads is
-  +0.968; cross-fitted AUC is within 0.002 of self-fitted in both directions, and
-  on synthetic the cross-fitted models beat the self-fitted one by ~0.17 AUC.
+- A simple temporal ranking structure learned from reuse history **transfers
+  between the two real workloads at no measurable cost**. Coefficient cosine
+  between conversation and tool-agent is +0.968; cross-fitted AUC is within 0.002
+  of self-fitted in both directions, and on synthetic the cross-fitted models
+  beat the self-fitted one by ~0.17 AUC. The transferred structure is close to
+  frequency + recency, so this is not evidence for a general value function.
 - The whole study ran on **one hyperparameter set across three workloads** with no
   per-trace tuning, and still produced AUC 0.86–0.94 on the real traces.
 - Among 23 features, **`window` (recent-window frequency at 10 s/60 s/300 s/600 s)

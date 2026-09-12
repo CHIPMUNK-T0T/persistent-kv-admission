@@ -23,6 +23,9 @@ class LogisticRanker:
     l2: float = 1.0
     max_iterations: int = 40
     tolerance: float = 1e-7
+    # With standardize=False the penalty acts on raw-unit coefficients, so the
+    # fit is a genuinely different model and not a reparameterisation.
+    standardize: bool = True
     mean: np.ndarray | None = None
     scale: np.ndarray | None = None
     coefficients: np.ndarray | None = None
@@ -33,9 +36,13 @@ class LogisticRanker:
     def fit(self, features: np.ndarray, labels: np.ndarray) -> "LogisticRanker":
         selected = features[:, self.indices].astype(float)
         labels = labels.astype(float)
-        self.mean = selected.mean(axis=0)
-        scale = selected.std(axis=0)
-        scale[scale < 1e-12] = 1.0
+        if self.standardize:
+            self.mean = selected.mean(axis=0)
+            scale = selected.std(axis=0)
+            scale[scale < 1e-12] = 1.0
+        else:
+            self.mean = np.zeros(selected.shape[1])
+            scale = np.ones(selected.shape[1])
         self.scale = scale
         design = np.column_stack(
             ((selected - self.mean) / scale, np.ones(len(selected)))

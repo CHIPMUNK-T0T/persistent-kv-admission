@@ -1,0 +1,10 @@
+standardization,fitted_on_a,fitted_on_b,cosine
+per_decision,conversation_trace,synthetic_trace,0.09531697963046941
+per_decision,conversation_trace,toolagent_trace,0.9789686550884162
+per_decision,synthetic_trace,toolagent_trace,0.17716321180982225
+train_global,conversation_trace,synthetic_trace,0.07872341635768358
+train_global,conversation_trace,toolagent_trace,0.9840200465845954
+train_global,synthetic_trace,toolagent_trace,0.13008577976428312
+none,conversation_trace,synthetic_trace,0.190908842769533
+none,conversation_trace,toolagent_trace,0.9898947530941394
+none,synthetic_trace,toolagent_trace,0.2573110884496218

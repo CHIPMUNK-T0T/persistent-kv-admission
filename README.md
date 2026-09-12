@@ -1,155 +1,204 @@
 # Persistent KV Admission
 
-Research repository for **Value-Aware Persistent KV Selection for Specialized and Agentic LLM Serving**.
+Research repository on **retention under finite capacity for persistent LLM KV
+caches**: which materialised prefix states to keep when the cache cannot hold
+them all.
 
-## Research question
+Everything here is trace replay over the pinned Mooncake FAST'25 traces
+(conversation, tool-agent, synthetic). No serving system is modified. Avoided
+prefill tokens are exact-prefix trace estimates, not measured GPU time.
 
-Under a fixed persistent KV cache budget, can we select KV states with higher future reuse value than generic cache policies such as LRU and LFU?
+## 1. Original question
 
-The core objective is not I/O throughput optimization. It is **retention / eviction under finite capacity**.
+Given a finite persistent KV cache, how should states with high future reuse
+value be selected so that the limited capacity is used best?
 
-## Core idea
-
-We treat each reusable KV state as a materialized inference state with heterogeneous future value.
-
-A tentative value model is:
-
-\[
-V(s) = E[N_{future}(s)] \times C_{recompute}(s)
-\]
-
-subject to:
+The objective is retention / eviction under a byte budget, not I/O throughput.
+The value of a state was first written as
 
 \[
-\sum_{s \in cache} Size(s) \le M
+V(s) = E[N_{future}(s)] \times C_{recompute}(s), \qquad \sum_{s \in cache} Size(s) \le M
 \]
 
-where:
+and the initial hypothesis (now Hypothesis 0, see
+`docs/research-design.md`) was that structural and temporal locality signals
+identify higher-value states than LRU or LFU do. Research 1 uses only observed
+structural and temporal locality; semantic signals are reserved for Research 2.
 
-- `E[N_future(s)]`: expected number of future reuses
-- `C_recompute(s)`: recomputation cost if the state is evicted
-- `M`: persistent cache capacity
+## 2. Phase 0 finding: structural signal exists but is small
 
-## Scope of Research 1
+`scripts/run_characterization.py`, `docs/characterization-findings.md`.
 
-Research 1 uses only **observed structural and temporal locality**. Semantic embeddings are explicitly excluded from the policy signal in this phase.
+- Reuse is heavy-tailed; most cumulative-prefix states are never reused.
+- The approximate offline-next-use comparator beats LRU by far more than the
+  5% stop criterion at every trace and budget, so generic policies do leave
+  headroom.
+- Fan-out and branch diversity add +0.002 to +0.008 AUC over frequency +
+  recency + prefix length on the real traces and are nearly collinear with
+  frequency. Longest-first is not a viable general selector.
 
-Candidate signals:
+Structure-aware selection was not promoted to the main direction.
 
-- exact reuse count
-- recency
-- inter-arrival interval
-- prefix length
-- state size
-- request-level fan-out
-- branch diversity
-- shared ancestry in the prefix tree
-- avoided prefill tokens / FLOPs
+## 3. Phase 0.5 finding: reuse is predictable, retention does not follow
 
-## Baselines
+`scripts/run_cross_workload.py`, `docs/temporal-prediction-findings.md`.
 
-- LRU
-- LFU
-- 2-hit / delayed admission
-- frequency + recency
-- structural-aware policy
-- value-aware policy
-- approximate offline-next-use comparator (headroom only)
+- 23 causal temporal features; an L2 logistic ranker fitted on an earlier
+  window with a horizon embargo. **AUC 0.86–0.94** for the 300–600 s reuse
+  label on the real traces. One hyperparameter set for every workload.
+- A simple temporal ranking structure (mostly frequency + recency) fitted on
+  one real workload scores the other real workload as well as its own model
+  does. Two traces from one deployment family are not enough to call this
+  general transfer.
+- In fixed-budget replay through one shared sampled-eviction mechanism, the
+  learned scorer does not beat parameterless LRU/LFU. **The best causal arm at
+  any trace and budget recovers 0.248 of the LRU-to-offline headroom**; the
+  online learner is never the best arm; the policy ranking inverts with budget.
 
-## Evaluation
+So the claim "predict future reuse well and retention improves" is refuted as
+stated on these traces.
 
-Primary metrics:
+## 4. Current question
 
-- cache hit rate under a fixed budget
-- reused prefix tokens
-- avoided prefill tokens
-- avoided prefill FLOPs / GPU compute
-- avoided recomputation per unit cache capacity
-- admission precision / recall
-- future-reuse prediction precision / recall
+**Why does accurate future-reuse prediction fail to translate into effective
+KV retention under a finite cache budget?**
 
-Secondary metrics:
+Three candidate causes, each measurable with the existing replay engine and
+without inventing a policy:
 
-- TTFT p50 / p95
-- GPU energy per request, if measurable
+| gap | measured as | meaning |
+|---|---|---|
+| signal gap | `oracle_binary − learned_history` | the causal predictor does not know the label well enough |
+| objective gap | `oracle_next_use_sampled − oracle_binary` (also per-byte and reuse-count oracles) | the binary "reused within H" label is the wrong target |
+| candidate-search gap | `offline_next_use (heap) − oracle_next_use_sampled` | sampled 16-leaf eviction cannot reach what exact search reaches |
 
-## Correctness guardrail
+Every arm above runs through the same prefix-closed, sampled-leaf eviction as
+the causal arms. Prefix dependency is a shared constraint, not a separate arm.
 
-Reuse is only allowed when exact-prefix and compatibility requirements are satisfied. Eligibility is conceptually:
+## 5. Oracle decomposition results (Phase 0.75)
 
-\[
-Eligible(s,t) = IdentityOK \land Compatible(t) \land IntegrityOK
-\]
+`scripts/run_predictability_gap.py`, `docs/predictability-retention-gap.md`.
+Five seeds per arm, seven budgets, same hyperparameters as Phase 0.5.
 
-Potential invalidation factors include model weights, tokenizer, RoPE configuration, KV layout, attention backend, quantization / parallelism setup, and persistent-format version.
+**The cause of the gap depends on the cache budget.** HeadroomClosure of an
+oracle that knows the exact training label (reused within 600 s on the real
+traces, 300 s on synthetic):
 
-## Experimental plan
+| budget | conversation | tool-agent | synthetic |
+|---|---:|---:|---:|
+| 0.25% | 0.13 | 0.22 | 0.06 |
+| 1% | 0.43 | 0.44 | 0.21 |
+| 5% | 0.86 | 0.96 | 0.29 |
 
-1. **Trace characterization**
-   - Reconstruct prefix chains from public traces such as Mooncake.
-   - Measure reuse count, recency, inter-arrival, fan-out, branch diversity, and prefix length.
-   - Compare causal online policies separately, then measure LRU headroom against an approximate offline-next-use comparator.
+- **Below 1%: objective problem.** The perfect label recovers 5–21%. Among the
+  leaves a small cache holds, 88–97% will be reused within 600 s, so the label
+  cannot separate them. The best label horizon grows with the budget (60 s
+  below 1%, 300 s at 1–2%, 600 s at 5–10%); a next-use-time oracle recovers
+  0.82–1.00 everywhere. Value per byte accounts for ≤ 0.01 on the real traces
+  at every budget ≥ 0.5%; sampled eviction accounts for 0.00–0.18.
+- **At 2–10% on the real traces: signal problem.** The label is right (oracle
+  0.72–0.96) and the history-based predictor fails on the decision population:
+  the same score that reaches AUC 0.86–0.94 on observed states reaches
+  0.57–0.63 on the eviction candidates, and its regret rate (evicting a leaf
+  that will be reused when one that will not was available) equals LRU's.
+- The cross-workload transfer is unchanged under train-set and no
+  standardisation (real-trace cells identical to three decimals; coefficient
+  cosine ≥ 0.98), so it is not an artefact of the preprocessing.
 
-2. **Policy simulator**
-   - Replay traces under a fixed cache budget.
-   - Compare LRU, LFU, 2-hit, Longest-first, frequency × prefix length, and a simple structural baseline.
+## 6. Research 1 / Research 2 decision
 
-3. **Online prototype**
-   - Integrate the policy into vLLM / LMCache or an equivalent KV persistence layer.
-   - Evaluate with real KV states under identical cache capacity.
+Under the gate fixed before the run (`oracle_binary` closure ≥ 0.7 → signal
+problem, ≤ 0.3 → objective problem, between → decompose further), the answer is
+regime-dependent, so the decision is stated per regime and in order:
 
-4. **End-to-end validation**
-   - Validate avoided compute, TTFT, and optionally GPU energy.
+1. **Research 1 continues with a changed target.** The fixed-horizon binary
+   label is replaced by a residence-time-matched horizon, a reuse count, or the
+   next-use time. This changes what is predicted, not the policy, and applies
+   first because it is needed in every regime and is measurable from the
+   existing candidate logs.
+2. **Research 2 has grounds in the large-budget regime.** There, single-state
+   reuse history does not contain what the eviction decision needs among live
+   states (decision-population AUC ~0.6, unchanged by training on that
+   population). Its target is precise: raise within-decision AUC for the
+   long-horizon label above ~0.6, with the oracle closure as ceiling.
 
-## Non-goals
+Details, tables, and the Confirmed / Refuted / Unresolved lists are in
+`docs/predictability-retention-gap.md`.
 
-- SSD / GDS / PCIe bandwidth optimization as the main contribution
-- restore-vs-recompute crossover as the main result
-- storage-engine redesign
-- semantic embedding prediction
-- approximate KV reuse
-- improving model answer quality via caching
+## Repository layout
 
-## Repository status
+- `src/persistent_kv_admission/` — trace loader, prefix-closed replay engine,
+  temporal features, rankers, online scorer, cross-workload and gap modules
+- `scripts/` — one runner per phase (`scripts/README.md`)
+- `docs/` — design, plan, and one findings document per phase
+- `results/paper/` — tracked review artifacts (CSV summaries, figures, run configs)
+- `results/<phase>/` — full untracked dumps
+- `tests/` — `PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_*.py' -t tests`
 
-Early-stage research. Problem formulation, policy design, datasets, and evaluation methodology are expected to evolve as characterization results and prior-work review progress.
-
-## Research 1: trace characterization
-
-The repository now contains a reproducible characterization pipeline. It deliberately stops before implementing a new online policy.
+## Reproduction
 
 ```bash
 ./scripts/download_mooncake_traces.sh
 python3 scripts/run_characterization.py data/raw/*_trace.jsonl
+python3 scripts/run_cross_workload.py data/raw/*_trace.jsonl
+python3 scripts/run_predictability_gap.py data/raw/*_trace.jsonl --seeds 5
 ```
 
-Raw generated outputs are written below `results/characterization/<trace>/`: state and reuse CSVs, causal horizon-ranking metrics, fixed-budget replay results, required plots, the exact run configuration, and a short `INTERPRETATION.md`. Lightweight review artifacts are tracked under `results/paper/`.
+Dependencies: NumPy and Matplotlib.
+
+## Reference: data and protocol
 
 ### Input schema and validated assumptions
 
-The loader expects the official Mooncake FAST'25 JSONL fields `timestamp`, `input_length`, `output_length`, and ordered `hash_ids`.
-
-Data source: [Mooncake FAST'25 trace release](https://github.com/kvcache-ai/Mooncake/tree/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces), pinned by the download script to commit `3cca71daccf2a7afb8fe3f0295358f70e3a69fdb`. Schema semantics are also described in the [FAST'25 paper](https://www.usenix.org/system/files/fast25-qin.pdf), Appendix A.
+The loader expects the official Mooncake FAST'25 JSONL fields `timestamp`,
+`input_length`, `output_length`, and ordered `hash_ids`. Data source:
+[Mooncake FAST'25 trace release](https://github.com/kvcache-ai/Mooncake/tree/3cca71daccf2a7afb8fe3f0295358f70e3a69fdb/FAST25-release/traces),
+pinned by the download script to commit `3cca71daccf2a7afb8fe3f0295358f70e3a69fdb`.
+Schema semantics: [FAST'25 paper](https://www.usenix.org/system/files/fast25-qin.pdf), Appendix A.
 
 - `timestamp` is relative arrival time in milliseconds and must be nondecreasing.
-- One `hash_id` is a cumulative prefix hash through one 512-token block. Equality means exact prefix reuse through that depth; it is not a hash of an independent block.
-- `len(hash_ids)` must equal `ceil(input_length / 512)`. The final node can therefore contain fewer than 512 tokens.
-- A repeated hash must always have the same depth, parent hash, prefix length, and incremental block length. The loader rejects inconsistent traces.
-- File order is preserved, but requests with an equal timestamp are treated as simultaneous. They observe the cache before that timestamp's batch and cannot create within-batch hits.
-- No session ID is present. The analysis therefore reports `request-level fan-out` and `branch diversity`, never cross-session reuse.
+- One `hash_id` is a cumulative prefix hash through one 512-token block.
+  Equality means exact prefix reuse through that depth.
+- `len(hash_ids)` must equal `ceil(input_length / 512)`; the final node can hold
+  fewer than 512 tokens.
+- A repeated hash must always have the same depth, parent, prefix length, and
+  incremental block length. The loader rejects inconsistent traces.
+- Requests with an equal timestamp are simultaneous: they observe the cache
+  before that timestamp's batch and cannot hit within the batch.
+- No session ID is present, so fan-out and branch diversity are request-level
+  terms.
 
-The state-size proxy is `incremental block tokens × bytes_per_token` (default 2048). It is only a capacity-normalization proxy, not a measured model-specific KV layout. A state's `prefix_tokens` is cumulative, while storage charges only its incremental final block. `potential_reuses × prefix_tokens` is reported as a cumulative-prefix value proxy; `potential_reuses × block_tokens` avoids double-counting ancestors and is reported as estimated avoided prefill tokens in the unbounded idealization.
+The state-size proxy is `incremental block tokens × bytes_per_token` (default
+2048). Storage charges only a state's own block; hits count the reused prefix.
 
 ### Prediction protocol
 
-At sampled timestamp boundaries, every previously seen state is ranked using one causal signal at a time: recency, frequency, prefix length, observed direct fan-out, or observed terminal-branch diversity. The binary label is whether the exact state appears strictly after the boundary and within the horizon. AUC, threshold-based average precision, and tie-aware expected precision@100 are macro-averaged across snapshots. Windows extending past trace end are excluded; 6-hour and 1-day claims cannot be made from an approximately one-hour trace.
-
-Structural incrementality is tested with two simple ridge linear rankers implemented with NumPy: `Base = log1p(frequency) + -log1p(age_seconds) + log1p(prefix_length)` and `Extended = Base + log1p(fan_out) + log1p(branch_diversity)`. The first 60% of sampled snapshots are training candidates, the final 40% are held out, and a full future-horizon embargo removes training labels that would not be known at the first test snapshot. This avoids a scikit-learn dependency and keeps fitting deterministic. Snapshot-state observations are weighted equally. The pipeline also reports transformed-feature Pearson correlations and structural-signal ranking within separate frequency and recency quantile strata.
+At sampled timestamp boundaries every previously seen state is ranked by a
+causal score. The label is whether the exact state appears strictly after the
+boundary and within the horizon. AUC, threshold-integrated average precision,
+and tie-aware expected precision@100 are macro-averaged across snapshots.
+Training uses the first 60% of the trace with a full horizon embargo; test
+snapshots are shared across horizons. The real traces span about 59 minutes,
+so horizons beyond 600 s are unavailable.
 
 ### Replay protocol
 
-All retained states form a prefix-closed forest. A child is useful only while its full ancestor chain is retained, and eviction considers leaves so it cannot strand a child. Causal online replay compares LRU, 2-hit admission with LRU eviction, LFU, Longest-first, frequency × prefix length, and the deliberately simple `fan-out + branch diversity` score. Equal-timestamp observations can satisfy the 2-hit gate only after the batch and cannot hit within that batch. The approximate offline-next-use comparator is excluded from online rankings and used only to estimate headroom. It has future knowledge and greedy leaf eviction, so it is not a proven optimum for weighted prefix caching.
+Retained states form a prefix-closed forest: a child is usable only while its
+full ancestor chain is retained, and eviction removes leaves. Cache budgets are
+fixed byte capacities expressed as fractions of the packed unique-state working
+set. Every scored policy, baselines included, runs through the same sampled
+eviction (16 random retained leaves re-scored at the decision); the exact heap
+path is kept for the offline comparator and for deterministic reference arms.
+`HeadroomClosure = (Policy − LRU) / (OfflineNextUse − LRU)` in avoided prefill
+tokens over the evaluation window. The offline comparator has future knowledge
+and greedy leaf eviction; it is a headroom estimate, not a proven optimum.
 
-Cache budgets are fixed byte capacities expressed as fractions of the packed unique-state working set. The same absolute capacity is used for both models: `packed` charges actual incremental block tokens, while `fixed_block` charges all states as a full 512-token block, including partial final blocks. Both models run every trace, budget, and policy; `effective_capacity_fraction` records the resulting fraction of each model's working set. Exact-prefix hit tokens, avoided prefill tokens, block and request hit rates, and avoided tokens per capacity byte are reported. This trace-only estimate does not measure FLOPs, GPU time, restore cost, SSD/GDS/PCIe throughput, or a restore/recompute crossover.
+## Non-goals
 
-The current evidence shows that structural signals can rank reuse within some frequency/recency strata, but Extended does not improve Base consistently across all traces and horizons. Structure-aware selection is therefore not promoted to the main research direction. Structural signal can predict reuse, but whether its relative advantage increases at persistent-cache timescales remains unresolved.
+- SSD / GDS / PCIe bandwidth optimisation as the main contribution
+- restore-vs-recompute crossover as the main result
+- storage-engine redesign
+- semantic embedding prediction (Research 2, gated)
+- approximate KV reuse
+- improving model answer quality via caching
+- vLLM / LMCache integration before the retention objective is settled
