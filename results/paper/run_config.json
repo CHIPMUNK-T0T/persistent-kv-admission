@@ -1,0 +1,80 @@
+{
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "budget_fractions": [
+    0.0025,
+    0.01,
+    0.05
+  ],
+  "snapshots": 24,
+  "precision_k": 100,
+  "fits": {
+    "conversation_trace": {
+      "trace": "conversation_trace",
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "split_seconds": 2122.1994,
+      "train_rows": 142484,
+      "train_positives": 21910,
+      "converged": true,
+      "usable_horizons": [
+        10,
+        60,
+        300,
+        600
+      ],
+      "unusable_horizons": [
+        1800
+      ]
+    },
+    "toolagent_trace": {
+      "trace": "toolagent_trace",
+      "fit_horizon_seconds": 600,
+      "split_ms": 2122199.4,
+      "split_seconds": 2122.1994,
+      "train_rows": 142417,
+      "train_positives": 20426,
+      "converged": true,
+      "usable_horizons": [
+        10,
+        60,
+        300,
+        600
+      ],
+      "unusable_horizons": [
+        1800
+      ]
+    },
+    "synthetic_trace": {
+      "trace": "synthetic_trace",
+      "fit_horizon_seconds": 300,
+      "split_ms": 613215.0,
+      "split_seconds": 613.215,
+      "train_rows": 131615,
+      "train_positives": 42003,
+      "converged": true,
+      "usable_horizons": [
+        10,
+        60,
+        300
+      ],
+      "unusable_horizons": [
+        600,
+        1800
+      ]
+    }
+  },
+  "note": "One hyperparameter set is used for every workload. No per-trace tuning."
+}

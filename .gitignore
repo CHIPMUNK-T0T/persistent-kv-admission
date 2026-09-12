@@ -5,5 +5,8 @@ __pycache__/
 venv/
 .env
 .DS_Store
-results/
+results/*
+!results/paper/
+!results/paper/**
 data/raw/
+NOTE/
