@@ -87,3 +87,19 @@ next-use oracle at 0.25–1%
 (`docs/target-change-findings.md`). What remains is a signal gap on the new
 target, on the eviction-candidate population. The next measurement inside
 Research 1 is listed in `docs/experiment-plan.md`.
+
+## Setting change after Phase 0.9: the persistent tier's population (Phase 0.95, done)
+
+The objective is unchanged. What changed is the population the evaluation
+speaks about: a persistent tier decides about the states an upper tier
+evicts, not about every state ever seen. Phase 0.95 fixes the upper tier
+(prefix-closed, LRU or LFU) and evaluates lower-tier retention on its victim
+stream under a union-closure hit rule, with an independent-block control
+that removes prefix dependency and a standalone-closure sensitivity. Result:
+the room over generic policies on that population is 25–80% of the offline
+gain, and prefix dependency costs generic policies nothing, because recency
+and frequency are monotone along an ancestor chain and the upper tier
+evicts leaves (`docs/two-tier-victim-findings.md`). Tree-aware allocation is
+therefore not the direction; the open question on the victim population is
+the same as before, ranking victims by future reuse. Phases 0–0.9 remain
+valid as single-tier results.

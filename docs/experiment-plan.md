@@ -92,19 +92,62 @@ own count oracle and 29% of its own next-use oracle at 0.25–1%, and its best
 cell moves from 0.253 to 0.270. The matched arm adds nothing. Findings:
 `docs/target-change-findings.md`.
 
+## Phase 0.95 — L1 victim stream and tree allocation (done)
+
+Setting change, not objective change: a persistent tier decides about the
+states an upper tier evicts, so the evaluation population becomes the L1
+victim stream. L1 is the existing prefix-closed cache with heap LRU or LFU
+at 0.25 / 1 / 2% of the working set; every L1 eviction is logged as one
+`state × eviction event` with causal and evaluation-only fields
+(right-censored at the trace end); generic L2 policies (LRU, LFU, 2-hit)
+and the offline comparator are replayed on the same stream at L2 = 1–16 × L1
+under three fixed models: union closure with the tree hit rule (primary), an
+independent-block hit rule (control that removes prefix dependency), and a
+standalone prefix-closed L2 (sensitivity). Because every arriving block
+enters L1, the victim stream is identical for every L2 arm and there is no
+closed loop. Go / stop rule fixed before the run: absolute gain ≥ 5% of
+input tokens, dependency cost ≥ 10% of the control's gain for some policy,
+room over the best generic ≥ 20% of the offline gain, all three on both
+real traces (`scripts/run_two_tier.py`).
+
+Outcome: absolute and room pass in every cell (offline L2 adds 5–35 points
+of input tokens, 2–5 × the best generic); dependency fails in 45 of 48
+real-trace cells and the three passes are the offline comparator's
+tie-break. Under LRU, LFU, and 2-hit the dependency cost is exactly zero
+because recency and frequency are monotone along a chain and L1 evicts
+leaves. No positive grounds for making tree allocation the centre were
+found (the control rules out ancestor-loss for the policies tested, not
+every allocation); the two-tier setting stays. The offline tie-break
+diagnostic is part of the run (`two_tier_offline_tiebreak.csv`). Findings:
+`docs/two-tier-victim-findings.md`.
+
+## Capacity-normalized horizon sweep (drafted, not run)
+
+A sweep of the oracle label horizon in units of cache-capacity worth of
+incoming bytes (H = k · M) was specified after Phase 0.9 to test whether
+the budget-dependent best horizon collapses to one k. It was superseded
+before running by Phase 0.95: on these near-stationary traces the byte
+clock and the wall clock coincide (Spearman 0.99), and the victim event log
+records distinct competing bytes until reuse directly. It is kept here as a
+possible appendix, not as a planned phase.
+
 ## Next step inside Research 1 (to be decided)
 
-The gap that remains after the target change is a signal gap on the new
-target, on the decision population. Candidates that stay inside Research 1
-and introduce no policy:
+The room a persistent tier leaves over generic policies is 25–80% of the
+offline gain on the L1 victim stream, and prefix dependency does not
+explain it. Candidates that stay inside Research 1 and introduce no policy:
 
-- the regression analogue of the Phase 0.9 capacity check on the candidate
-  logs: fit the count / next-use targets on the eviction candidates, to
-  separate "wrong fit population" from "features cannot rank live states";
-- one sample-width setting above 16 to size the search gap (0.11–0.18 at
-  1–5%);
-- longer traces, which are the only way to test which budget regime a
-  persistent tier sits in.
+- a predictability check on the lower tier's decision population rather
+  than on the victim stream as a whole: log each L2 decision as the arriving
+  victim together with the L2 residents it would displace, with the same
+  causal fields (lifetime count, seconds since last use, prior evictions,
+  depth, retained siblings) on both sides, and measure whether those fields
+  rank the arriving victim against the residents by future reuse (time
+  split, horizon embargo). An AUC over all victims would repeat the
+  population mismatch of Phase 0.5;
+- longer or rate-varying traces, which are the only way to test which L1 / L2
+  regime a persistent tier sits in and whether the byte and time clocks
+  separate.
 
 ## Phase 1 — Policy simulator (planned; contents depend on the step above)
 
@@ -115,7 +158,8 @@ Policies to compare under the corrected objective:
 - approximate offline-next-use comparator (headroom only)
 
 Metrics: hit rate, admission precision / recall, reused tokens, avoided
-recomputation, seed dispersion.
+recomputation, seed dispersion; on the two-tier setting, extra avoided
+tokens over L1 alone as a share of input tokens.
 
 ## Phase 2 — Online prototype (planned)
 

@@ -156,6 +156,51 @@ LFU, five seeds:
   right, the history features cannot rank it on the eviction candidates. The
   synthetic trace stays unlearnable (≤ 0.09) under every target.
 
+## 8. Phase 0.95 result: on the victim stream, the tree costs nothing and the room stays
+
+`scripts/run_two_tier.py`, `docs/two-tier-victim-findings.md`. A persistent
+tier decides about the states an upper tier evicts, not about every state
+ever seen. The upper tier (L1) is the same prefix-closed cache with heap LRU
+or LFU at 0.25 / 1 / 2% of the working set; every eviction is one logged
+event; generic lower-tier (L2) policies and the offline comparator run on the
+same victim stream at L2 = 1–16 × L1, under a union-closure hit rule, an
+independent-block control that removes prefix dependency, and a standalone
+prefix-closed sensitivity. Because every arriving block enters L1, the stream
+is identical for every L2 arm. No policy, no fitting, one seed.
+
+Extra avoided prefill over L1 alone, share of evaluation-window input tokens,
+L1 = LRU:
+
+| L1, L2 | conversation: offline L2 / best generic L2 / infinite L2 | tool-agent: same |
+|---|---|---|
+| 0.25%, 4 × | 21.2 / 5.7 (LFU) / 35.8 | 15.6 / 4.7 (LFU) / 23.8 |
+| 1%, 1 × | 22.1 / 6.2 (2-hit) / 34.9 | 15.4 / 4.6 (2-hit) / 22.4 |
+| 1%, 4 × | 34.4 / 16.1 (2-hit) / 34.9 | 22.4 / 11.7 (2-hit) / 22.4 |
+| 2%, 2 × | 32.2 / 15.5 (LRU) / 32.2 | 20.4 / 11.0 (LRU) / 20.4 |
+
+- **Confirmed:** about 30% of victim events are requested again within the
+  window; an infinite L2 would add 20–36 points of input tokens; the offline
+  L2 adds 5–35 points and 2–5 × what the best generic L2 adds, in every cell.
+  A victim's value is coupled to its ancestors (only 5–7% of reuses find them
+  in L1), and LRU / LFU / 2-hit hold the chain for free: recency and
+  frequency are monotone along a chain and L1 evicts leaves, so ancestors
+  outlive descendants. The dependency cost is exactly zero tokens for all
+  three policies in all 60 cells.
+- **Refuted:** that the policies tested lose reuse to missing ancestors. The
+  pre-fixed dependency gate fails in 45 of 48 real-trace cells; the three
+  passes are the offline comparator's tie-break (0 with a depth-consistent
+  tie-break). The control keeps each policy's contents and changes only the
+  hit accounting, so this rules out ancestor-loss for these policies, not
+  every tree-aware allocation. Once L1 + L2 reaches about 4% of the working
+  set the offline L2 is at 0.98–1.00 of the infinite-L2 ceiling, so
+  set-level allocation has ≤ 2% to add there; at 0.25% × 4 it is at
+  0.59–0.66 and the question is open.
+- **Decision (provisional):** no positive grounds were found to make
+  tree-aware allocation the centre. The two-tier setting stays as the
+  evaluation setting; the open question is the lower tier's own decision, an
+  arriving victim against the residents it would displace, where generic
+  policies leave 25–80% of the offline gain.
+
 ## Repository layout
 
 - `src/persistent_kv_admission/` — trace loader, prefix-closed replay engine,
@@ -176,6 +221,7 @@ python3 scripts/run_predictability_gap.py data/raw/*_trace.jsonl --seeds 5
 # needs scikit-learn; see scripts/README.md for the virtualenv
 .venv/bin/python scripts/run_candidate_models.py data/raw/*_trace.jsonl
 python3 scripts/run_target_change.py data/raw/*_trace.jsonl --seeds 5
+python3 scripts/run_two_tier.py data/raw/*_trace.jsonl
 ```
 
 Dependencies: NumPy and Matplotlib; scikit-learn only for the candidate-model check.

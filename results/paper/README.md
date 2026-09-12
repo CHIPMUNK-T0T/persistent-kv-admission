@@ -61,3 +61,17 @@ and are not tracked.
 
 Per-seed rows and the raw JSONL are written to `results/target_change/` and
 are not tracked.
+
+## Phase 0.95 artifacts (`scripts/run_two_tier.py`)
+
+- `victim_events_summary.csv`: per trace × L1 policy × L1 budget, the L1 victim stream in the evaluation window: event counts, repeat-eviction share, share requested again before the trace end (the rest is right-censored), share whose ancestors are all still in L1 at reuse, median distances to reuse (seconds, requests, arriving bytes, distinct bytes, distinct bytes ÷ L1 capacity), the infinite-L2 rescue ceiling with and without ancestors as a share of input tokens, and the share of reused victims within k × L1 distinct bytes.
+- `victim_events_by_depth.csv`: the same stream by block-depth bin.
+- `two_tier_replay.csv`: one row per trace × L1 policy × L1 budget × L2 multiplier × (closure, hit model, L2 policy): avoided tokens by tier, extra avoided tokens over L1 alone and as a share of input tokens, L2 closure against the offline L2, dependency cost (independent − tree), standalone cost, byte-seconds and avoided tokens by depth (both restricted to the evaluation window), `l2_already_held` (standalone only: victims already resident in L2), and the single-tier references at L1 + L2 bytes.
+- `two_tier_gate.csv`: the per-cell go / stop table (absolute, dependency, room) with the thresholds fixed before the run.
+- `two_tier_single_tier_reference.csv`: LRU / LFU / offline in one prefix-closed cache of exactly L1 + L2 bytes (the two tier capacities summed).
+- `two_tier_offline_tiebreak.csv`: the offline-L2 tie-break diagnostic on the cells 0.25% × 1 / 2 and 1% × 1 (every trace, both L1 policies): tree / independent / L1-only avoided tokens and the dependency cost under `prefix_first` (the grid's comparator) and `deeper_first`.
+- `two_tier_config.json`: grid, arms, thresholds, evaluation-window start, working-set bytes.
+- `fig11_victim_stream.png`, `fig12_two_tier_gain.png`, `fig13_depth_allocation.png`.
+
+The full event logs and raw replay rows are written to `results/two_tier/`
+and are not tracked.

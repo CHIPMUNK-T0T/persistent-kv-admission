@@ -1,0 +1,106 @@
+{
+  "l1_policies": [
+    "lru",
+    "lfu"
+  ],
+  "l1_budgets": [
+    0.0025,
+    0.01,
+    0.02
+  ],
+  "l2_multipliers": [
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0
+  ],
+  "max_total_fraction": 0.1,
+  "arms": [
+    [
+      "union",
+      "tree",
+      "lru"
+    ],
+    [
+      "union",
+      "tree",
+      "lfu"
+    ],
+    [
+      "union",
+      "tree",
+      "lru_2hit"
+    ],
+    [
+      "union",
+      "tree",
+      "offline_next_use"
+    ],
+    [
+      "union",
+      "independent",
+      "lru"
+    ],
+    [
+      "union",
+      "independent",
+      "lfu"
+    ],
+    [
+      "union",
+      "independent",
+      "lru_2hit"
+    ],
+    [
+      "union",
+      "independent",
+      "offline_next_use"
+    ],
+    [
+      "standalone",
+      "tree",
+      "lru"
+    ],
+    [
+      "standalone",
+      "tree",
+      "lfu"
+    ],
+    [
+      "standalone",
+      "tree",
+      "offline_next_use"
+    ]
+  ],
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "gates": {
+    "absolute": 0.05,
+    "dependency": 0.1,
+    "room": 0.2
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4,
+    "synthetic_trace": 613215.0
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640,
+    "synthetic_trace": 43708348416
+  },
+  "note": "L1 fixed (heap LRU/LFU); every arriving block enters L1, so the victim stream is identical for every L2 arm. Exclusive L2 under union closure; independent-block hit rule as the control; standalone prefix-closed L2 as the sensitivity. One seed: everything is deterministic."
+}

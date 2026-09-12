@@ -18,6 +18,9 @@ from .trace import Request, Trace
 DecisionHook = Callable[[list[str], list[tuple[float, ...]], int, float, int], None]
 # Called after every timestamp group has been observed and inserted.
 GroupHook = Callable[["_PrefixClosedCache", int, float], None]
+# Called with the victim's state id, the current timestamp, and the current
+# timestamp-group index just before a leaf is evicted, on either eviction path.
+EvictHook = Callable[[str, float, int], None]
 
 
 class StateScorer(Protocol):
@@ -80,6 +83,7 @@ class _PrefixClosedCache:
         sample_width: int = 16,
         seed: int = 0,
         decision_hook: DecisionHook | None = None,
+        evict_hook: EvictHook | None = None,
     ) -> None:
         self.trace = trace
         self.capacity_bytes = capacity_bytes
@@ -109,6 +113,7 @@ class _PrefixClosedCache:
         self.rng = random.Random(seed)
         self.leaves: dict[str, None] = {}
         self.decision_hook = decision_hook
+        self.evict_hook = evict_hook
         if scorer is not None and hasattr(scorer, "attach"):
             # Lets a learning scorer draw training examples from the population
             # it actually makes decisions over, rather than every state ever seen.
@@ -161,7 +166,10 @@ class _PrefixClosedCache:
         self.timestamp_ms = timestamp_ms
         if self.scorer is not None:
             self.scorer.observe(requests, timestamp_ms)
-        touched: set[str] = set()
+        # Insertion-ordered dict, not a set: iterating this assigns the heap
+        # serials that break ties between equal scores, so the order must not
+        # depend on per-process string-hash randomisation.
+        touched: dict[str, None] = {}
         for request in requests:
             terminal = request.hash_ids[-1]
             for index, state_id in enumerate(request.hash_ids):
@@ -170,7 +178,7 @@ class _PrefixClosedCache:
                 self.observed_terminals[state_id].add(terminal)
                 if index + 1 < len(request.hash_ids):
                     self.observed_children[state_id].add(request.hash_ids[index + 1])
-                touched.add(state_id)
+                touched[state_id] = None
         for state_id in touched:
             self.versions[state_id] += 1
             # Sampled eviction never reads the heap, so feeding it would only
@@ -239,6 +247,8 @@ class _PrefixClosedCache:
                         self.heap, (current, self.serial, self.versions[state_id], state_id)
                     )
                     continue
+            if self.evict_hook is not None:
+                self.evict_hook(state_id, self.timestamp_ms, self.group_index)
             self._remove(state_id, push_parent=True)
             return
         raise RuntimeError("no evictable leaf found in non-empty prefix-closed cache")
@@ -279,15 +289,21 @@ class _PrefixClosedCache:
         victim_index = min(range(len(candidates)), key=scores.__getitem__)
         if self.decision_hook is not None:
             self.decision_hook(candidates, scores, victim_index, self.timestamp_ms, self.group_index)
+        if self.evict_hook is not None:
+            self.evict_hook(candidates[victim_index], self.timestamp_ms, self.group_index)
         self._remove(candidates[victim_index], push_parent=False)
 
 
 def _occurrence_groups(trace: Trace) -> dict[str, list[int]]:
     result: dict[str, list[int]] = defaultdict(list)
     for group_index, (_, requests) in enumerate(trace.timestamp_groups()):
-        present: set[str] = set()
+        # Ordered, not a set: the per-state lists are the same either way, but
+        # the key order of the returned mapping would otherwise depend on hash
+        # randomisation, and it is passed around as a plain dict.
+        present: dict[str, None] = {}
         for request in requests:
-            present.update(request.hash_ids)
+            for state_id in request.hash_ids:
+                present[state_id] = None
         for state_id in present:
             result[state_id].append(group_index)
     return dict(result)
@@ -308,6 +324,7 @@ def replay(
     seed: int = 0,
     decision_hook: DecisionHook | None = None,
     group_hook: GroupHook | None = None,
+    evict_hook: EvictHook | None = None,
 ) -> ReplayResult:
     if scorer is None and policy not in POLICIES:
         raise ValueError(f"unknown policy {policy!r}")
@@ -318,7 +335,7 @@ def replay(
     groups = occurrence_groups or _occurrence_groups(trace)
     cache = _PrefixClosedCache(
         trace, capacity_bytes, bytes_per_token, policy, groups, size_model, scorer,
-        eviction, sample_width, seed, decision_hook,
+        eviction, sample_width, seed, decision_hook, evict_hook,
     )
     requested_tokens = 0
     requested_blocks = 0
