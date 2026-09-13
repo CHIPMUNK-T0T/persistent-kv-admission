@@ -78,3 +78,23 @@ offline tie-break diagnostic, run as the last step), `two_tier_config.json`, and
 the full event logs (one JSONL per trace × L1 policy × L1 budget) and raw
 replay rows go to `results/two_tier/` (untracked). Everything is
 deterministic; the run takes about five minutes on 24 workers.
+
+Run the Phase 0.97 decision-population-matched learning experiment (fixed
+two-tier setting; the training population of the L2 ranker is the only
+varied factor):
+
+```bash
+python3 scripts/run_decision_population.py data/raw/*_trace.jsonl --workers 24
+python3 scripts/run_decision_population.py data/raw/conversation_trace.jsonl --smoke   # one cell, one seed, for timing
+python3 scripts/run_decision_population.py --figure-only                                # redraw fig14–16
+```
+
+Controls are `--l1-budgets`, `--l2-multipliers`, `--seeds`, `--targets`,
+`--workers`, `--output-dir`, `--paper-dir`. Outputs
+`results/paper/decision_population_fits.csv`, `decision_population_predictive.csv`,
+`decision_population_replay.csv` (aggregated over seeds),
+`decision_population_replay_seeds.csv`, `decision_population_onpolicy.csv`,
+`decision_population_config.json`, and `fig14_decision_population.png` /
+`fig15_population_ladder.png` / `fig16_onpolicy_decisions.png`; decision logs
+(`.npz`, about 640 MB) and raw rows go to `results/decision_population/`
+(untracked). The full grid takes about 1.5 hours on 24 workers (1,962 replays).

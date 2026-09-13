@@ -73,5 +73,14 @@ are not tracked.
 - `two_tier_config.json`: grid, arms, thresholds, evaluation-window start, working-set bytes.
 - `fig11_victim_stream.png`, `fig12_two_tier_gain.png`, `fig13_depth_allocation.png`.
 
+## Phase 0.97 artifacts (`scripts/run_decision_population.py`)
+
+- `decision_population_fits.csv`: one row per fitted ranker (trace × target × training population × cell where applicable): rows, positives, horizon, split, standardisation convention, Newton iterations / convergence or ridge condition number, standardised coefficients, and the deviation of the A_pd control from the Phase 0.9 coefficients.
+- `decision_population_predictive.csv`: off-policy predictive metrics of every ranker on the test-split (and train-split) observed, victim, and candidate populations: pooled AUC / Spearman, within-decision AUC (micro / macro) or Spearman over decisions with ≥ 2 distinct labels, constant-label counts, evicted-lowest-label share; `lru_key` / `lfu_key` rows give the behaviour policies' own orderings.
+- `decision_population_replay.csv`, `decision_population_replay_seeds.csv`: L2 replay utility per trace × cell × arm, aggregated over five seeds (mean, std, CI95) and per seed: extra avoided tokens over L1 alone, share of evaluation-window input tokens, headroom closure = (arm − lru_s) / (heap offline − lru_s).
+- `decision_population_onpolicy.csv`: on-policy within-decision metrics of every sampled arm at seed 0 on the decisions it actually faced, scored with the store's own score tuples; includes `evicted_positive_rate_when_avoidable` and `victim_matches_argmin_rate`.
+- `decision_population_config.json`: grid, arms, seeds, hyperparameters, split, horizons.
+- `fig14_decision_population.png` (closure by cell, targets × real traces), `fig15_population_ladder.png` (train population × evaluation population), `fig16_onpolicy_decisions.png`.
+
 The full event logs and raw replay rows are written to `results/two_tier/`
 and are not tracked.

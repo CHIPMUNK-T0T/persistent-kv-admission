@@ -131,7 +131,7 @@ clock and the wall clock coincide (Spearman 0.99), and the victim event log
 records distinct competing bytes until reuse directly. It is kept here as a
 possible appendix, not as a planned phase.
 
-## Phase 0.97 — Decision-population-matched retention learning (current)
+## Phase 0.97 — Decision-population-matched retention learning (done 2026-09-13)
 
 Question, fixed before the run: does training on the actual
 retention-decision population convert global reuse predictability into
@@ -218,7 +218,22 @@ neural rankers, result-driven heuristics. Pipeline:
 `scripts/run_decision_population.py`. Findings:
 `docs/decision-population-findings.md`.
 
-## Phase 1 — Policy simulator (planned; contents depend on the step above)
+**Outcome (commit `379aa20`, results in `results/paper/decision_population_*`).**
+Case A refuted for every candidate population and target (0 of 6 cells in
+16 of 18 combinations, 1 of 6 in the other two). Case B met by its letter for
+C_lru on every target (off-policy R ≥ R_high in 6 of 6, closure gain over
+A_none < 0.05 in 5–6 of 6) but flagged in every target: the on-policy R is
+0.02–0.67 below the off-policy R (beyond 0.05 in 34 of 36 C_lru evaluations)
+and below R_high in most cells. Case C not
+established. Verdict: the primary question is refuted, the B / C diagnosis is
+unresolved between the two decision populations; no non-history signal, new
+heuristic or new policy follows from this phase. Best learned L2 closes
+0.13–0.27 of the headroom, at parity with the best generic heap policy
+(−0.8 to +0.7 input-token points). Open design question, not scheduled: on
+which decision population a retention ranker must be judged, given that the
+learned policy's own retained set is the population that decides utility.
+
+## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 
 Policies to compare under the corrected objective:
 

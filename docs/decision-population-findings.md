@@ -97,3 +97,176 @@ flags the off-policy diagnosis.
 Pipeline: `scripts/run_decision_population.py`; outputs in
 `results/paper/decision_population_*.csv`, `fig14_decision_population.png`,
 `fig15_population_ladder.png`.
+
+## 2. The run
+
+Commit `379aa20`, `python3 scripts/run_decision_population.py data/raw/conversation_trace.jsonl data/raw/toolagent_trace.jsonl data/raw/synthetic_trace.jsonl --workers 24`, 2026-09-13, 5,561 s wall clock on 24 workers (1,962 replays in 5,335 s). Nothing in the code, grid, thresholds, seeds or arms changed between the pre-registration amendment and the end of the run. Checks made on the outputs before any interpretation:
+
+- The four heap reference arms (LRU, LFU, 2-hit, offline) reproduce the Phase 0.95 tree / union rows exactly in all 72 trace × cell × arm combinations.
+- The A_pd control reproduces the Phase 0.9 coefficients to 0.0 for all three targets on both real traces (the synthetic Phase 0.9 coefficients were never stored, so that cell is unverifiable).
+- All 207 fits converged (logistic ≤ 8 Newton steps, ridge condition number ≤ 1,276); no NaN in any predictive, on-policy or replay row.
+- `admissions + rejections + already_held = L1 evictions` in all 2,250 per-seed replay rows; in all 1,134 on-policy rows the recorded arg-min equals the state actually evicted (rate 1.000); the LRU and LFU keys' on-policy metrics on their own decisions differ from their off-policy metrics on the logged decisions by ≤ 0.007, so the two evaluations agree when the policy is the same.
+- No closure spread across seeds above 0.10 (largest 0.098, toolagent 2% × 4, B / count).
+
+## 3. Replay utility (primary metric)
+
+Headroom closure = (arm − sampled L2-LRU) / (heap offline − sampled L2-LRU), mean over five seeds; CI95 half-widths are ≤ 0.02 for every learned arm on the real traces except at 2% × 4 (≤ 0.045). The next-use target is shown for the main-comparison populations because it is the best or within 0.02 of the best target for each population in most cells; all targets are in `decision_population_replay.csv` and fig14.
+
+| trace | L1 × L2 | best heap generic | best sampled generic | A_none nxt | B nxt | C_lru nxt | C_lfu nxt | C_union nxt | best learned (arm) | offline, share of input |
+|---|---|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.193 (LFU) | 0.117 (LFU) | 0.169 | 0.152 | 0.173 | 0.104 | 0.112 | 0.173 ± 0.006 (C_lru nxt) | 8.4 |
+| conversation | 0.25% × 4 | 0.228 (LFU) | 0.195 (LFU) | 0.211 | 0.202 | 0.190 | 0.181 | 0.192 | 0.228 ± 0.004 (A_none cnt) | 21.2 |
+| conversation | 1% × 1 | 0.208 (2-hit) | 0.152 (LFU) | 0.193 | 0.184 | 0.135 | 0.149 | 0.186 | 0.208 ± 0.009 (A_pd cnt) | 22.1 |
+| conversation | 1% × 4 | 0.136 (2-hit) | 0.085 (2-hit) | 0.121 | 0.066 | 0.016 | 0.101 | 0.141 | 0.141 ± 0.011 (C_union nxt) | 34.4 |
+| conversation | 2% × 1 | 0.179 (2-hit) | 0.115 (2-hit) | 0.110 | -0.295 | 0.011 | 0.117 | 0.157 | 0.157 ± 0.003 (C_union nxt) | 27.4 |
+| conversation | 2% × 4 | 0.148 (LRU) | 0.000 (LRU) | 0.169 | -1.071 | 0.176 | 0.175 | 0.181 | 0.208 ± 0.008 (A_pd cnt) | 32.2 |
+| toolagent | 0.25% × 1 | 0.186 (LFU) | 0.110 (LFU) | 0.161 | 0.126 | 0.143 | 0.098 | 0.111 | 0.185 ± 0.005 (A_pd cnt) | 6.5 |
+| toolagent | 0.25% × 4 | 0.222 (LFU) | 0.185 (LFU) | 0.205 | 0.198 | 0.169 | 0.166 | 0.177 | 0.218 ± 0.004 (A_none cnt) | 15.6 |
+| toolagent | 1% × 1 | 0.229 (2-hit) | 0.164 (2-hit) | 0.196 | 0.151 | 0.118 | 0.140 | 0.170 | 0.206 ± 0.005 (A_pd nxt) | 15.4 |
+| toolagent | 1% × 4 | 0.169 (2-hit) | 0.104 (2-hit) | 0.117 | 0.062 | 0.002 | 0.107 | 0.128 | 0.132 ± 0.014 (A_pd bin) | 22.4 |
+| toolagent | 2% × 1 | 0.190 (2-hit) | 0.129 (2-hit) | 0.090 | -0.306 | -0.054 | 0.088 | 0.128 | 0.128 ± 0.008 (C_union nxt) | 18.9 |
+| toolagent | 2% × 4 | 0.193 (LRU) | 0.000 (LRU) | 0.222 | -1.495 | 0.250 | 0.237 | 0.266 | 0.266 ± 0.009 (C_union nxt) | 20.4 |
+
+The same cells in extra avoided prefill tokens over L1 alone, as a share of evaluation-window input tokens:
+
+| trace | L1 × L2 | lru_s | best heap generic | best learned | offline | learned − best heap |
+|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.1 | 1.7 (LFU) | 1.6 | 8.4 | -0.2 |
+| conversation | 0.25% × 4 | 1.1 | 5.7 (LFU) | 5.7 | 21.2 | +0.0 |
+| conversation | 1% × 1 | 2.0 | 6.2 (2-hit) | 6.2 | 22.1 | +0.0 |
+| conversation | 1% × 4 | 13.2 | 16.1 (2-hit) | 16.2 | 34.4 | +0.1 |
+| conversation | 2% × 1 | 7.8 | 11.3 (2-hit) | 10.9 | 27.4 | -0.4 |
+| conversation | 2% × 4 | 19.7 | 21.6 (LRU) | 22.3 | 32.2 | +0.7 |
+| toolagent | 0.25% × 1 | 0.8 | 1.9 (LFU) | 1.8 | 6.5 | -0.0 |
+| toolagent | 0.25% × 4 | 1.5 | 4.7 (LFU) | 4.6 | 15.6 | -0.1 |
+| toolagent | 1% × 1 | 1.4 | 4.6 (2-hit) | 4.3 | 15.4 | -0.3 |
+| toolagent | 1% × 4 | 9.6 | 11.7 (2-hit) | 11.3 | 22.4 | -0.5 |
+| toolagent | 2% × 1 | 5.8 | 8.3 (2-hit) | 7.4 | 18.9 | -0.8 |
+| toolagent | 2% × 4 | 14.1 | 15.3 (LRU) | 15.8 | 20.4 | +0.5 |
+
+- **No learned L2, on any training population or target, closes more than 0.27 of the headroom in any real cell**; the best learned arm sits at 0.13–0.27 and leaves 73–87% of the offline − LRU gap in every cell. In input tokens the best learned arm is within −0.8 to +0.7 points of the best generic heap policy; it exceeds that policy only at 2% × 4 (+0.5 / +0.7 points), where heap LFU and 2-hit fall below LRU.
+- **The candidate-trained rankers do not improve on the global one.** C_lru, the population that matches the pre-registered R, has the lowest closure of the C variants: below A_none in 9–12 of 12 cells per target, and below sampled LRU (negative) at 1% × 4, 2% × 1 and 2% × 4 on both traces for the binary and count targets (toolagent 2% × 1 for next-use). No C variant exceeds A_none by more than 0.05 in any cell on the binary or next-use targets (C_union is within ±0.05 of A_none in 11 of 12 next-use cells). The only larger gains are on the count target at toolagent 2% × 4 (+0.18 to +0.47), where A_none's count fit is the outlier described in §6.
+- **The victim-trained ranker B collapses at L1 = 2%** (closure −0.27 to −0.35 at 2% × 1 and −0.86 to −1.87 at 2% × 4 on the two traces) although it tracks A_none within 0.05 at 0.25%. This was not pre-registered; its cause was not examined here.
+- The sampled mechanism itself costs closure relative to the heap versions of the same policy: 0.00–0.19 for LRU, 0.03–0.14 for LFU, 0.02–0.08 for 2-hit, growing with the budget. The learned arms run on the sampled mechanism, so at 2% × 4 the learned closure of 0.19–0.27 is largely the recovery of the sampling loss (heap LRU is at 0.15–0.19 on the same scale).
+
+## 4. Predictive quality: off-policy and on-policy
+
+R is the pre-registered ranking metric (within-decision AUC macro for binary; mean within-decision Spearman over decisions with ≥ 2 distinct labels for the graded targets), evaluated off-policy on the test-split decisions of the sampled L2-LRU behaviour log of the same cell, and on-policy on the decisions the learned arm itself produced at seed 0, scored with the values the store used. "C_lru train" is C_lru's R on its own training decisions. The last column is the LRU key's own R on its log and on its own on-policy stream.
+
+**binary (R_high = 0.70)**
+
+| trace | L1 × L2 | A_none off / on | B off / on | C_lru off / on | C_lfu off / on | C_union off / on | C_lru train | LRU key off / LRU on |
+|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.725 / 0.575 | 0.741 / 0.395 | 0.741 / 0.414 | 0.646 / 0.241 | 0.715 / 0.271 | 0.709 | 0.499 / 0.499 |
+| conversation | 0.25% × 4 | 0.713 / 0.616 | 0.740 / 0.529 | 0.739 / 0.517 | 0.666 / 0.581 | 0.699 / 0.582 | 0.700 | 0.502 / 0.504 |
+| conversation | 1% × 1 | 0.720 / 0.611 | 0.731 / 0.564 | 0.736 / 0.513 | 0.664 / 0.596 | 0.700 / 0.609 | 0.692 | 0.507 / 0.505 |
+| conversation | 1% × 4 | 0.738 / 0.669 | 0.744 / 0.660 | 0.745 / 0.633 | 0.724 / 0.684 | 0.736 / 0.678 | 0.695 | 0.562 / 0.559 |
+| conversation | 2% × 1 | 0.731 / 0.629 | 0.716 / 0.554 | 0.741 / 0.611 | 0.694 / 0.655 | 0.725 / 0.657 | 0.690 | 0.534 / 0.534 |
+| conversation | 2% × 4 | 0.744 / 0.695 | 0.691 / 0.624 | 0.747 / 0.703 | 0.737 / 0.704 | 0.743 / 0.705 | 0.701 | 0.605 / 0.608 |
+| toolagent | 0.25% × 1 | 0.744 / 0.581 | 0.757 / 0.394 | 0.758 / 0.417 | 0.683 / 0.244 | 0.710 / 0.263 | 0.722 | 0.487 / 0.488 |
+| toolagent | 0.25% × 4 | 0.726 / 0.617 | 0.751 / 0.534 | 0.752 / 0.523 | 0.702 / 0.579 | 0.715 / 0.575 | 0.712 | 0.501 / 0.499 |
+| toolagent | 1% × 1 | 0.728 / 0.611 | 0.744 / 0.546 | 0.747 / 0.510 | 0.702 / 0.602 | 0.716 / 0.600 | 0.705 | 0.504 / 0.503 |
+| toolagent | 1% × 4 | 0.754 / 0.670 | 0.761 / 0.653 | 0.763 / 0.648 | 0.750 / 0.688 | 0.756 / 0.678 | 0.715 | 0.561 / 0.563 |
+| toolagent | 2% × 1 | 0.746 / 0.636 | 0.748 / 0.459 | 0.755 / 0.594 | 0.725 / 0.664 | 0.744 / 0.662 | 0.705 | 0.537 / 0.537 |
+| toolagent | 2% × 4 | 0.760 / 0.709 | 0.728 / 0.550 | 0.768 / 0.720 | 0.761 / 0.720 | 0.764 / 0.718 | 0.731 | 0.618 / 0.618 |
+
+**count (R_high = 0.30)**
+
+| trace | L1 × L2 | A_none off / on | B off / on | C_lru off / on | C_lfu off / on | C_union off / on | C_lru train | LRU key off / LRU on |
+|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.351 / 0.033 | 0.377 / -0.045 | 0.380 / -0.018 | 0.222 / -0.294 | 0.345 / -0.317 | 0.322 | -0.006 / -0.006 |
+| conversation | 0.25% × 4 | 0.354 / 0.231 | 0.390 / 0.131 | 0.394 / 0.089 | 0.275 / 0.077 | 0.322 / 0.054 | 0.324 | 0.006 / 0.008 |
+| conversation | 1% × 1 | 0.366 / 0.216 | 0.377 / 0.075 | 0.381 / -0.007 | 0.268 / 0.140 | 0.317 / 0.115 | 0.307 | 0.013 / 0.009 |
+| conversation | 1% × 4 | 0.370 / 0.312 | 0.348 / 0.257 | 0.383 / 0.210 | 0.333 / 0.335 | 0.365 / 0.328 | 0.307 | 0.090 / 0.087 |
+| conversation | 2% × 1 | 0.364 / 0.292 | 0.308 / 0.131 | 0.376 / 0.179 | 0.283 / 0.293 | 0.332 / 0.293 | 0.300 | 0.051 / 0.051 |
+| conversation | 2% × 4 | 0.337 / 0.288 | 0.213 / 0.141 | 0.343 / 0.263 | 0.325 / 0.297 | 0.334 / 0.296 | 0.286 | 0.142 / 0.147 |
+| toolagent | 0.25% × 1 | 0.381 / 0.067 | 0.395 / -0.039 | 0.403 / 0.006 | 0.257 / -0.328 | 0.338 / -0.336 | 0.338 | -0.026 / -0.023 |
+| toolagent | 0.25% × 4 | 0.378 / 0.278 | 0.390 / 0.148 | 0.405 / 0.138 | 0.325 / 0.071 | 0.345 / 0.064 | 0.332 | 0.003 / 0.001 |
+| toolagent | 1% × 1 | 0.390 / 0.266 | 0.396 / 0.009 | 0.395 / -0.032 | 0.314 / 0.115 | 0.347 / 0.120 | 0.324 | 0.008 / 0.005 |
+| toolagent | 1% × 4 | 0.370 / 0.315 | 0.368 / 0.228 | 0.406 / 0.223 | 0.369 / 0.345 | 0.390 / 0.337 | 0.333 | 0.089 / 0.091 |
+| toolagent | 2% × 1 | 0.354 / 0.304 | 0.371 / -0.018 | 0.392 / 0.169 | 0.321 / 0.299 | 0.360 / 0.293 | 0.320 | 0.053 / 0.055 |
+| toolagent | 2% × 4 | 0.308 / 0.290 | 0.261 / -0.028 | 0.362 / 0.291 | 0.351 / 0.317 | 0.358 / 0.315 | 0.317 | 0.156 / 0.156 |
+
+**next-use (R_high = 0.30)**
+
+| trace | L1 × L2 | A_none off / on | B off / on | C_lru off / on | C_lfu off / on | C_union off / on | C_lru train | LRU key off / LRU on |
+|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.322 / 0.052 | 0.359 / 0.009 | 0.359 / 0.052 | 0.277 / -0.244 | 0.342 / -0.151 | 0.312 | -0.005 / -0.007 |
+| conversation | 0.25% × 4 | 0.315 / 0.177 | 0.367 / 0.183 | 0.371 / 0.110 | 0.280 / 0.083 | 0.338 / 0.073 | 0.314 | -0.000 / 0.001 |
+| conversation | 1% × 1 | 0.334 / 0.159 | 0.357 / 0.187 | 0.362 / 0.009 | 0.278 / 0.105 | 0.331 / 0.084 | 0.294 | 0.008 / 0.005 |
+| conversation | 1% × 4 | 0.349 / 0.279 | 0.307 / 0.206 | 0.370 / 0.200 | 0.341 / 0.292 | 0.362 / 0.285 | 0.289 | 0.094 / 0.090 |
+| conversation | 2% × 1 | 0.340 / 0.220 | 0.323 / -0.014 | 0.363 / 0.159 | 0.297 / 0.229 | 0.352 / 0.233 | 0.280 | 0.053 / 0.053 |
+| conversation | 2% × 4 | 0.331 / 0.285 | 0.219 / 0.075 | 0.338 / 0.283 | 0.326 / 0.298 | 0.334 / 0.299 | 0.277 | 0.144 / 0.148 |
+| toolagent | 0.25% × 1 | 0.350 / 0.074 | 0.374 / -0.085 | 0.377 / -0.045 | 0.279 / -0.211 | 0.351 / -0.164 | 0.329 | -0.025 / -0.025 |
+| toolagent | 0.25% × 4 | 0.331 / 0.197 | 0.368 / 0.140 | 0.375 / 0.060 | 0.320 / 0.083 | 0.347 / 0.080 | 0.319 | -0.002 / -0.006 |
+| toolagent | 1% × 1 | 0.347 / 0.174 | 0.366 / 0.221 | 0.372 / 0.025 | 0.318 / 0.086 | 0.348 / 0.103 | 0.306 | 0.003 / 0.000 |
+| toolagent | 1% × 4 | 0.364 / 0.276 | 0.293 / 0.184 | 0.391 / 0.212 | 0.371 / 0.290 | 0.384 / 0.275 | 0.318 | 0.091 / 0.094 |
+| toolagent | 2% × 1 | 0.349 / 0.231 | 0.352 / -0.034 | 0.374 / 0.109 | 0.325 / 0.222 | 0.370 / 0.233 | 0.301 | 0.055 / 0.057 |
+| toolagent | 2% × 4 | 0.347 / 0.300 | 0.272 / 0.042 | 0.359 / 0.301 | 0.350 / 0.319 | 0.356 / 0.317 | 0.310 | 0.158 / 0.157 |
+
+- **Off-policy, on the LRU behaviour log, the global and the LRU-log-trained rankers clear R_high everywhere**: A_none, A_pd and C_lru in 36 of 36 trace × cell × target evaluations, C_union in 34, B in 30, C_lfu (trained on the LFU log) in 21. C_lru adds 0.00–0.06 to A_none there and is the best model on that log in every cell; C_lfu is best on the LFU log (fig15). The gain of matching the training population to the evaluation log is real but ≤ 0.05.
+- **On-policy, on the decisions each learned arm creates for itself, R is far lower**: 0.02–0.67 below the off-policy value of the same model, beyond the pre-registered 0.05 tolerance in 28–36 of 36 evaluations for A_none, B, C_lru and C_union, and below R_high in 30–36 of 36 for those populations (4–6 of the 6 cells for every target). The gap is largest at 0.25% × 1, where the candidate-trained arms rank their own decision sets inversely to reuse (binary AUC 0.24–0.27, graded Spearman −0.15 to −0.34) and even A_none falls to 0.58 / 0.03–0.07. The gap shrinks with the budget and is 0.02–0.08 at 2% × 4 (B excepted: 0.07–0.29).
+- The behaviour keys do not show this gap (≤ 0.007), so it is a property of the learned policies' streams, not of the logger. It is consistent with the retained set being selected by the same score that is later asked to rank it: residents are the states the ranker scored high, so the residents that turn out not to be reused accumulate, and the arriving victim, which the ranker scores low, is the candidate most often reused next. This mechanism was not tested and is stated as the reading most consistent with the numbers, not as a finding.
+- The share of on-policy evictions that removed a state reused within H while a never-reused-within-H candidate was available (binary label, seed 0):
+
+| trace | L1 × L2 | LRU | LFU | 2-hit | A_none | B | C_lru | C_lfu | C_union |
+|---|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | 0.32 | 0.29 | 0.52 | 0.31 | 0.31 | 0.31 | 0.32 | 0.32 |
+| conversation | 0.25% × 4 | 0.32 | 0.28 | 0.48 | 0.28 | 0.28 | 0.28 | 0.29 | 0.28 |
+| conversation | 1% × 1 | 0.31 | 0.27 | 0.44 | 0.27 | 0.27 | 0.27 | 0.28 | 0.27 |
+| conversation | 1% × 4 | 0.21 | 0.24 | 0.16 | 0.18 | 0.19 | 0.21 | 0.19 | 0.19 |
+| conversation | 2% × 1 | 0.24 | 0.25 | 0.29 | 0.21 | 0.26 | 0.23 | 0.22 | 0.22 |
+| conversation | 2% × 4 | 0.12 | 0.18 | 0.02 | 0.10 | 0.20 | 0.11 | 0.10 | 0.10 |
+| toolagent | 0.25% × 1 | 0.32 | 0.28 | 0.56 | 0.31 | 0.31 | 0.31 | 0.32 | 0.32 |
+| toolagent | 0.25% × 4 | 0.32 | 0.28 | 0.50 | 0.27 | 0.28 | 0.28 | 0.29 | 0.28 |
+| toolagent | 1% × 1 | 0.30 | 0.27 | 0.46 | 0.27 | 0.27 | 0.28 | 0.27 | 0.27 |
+| toolagent | 1% × 4 | 0.20 | 0.23 | 0.13 | 0.17 | 0.19 | 0.21 | 0.18 | 0.18 |
+| toolagent | 2% × 1 | 0.23 | 0.24 | 0.29 | 0.21 | 0.27 | 0.24 | 0.21 | 0.21 |
+| toolagent | 2% × 4 | 0.10 | 0.17 | 0.00 | 0.09 | 0.21 | 0.10 | 0.08 | 0.08 |
+
+  The learned arms are at the sampled-LRU / LFU level (0.27–0.32) at 0.25% and 1% × 1 and within 0.03 of sampled LRU at the larger budgets (B excepted); only heap-style 2-hit at 2% × 4 is clearly lower, at the price of admitting almost nothing.
+
+## 5. Pre-registered interpretation
+
+Per target on the two real traces, cells out of 6 (C = candidate-trained population; "closure gain" is against A_none; "best sampled" is the best of the three generic sampled arms, the pre-registered floor):
+
+| trace | target | C | Case A cells | R ≥ R_high | R − R(A_none) ≥ 0.05 | closure gain < 0.05 | train R < R_high | closure < best sampled + 0.05 | on-policy R < R_high | max |on − off| |
+|---|---|---|---|---|---|---|---|---|---|---|
+| conversation | binary | C_lru | 0/6 | 6/6 | 0/6 | 6/6 | 3/6 | 6/6 | 5/6 | 0.33 |
+| conversation | binary | C_lfu | 0/6 | 2/6 | 0/6 | 6/6 | 6/6 | 5/6 | 5/6 | 0.40 |
+| conversation | binary | C_union | 0/6 | 4/6 | 0/6 | 6/6 | 6/6 | 5/6 | 5/6 | 0.44 |
+| conversation | count | C_lru | 0/6 | 6/6 | 0/6 | 6/6 | 2/6 | 6/6 | 6/6 | 0.40 |
+| conversation | count | C_lfu | 0/6 | 2/6 | 0/6 | 6/6 | 6/6 | 5/6 | 5/6 | 0.52 |
+| conversation | count | C_union | 0/6 | 6/6 | 0/6 | 6/6 | 6/6 | 5/6 | 5/6 | 0.66 |
+| conversation | next_use | C_lru | 0/6 | 6/6 | 1/6 | 6/6 | 4/6 | 4/6 | 6/6 | 0.35 |
+| conversation | next_use | C_lfu | 0/6 | 2/6 | 0/6 | 6/6 | 6/6 | 5/6 | 6/6 | 0.52 |
+| conversation | next_use | C_union | 0/6 | 6/6 | 0/6 | 6/6 | 6/6 | 4/6 | 6/6 | 0.49 |
+| toolagent | binary | C_lru | 0/6 | 6/6 | 0/6 | 6/6 | 0/6 | 6/6 | 5/6 | 0.34 |
+| toolagent | binary | C_lfu | 0/6 | 5/6 | 0/6 | 6/6 | 4/6 | 5/6 | 5/6 | 0.44 |
+| toolagent | binary | C_union | 0/6 | 6/6 | 0/6 | 6/6 | 4/6 | 5/6 | 5/6 | 0.45 |
+| toolagent | count | C_lru | 0/6 | 6/6 | 1/6 | 5/6 | 0/6 | 6/6 | 6/6 | 0.43 |
+| toolagent | count | C_lfu | 1/6 | 5/6 | 0/6 | 5/6 | 5/6 | 5/6 | 4/6 | 0.58 |
+| toolagent | count | C_union | 1/6 | 6/6 | 0/6 | 5/6 | 4/6 | 5/6 | 4/6 | 0.67 |
+| toolagent | next_use | C_lru | 0/6 | 6/6 | 0/6 | 6/6 | 0/6 | 5/6 | 5/6 | 0.42 |
+| toolagent | next_use | C_lfu | 0/6 | 5/6 | 0/6 | 6/6 | 4/6 | 5/6 | 5/6 | 0.49 |
+| toolagent | next_use | C_union | 0/6 | 6/6 | 0/6 | 6/6 | 3/6 | 5/6 | 5/6 | 0.51 |
+
+- **Case A (mismatch was the problem): refuted** for every candidate population on every target. No C variant reaches closure(A_none) + 0.10 together with the best generic sampled arm in more than 1 of 6 cells (0 of 6 in 16 of the 18 combinations). Training on the actual decision population does not convert the global model's predictive quality into retention utility.
+- **Case B (prediction adequate, retention not converted): met by its letter** for C_lru on all three targets and both traces (off-policy R ≥ R_high in 6 of 6 cells, closure gain over A_none < 0.05 in 5–6 of 6) and for C_union on the graded targets; **flagged in every target** by the pre-registered on-policy check: the on-policy R of the same arm is more than 0.05 below its off-policy R in 34 of 36 C_lru evaluations (largest gap per target 0.33–0.43; up to 0.67 for C_union) and below R_high in 33 of 36. The premise "prediction adequate" holds on the LRU behaviour log and does not hold on the decisions the learned policy actually faces.
+- **Case C (representation is the limit): not established.** R(C) ≥ R_high off-policy, the train-split R of C_lru is ≥ R_high in 27 of 36 evaluations, and the fits converged. The evidence needed for Case C (low ranking quality on the decision population even in-sample) is absent off-policy and present only on-policy, where it is confounded with the selection effect above.
+- **Verdict: the primary question is answered (Refuted); the secondary diagnosis is Unresolved between B and C.** Which of "adequate prediction, not converted" and "insufficient representation" describes the learned L2 depends on which decision population is asked, and the on-policy population is the one that determines replay utility. The pre-registered rule that only Case C justifies non-history signal is therefore not satisfied.
+
+## 6. Other observations, not pre-registered
+
+- A_none and A_pd (raw features versus Phase 0.9 per-decision standardisation, same rows) are within ±0.10 closure in 35 of 36 real cells; the exception is toolagent 2% × 4 / count, where A_none is at −0.28 and A_pd at +0.26 (CI95 ±0.016 / ±0.016). The cause was not examined.
+- C_lru has the highest off-policy R on the LRU log in every cell and the lowest replay closure of the C variants, negative in 6 of 12 cells on the binary and on the count target. This is the sharpest single instance of off-policy ranking quality and on-policy utility disagreeing.
+- On the synthetic trace every learned arm is below sampled LRU (closure −0.66 to +0.03) while the heap generics are at +0.03 to +0.26, and A_none's off-policy R on the synthetic candidate sets is below chance (AUC 0.43–0.46; A_pd 0.57–0.65). The synthetic trace is outside the pre-registered judgement and is reported as observed.
+- The on-policy metric is measured at seed 0 only; the five-seed closure CIs show that the replay side is stable, but the on-policy R has no dispersion estimate.
+
+## 7. Claim limits
+
+One linear ranker (logistic / ridge, L2 = 0.01) on the 23 causal history features; two real traces plus one synthetic; H = 600 s (300 s synthetic); sampled decision width 16; five seeds for replay, one for on-policy; behaviour logs from sampled L2-LRU and L2-LFU only, reservoir-capped at 40,000 decisions per log; rows capped at 150,000 per fit; test-split evaluation with the horizon embargo. The closure scale is bounded by the sampled mechanism (its own loss relative to heap policies is up to 0.19); a learned arm run through an exact structure would need to be re-measured. "Best generic" in the pre-registered rule is the best sampled generic arm; against the heap generics the learned arms are at or below parity except at 2% × 4. Nothing here evaluates semantic or embedding features, neural rankers, iterated on-policy training, or any policy other than the five populations listed.
+
+## 8. Decision
+
+The decision-population hypothesis is refuted within this design: matching the training population to the retention decision does not convert the history representation's predictive quality into L2 utility, and the best learned L2 leaves 73–87% of the offline headroom in every real cell, at parity with the best generic heap policy. The B-versus-C diagnosis is Unresolved because the off-policy and on-policy views of "prediction adequate" disagree by more than the pre-registered tolerance. Per the pre-registration, this does not license non-history signal, additional heuristics, or a new policy; the open question it leaves is a measurement one, namely on which decision population a retention ranker has to be judged, and it is recorded in the plan as a design question, not scheduled.

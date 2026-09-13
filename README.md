@@ -201,6 +201,55 @@ L1 = LRU:
   arriving victim against the residents it would displace, where generic
   policies leave 25–80% of the offline gain.
 
+## 9. Phase 0.97 result: matching the training population does not convert prediction into retention
+
+`scripts/run_decision_population.py`, `docs/decision-population-findings.md`.
+On the two-tier setting of Phase 0.95, the L2 ranker's training population is
+the only varied factor: A, the global observed set (Phase 0.9 control, in the
+Phase 0.9 standardisation and in raw features); B, the L1 victim events; C,
+the decision sets logged while sampled L2-LRU / L2-LFU run on the training
+split. Same 23 features, same linear ranker, same three targets, same split
+and embargo. Every scored L2 runs through one sampled-eviction mechanism
+(arriving victim + 16 sampled residents, lowest score leaves); the generic
+policies run through it too, and their heap versions and the heap offline
+comparator are references. Headroom closure = (arm − sampled L2-LRU) /
+(heap offline − sampled L2-LRU), five seeds. Design and interpretation cases
+were pre-registered and amended before any result was inspected.
+
+Best learned L2 versus best generic heap policy, extra avoided prefill over
+L1 alone, share of evaluation-window input tokens, L1 = LRU:
+
+| L1, L2 | conversation: best learned / best generic / offline | tool-agent: same |
+|---|---|---|
+| 0.25%, 1 × | 1.6 / 1.7 (LFU) / 8.4 | 1.8 / 1.9 (LFU) / 6.5 |
+| 0.25%, 4 × | 5.7 / 5.7 (LFU) / 21.2 | 4.6 / 4.7 (LFU) / 15.6 |
+| 1%, 4 × | 16.2 / 16.1 (2-hit) / 34.4 | 11.3 / 11.7 (2-hit) / 22.4 |
+| 2%, 4 × | 22.3 / 21.6 (LRU) / 32.2 | 15.8 / 15.3 (LRU) / 20.4 |
+
+- **Refuted:** that the training-population mismatch was what kept the
+  history representation from improving retention (pre-registered Case A).
+  No candidate-trained ranker reaches closure(A) + 0.10 together with the
+  best generic sampled arm in more than 1 of 6 cells, for any target. The
+  best learned L2 on any population closes 0.13–0.27 of the headroom, leaves
+  73–87% of it in every real cell, and is within −0.8 to +0.7 input-token
+  points of the best generic heap policy. The victim-trained ranker
+  collapses at L1 = 2% (closure −0.27 to −1.87).
+- **Confirmed, with a flag:** off-policy, on the LRU behaviour log, the
+  global and the LRU-log-trained rankers clear the pre-registered accuracy
+  bar (within-decision AUC ≥ 0.70, Spearman ≥ 0.30) in every cell, and
+  candidate training adds ≤ 0.06; on-policy, on the decisions each learned
+  arm creates for itself, the same rankers are 0.02–0.67 lower, beyond the
+  0.05 tolerance in 28–36 of 36 evaluations, and below the bar in most cells,
+  inverting to AUC 0.24–0.27 at 0.25% × 1. The behaviour keys show no such
+  gap (≤ 0.007). The learned arms evict an avoidable reused state as often
+  as sampled LRU does.
+- **Unresolved:** whether the limit is "prediction adequate but not
+  converted" (Case B, met by its letter) or "representation insufficient"
+  (Case C, not established): the two decision populations give opposite
+  answers, and the on-policy one determines utility. Per the
+  pre-registration this does not license non-history signal, new heuristics,
+  or a new policy.
+
 ## Repository layout
 
 - `src/persistent_kv_admission/` — trace loader, prefix-closed replay engine,

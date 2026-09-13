@@ -1,0 +1,86 @@
+{
+  "onpolicy_seed": 0,
+  "l1_policy": "lru",
+  "l1_budgets": [
+    0.0025,
+    0.01,
+    0.02
+  ],
+  "l2_multipliers": [
+    1.0,
+    4.0
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "targets": [
+    "binary",
+    "count",
+    "next_use"
+  ],
+  "hit_model": "tree",
+  "closure": "union",
+  "sample_width": 16,
+  "train_populations": [
+    "A_pd",
+    "A_none",
+    "B",
+    "C_lru",
+    "C_lfu",
+    "C_union"
+  ],
+  "heap_arms": [
+    "lru",
+    "lfu",
+    "lru_2hit",
+    "offline_next_use"
+  ],
+  "generic_sampled_arms": [
+    "lru",
+    "lfu",
+    "lru_2hit"
+  ],
+  "closure_floor": "lru_s",
+  "closure_ceiling": "offline_next_use",
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "snapshot_count": 24,
+  "candidate_cap": 40000,
+  "decision_cap": 40000,
+  "max_train_rows": 150000,
+  "negatives_per_positive": 10.0,
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0,
+    "synthetic_trace": 300.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4,
+    "synthetic_trace": 613215.0
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640,
+    "synthetic_trace": 43708348416
+  },
+  "smoke": false,
+  "replay_seconds": 5335.049396753311,
+  "note": "Only the training population of the L2 ranker varies. Features, target, model, split, embargo, sampled candidate width, size model and seeds are the Phase 0.9 and 0.95 settings. A_pd keeps the Phase 0.9 standardisation (per-decision at fit time, FixedModelScorer normalising on the ranked set at replay time); every other fit takes raw features and is replayed through RawFeatureScorer."
+}
