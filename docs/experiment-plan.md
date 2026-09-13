@@ -240,6 +240,62 @@ to present-but-unusable KV (`l2_present_unusable_tokens`, zero for the heap
 policies, 0.05–3.9% of input under the sampled mechanism). No new features
 or policies before that diagnostic.
 
+## Phase 0.98 — Eviction-decision attribution (current; diagnostic, no new policy)
+
+Question, fixed before the run: on the cells where the learned or
+victim-trained L2 of Phase 0.97 loses most, which eviction decisions cost the
+reuse, and is the present-but-unusable KV a property of the sampled
+mechanism or of the learned scores? Purely descriptive; nothing is fitted,
+no feature or policy is added, and the Phase 0.97 arms are replayed as they
+are (fits and scorers reloaded from the same procedure and seed).
+
+Fixed: the Phase 0.97 setting and code; L1 = heap LRU; cells chosen by the
+Phase 0.97 results before this phase runs: 0.25% × 1 (largest on-policy
+inversion), 1% × 4 (C_lru below sampled LRU on binary / count, learned at
+parity with 2-hit), 2% × 4 (B collapse, learned above heap LRU), on the two
+real traces; arms: sampled LRU (mechanism control), sampled LFU, sampled
+2-hit, and A_none, B, C_lru, C_union on the next-use and the binary target;
+five seeds; evaluation window as before.
+
+Measured, per trace × cell × arm × seed:
+
+1. **Loss attribution.** For every measured request, blocks beyond the L1
+   prefix are classified under the tree rule by the first block `m` that is
+   not in L2: the tokens of `m` are a *root loss*, attributed to the last
+   decision that removed `m` from L2 (rejection of the arriving victim,
+   eviction as a resident, or compulsory: never offered); blocks after `m`
+   that are in L2 are *present-unusable*, attributed to the same decision
+   type as `m`; blocks after `m` not in L2 are *downstream-absent*, not
+   attributed. Tokens per category, as a share of window input tokens, and
+   the difference to sampled LRU of the same cell and seed.
+2. **Orphaning.** At every resident eviction, the blocks and bytes of the
+   evicted state's L2-resident descendants (which the tree rule makes
+   unusable at that moment); share of evictions that orphan ≥ 1 block and
+   total orphaned bytes, per arm, against sampled LRU (heap LRU orphans
+   nothing, Phase 0.95).
+3. **Decision-type regret.** Window decisions with `t + H ≤ end`, split into
+   rejections of the arriving victim and evictions of a resident: count,
+   share whose removed state is reused within H, share of those where a
+   candidate not reused within H was available.
+4. **Ranking split.** On the same decisions: the arriving victim against the
+   residents (pairwise AUC of the victim's label versus each resident's,
+   ordered by the store's scores) and residents-only within-decision AUC /
+   Spearman, next to the whole-set metric of Phase 0.97.
+
+Reading, fixed before the run, per arm and cell relative to sampled LRU in
+the same cell and seed: the decision type (rejection / resident eviction)
+whose attributed root + present-unusable loss accounts for ≥ 50% of the
+arm's total loss difference to sampled LRU is named the dominant failure;
+otherwise "mixed". Orphaned bytes within 1.2 × sampled LRU's read as
+mechanism-borne, ≥ 2 × as learning-borne, between as unresolved. A
+victim-versus-resident AUC below 0.5 with a residents-only AUC ≥ 0.6 reads
+as a failure to place the arrival among the residents rather than a failure
+to order residents. No threshold in this phase triggers a new feature or
+policy; the output is the attribution table and figure. Pipeline:
+`scripts/run_decision_attribution.py`; outputs
+`results/paper/decision_attribution_*.csv`, `fig17_decision_attribution.png`;
+findings appended to `docs/decision-population-findings.md` §9.
+
 ## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 
 Policies to compare under the corrected objective:
