@@ -70,6 +70,25 @@ CLOSURES = ("union", "standalone")
 # admission, where the arrival is an ordinary resident).
 L2DecisionHook = Callable[[list[str], list[tuple[float, ...]], int, float, int, int], None]
 
+# Called once per request, immediately after the L1 prefix and the L2 hit sets
+# of that request have been computed, with those variables exactly as the
+# request loop holds them: `(ids, prefix, l2_hits, present, timestamp_ms,
+# group_index, measured)`. Read-only; nothing in the replay consults it, so a
+# diagnostic can classify the blocks beyond the L1 prefix without changing a
+# single decision. Added in Phase 0.98.
+L2RequestHook = Callable[[tuple[str, ...], int, list[int], list[int], float, int, bool], None]
+
+# Called whenever a state leaves the lower tier, as
+# `(state_id, kind, timestamp_ms, group_index, decision_index)`. `kind` is
+# "rejected" (the arriving victim lost its own first round, or the 2-hit rule
+# declined it before it was ranked), "evicted" (a resident lost a round, or a
+# heap pop removed it), or "promoted" (a request materialised it in L1, which
+# is not a loss cause but is needed for the last-removal record to be right).
+# `decision_index` is the store's decision counter for the sampled decision
+# that removed the state, and -1 where no decision set was scored.
+L2RemovalHook = Callable[[str, str, float, int, int], None]
+L2_REMOVAL_KINDS = ("rejected", "evicted", "promoted")
+
 # Tie-break between two L2 blocks with the same next use under the offline
 # comparator. "prefix_first" (default, the published setting) keeps the longer
 # prefix; "deeper_first" evicts it. Diagnostic only: the default is unchanged.
@@ -255,6 +274,7 @@ class _VictimStore:
         decision_hook: L2DecisionHook | None = None,
         frequency: dict[str, int] | None = None,
         last_group: dict[str, int] | None = None,
+        removal_hook: L2RemovalHook | None = None,
     ) -> None:
         if eviction not in L2_EVICTIONS:
             raise ValueError(f"unknown L2 eviction mechanism {eviction!r}")
@@ -293,6 +313,7 @@ class _VictimStore:
         self.rng = random.Random(seed)
         self.scorer = scorer
         self.decision_hook = decision_hook
+        self.removal_hook = removal_hook
         self.frequency = frequency
         self.last_group = last_group
         self.decisions = 0
@@ -343,6 +364,10 @@ class _VictimStore:
         """
         if self.policy == "lru_2hit" and frequency < 2:
             self.rejections += 1
+            # Declined by the admission rule before any candidate was ranked,
+            # so there is no decision index; it is a rejection all the same.
+            if self.removal_hook is not None:
+                self.removal_hook(state_id, "rejected", timestamp_ms, group_index, -1)
             return False
         if state_id in self.cached:
             raise RuntimeError(f"{state_id} evicted from L1 while resident in exclusive L2")
@@ -367,6 +392,8 @@ class _VictimStore:
                 continue
             self._remove(candidate)
             self.evictions += 1
+            if self.removal_hook is not None:
+                self.removal_hook(candidate, "evicted", timestamp_ms, group_index, -1)
         return True
 
     def _admit_sampled(self, arriving: str, group_index: int, timestamp_ms: float) -> bool:
@@ -399,8 +426,15 @@ class _VictimStore:
                     candidates, scores, victim_index, timestamp_ms, group_index, arriving_index
                 )
             victim = candidates[victim_index]
+            # Declining the arrival in its own first round is a rejection, not
+            # an eviction; the test is made before the removal so that the
+            # removal hook can name the kind, and is otherwise unchanged.
+            rejected = first_round and victim == arriving
             self._remove(victim)
-            if first_round and victim == arriving:
+            if self.removal_hook is not None:
+                self.removal_hook(victim, "rejected" if rejected else "evicted",
+                                  timestamp_ms, group_index, self.decisions - 1)
+            if rejected:
                 # Declining the arrival returns the store to the size it had
                 # before, so the loop is over; undo the admission counter.
                 self.admissions -= 1
@@ -417,10 +451,16 @@ class _VictimStore:
         self.bytes_by_depth[depth_bin(self.trace.states[state_id].depth)] -= size
         self.versions[state_id] += 1
 
-    def promote(self, state_id: str) -> None:
-        """The state is being materialised in L1 by a request; it leaves L2."""
+    def promote(self, state_id: str, timestamp_ms: float = 0.0, group_index: int = -1) -> None:
+        """The state is being materialised in L1 by a request; it leaves L2.
+
+        The timestamps are for the removal hook only; the store itself does not
+        read them, so a caller that keeps no removal record can omit them.
+        """
         if state_id in self.cached:
             self._remove(state_id)
+            if self.removal_hook is not None:
+                self.removal_hook(state_id, "promoted", timestamp_ms, group_index, -1)
 
 
 def _chain(trace: Trace, state_id: str) -> tuple[str, ...]:
@@ -455,6 +495,8 @@ def run_two_tier(
     l2_arm: str = "",
     observer=None,
     victim_hook: Callable[[str, float, int], None] | None = None,
+    l2_request_hook: L2RequestHook | None = None,
+    l2_removal_hook: L2RemovalHook | None = None,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -473,6 +515,14 @@ def run_two_tier(
     deployed scorer would see when the evictions of that group are decided.
     `victim_hook` is called for every L1 eviction, before the victim is offered
     to L2, so a logger can record the victim stream at that same instant.
+
+    `l2_request_hook` and `l2_removal_hook` (Phase 0.98) are read-only
+    diagnostics: the first sees each request's L1 prefix and L2 hit sets as the
+    request loop computed them, the second sees every state that leaves L2 and
+    why. Neither is consulted by the replay, so with both None — the default —
+    nothing about the run or its result changes. A removal hook carrying an
+    `attach` method is shown the union store, the way a learning scorer is, so
+    that it can read the resident set at the instant of a removal.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -598,7 +648,8 @@ def run_two_tier(
                                     offline_tiebreak=offline_tiebreak, eviction=l2_eviction,
                                     sample_width=l2_sample_width, seed=l2_seed, scorer=l2_scorer,
                                     decision_hook=l2_decision_hook,
-                                    frequency=l1.frequency, last_group=l1.last_group)
+                                    frequency=l1.frequency, last_group=l1.last_group,
+                                    removal_hook=l2_removal_hook)
             l2_bytes_by_depth = l2_union.bytes_by_depth
         else:
             l2_standalone = _PrefixClosedCache(
@@ -612,6 +663,10 @@ def run_two_tier(
         # A learning scorer normalises on the population it actually ranks,
         # which here is the set of states L2 holds, not every state ever seen.
         l2_scorer.attach(l2_union)
+    if l2_removal_hook is not None and l2_union is not None and hasattr(l2_removal_hook, "attach"):
+        # The orphaning measure needs the resident set as it stands at the
+        # instant a state is removed, which only the store holds.
+        l2_removal_hook.attach(l2_union)
 
     previous_ms: float | None = None
     for group_index, (timestamp_ms, requests) in enumerate(trace.timestamp_groups()):
@@ -652,6 +707,8 @@ def run_two_tier(
                 else:
                     l2_hits = [i for i in range(prefix, len(ids)) if ids[i] in l2_cached]
                     present = l2_hits
+            if l2_request_hook is not None:
+                l2_request_hook(ids, prefix, l2_hits, present, timestamp_ms, group_index, measured)
             for index, state_id in enumerate(ids):
                 event = open_events.pop(state_id, None)
                 if event is None:
@@ -692,7 +749,7 @@ def run_two_tier(
                         promote[ids[index]] = None
         if l2_union is not None:
             for state_id in promote:
-                l2_union.promote(state_id)
+                l2_union.promote(state_id, timestamp_ms, group_index)
         # Same instant as `replay.update_history` shows a scorer its
         # observations: after the group has been served and before anything is
         # inserted or evicted, so the evictions of this group are decided on a

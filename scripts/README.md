@@ -98,3 +98,27 @@ Controls are `--l1-budgets`, `--l2-multipliers`, `--seeds`, `--targets`,
 `fig15_population_ladder.png` / `fig16_onpolicy_decisions.png`; decision logs
 (`.npz`, about 640 MB) and raw rows go to `results/decision_population/`
 (untracked). The full grid takes about 1.5 hours on 24 workers (1,962 replays).
+
+Run the Phase 0.98 eviction-decision attribution (descriptive; the Phase 0.97
+arms are rebuilt by the Phase 0.97 code and replayed unchanged, with three
+read-only hooks recording where the lost reuse came from):
+
+```bash
+python3 scripts/run_decision_attribution.py data/raw/conversation_trace.jsonl data/raw/toolagent_trace.jsonl --workers 24
+python3 scripts/run_decision_attribution.py data/raw/conversation_trace.jsonl --smoke   # one cell, one seed, three arms
+python3 scripts/run_decision_attribution.py --figure-only                                # redraw fig17
+```
+
+Controls are `--seeds`, `--workers`, `--output-dir`, `--paper-dir`; the grid
+(two real traces, the cells 0.25% × 1, 1% × 4, 2% × 4, the three generic
+sampled arms and A_none / B / C_lru / C_union on the next-use and the binary
+target) is fixed in the script. Outputs
+`results/paper/decision_attribution_losses.csv` (aggregated, with the
+pre-registered readings), `decision_attribution_losses_seeds.csv`,
+`decision_attribution_decisions.csv`, `decision_attribution_orphaning.csv`,
+`decision_attribution_config.json`, and `fig17_decision_attribution.png`; raw
+rows and the rebuilt decision logs go to `results/decision_attribution/`
+(untracked). Every replay is checked against
+`decision_population_replay_seeds.csv` and the run aborts before writing if any
+arm does not reproduce Phase 0.97 exactly. The full grid is 330 replays, about
+25 minutes on 24 workers.
