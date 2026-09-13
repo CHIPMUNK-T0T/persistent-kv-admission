@@ -260,6 +260,39 @@ L1 alone, share of evaluation-window input tokens, L1 = LRU:
   0.95; the victim-trained ranker is highest where it collapses. It is an
   upper bound on recoverable reuse, not an estimate.
 
+## 10. Phase 0.98 result: the lost reuse is in the arrival's own decision, and the unusable KV is the mechanism's
+
+`scripts/run_decision_attribution.py`, `docs/decision-population-findings.md`
+§9. A descriptive replay of the Phase 0.97 arms (reproduced exactly, 330 of
+330) on the cells 0.25% × 1, 1% × 4 and 2% × 4 of both real traces, with
+read-only hooks that charge every lost block beyond the L1 prefix to the
+decision that removed its first missing ancestor (rejection of the arriving
+victim, eviction of a resident, or compulsory), count the L2-resident
+descendants orphaned by each eviction, and split the ranking into
+arrival-versus-residents and residents-only. Pre-registered readings, five
+seeds, sampled LRU as the mechanism control.
+
+- **Refuted:** that the learned scores add ancestor loss. Orphaned bytes
+  are 0.03–1.05 × sampled LRU's for every arm and target (60 of 60 read
+  "mechanism"); sampled LRU itself orphans on 44–48% of its evictions,
+  177–254 GB per window, because a sample of 16 residents can hold an
+  ancestor without its descendants. The present-but-unusable KV of Phase
+  0.97 is the sampled mechanism's cost.
+- **Confirmed:** the divergence from sampled LRU sits in the arriving
+  victim's own first-round decision. Every non-LRU arm at 0.25% × 1 (71–99
+  thousand rejections per window against 2–3 thousand), C_lru at 1% × 4 and
+  B at 2% × 4 read "rejected"; B's collapse is the rejection of arriving
+  ancestors of blocks it holds (1.2–3.0 input-token points present but
+  unusable after a rejection, 0 for sampled LRU) and its arrival is ranked
+  below the residents (victim-vs-residents AUC 0.31–0.40), the one cell pair
+  where "arrival placement" fires. A_none and C_union are not worse than
+  sampled LRU at 1% × 4 and 2% × 4.
+- **Limit:** the pre-registered root-only attribution charges one block per
+  broken chain and covers 22–41% of the L2-hit shortfall of the arms that
+  fall behind; the rest is downstream-absent. A per-block attribution is the
+  candidate next measurement, not scheduled. No new feature, policy or
+  mechanism follows from this phase.
+
 ## Repository layout
 
 - `src/persistent_kv_admission/` — trace loader, prefix-closed replay engine,

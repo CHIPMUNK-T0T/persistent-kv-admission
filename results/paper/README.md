@@ -82,5 +82,13 @@ are not tracked.
 - `decision_population_config.json`: grid, arms, seeds, hyperparameters, split, horizons.
 - `fig14_decision_population.png` (closure by cell, targets × real traces), `fig15_population_ladder.png` (train population × evaluation population), `fig16_onpolicy_decisions.png`.
 
+## Phase 0.98 artifacts (`scripts/run_decision_attribution.py`)
+
+- `decision_attribution_losses.csv`, `decision_attribution_losses_seeds.csv`: per trace × cell × arm × target (aggregated over five seeds, and per seed) the partition of every window block beyond the L1 prefix into L2 hits, root loss by the removing decision (rejected / evicted / compulsory / unexplained), present-unusable by the same decision, and downstream-absent; tokens and shares of window input; differences to sampled LRU of the same cell and seed; the pre-registered readings (`dominant_failure`, `orphaning_reading`, `ranking_reading`).
+- `decision_attribution_orphaning.csv`: per arm the rejections, resident evictions, share of evictions that orphan ≥ 1 L2-resident descendant, orphaned blocks and bytes (whole trace and window).
+- `decision_attribution_decisions.csv`: window decisions split into rejections and resident evictions with reuse-within-H and avoidable shares; victim-vs-residents pairwise AUC / Spearman, residents-only and whole-set within-decision metrics, victim rank fraction; binary and next-use labels.
+- `decision_attribution_config.json`: grid, arms, seeds, thresholds, git HEAD.
+- `fig17_decision_attribution.png`: stacked attributed-loss classes per arm and cell (next-use target), downstream-absent share annotated.
+
 The full event logs and raw replay rows are written to `results/two_tier/`
 and are not tracked.

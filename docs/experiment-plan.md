@@ -240,7 +240,7 @@ to present-but-unusable KV (`l2_present_unusable_tokens`, zero for the heap
 policies, 0.05–3.9% of input under the sampled mechanism). No new features
 or policies before that diagnostic.
 
-## Phase 0.98 — Eviction-decision attribution (current; diagnostic, no new policy)
+## Phase 0.98 — Eviction-decision attribution (done 2026-09-13; diagnostic, no new policy)
 
 Question, fixed before the run: on the cells where the learned or
 victim-trained L2 of Phase 0.97 loses most, which eviction decisions cost the
@@ -295,6 +295,25 @@ policy; the output is the attribution table and figure. Pipeline:
 `scripts/run_decision_attribution.py`; outputs
 `results/paper/decision_attribution_*.csv`, `fig17_decision_attribution.png`;
 findings appended to `docs/decision-population-findings.md` §9.
+
+**Outcome (commit `bafce0a`, results in `results/paper/decision_attribution_*`).**
+330 of 330 replays reproduce Phase 0.97 exactly; unexplained root losses 0.
+Orphaning reads "mechanism" in 60 of 60 arm × target × cell readings
+(0.03–1.05 × sampled LRU; sampled LRU itself orphans on 44–48% of its
+evictions): the present-but-unusable KV is the sampled mechanism's cost,
+not the learned scores'. Dominant failure: "rejected" for every non-LRU arm
+at 0.25% × 1 (loss moved from resident evictions to rejections, net +0.06
+to +0.96 points), for C_lru at 1% × 4 and for B at 2% × 4 (+2.3 to +3.0
+points, 1.2–3.0 points present-unusable after rejections of arriving
+ancestors); "evicted" for B / next-use at 1% × 4 and C_lru / binary at
+2% × 4; "not worse" for A_none and C_union at 1% × 4 and 2% × 4. "Arrival
+placement" fires for B at conversation 2% × 4 (toolagent misses the
+residents-only bar by 0.01–0.02). Limit: the root-only decision loss covers
+22–41% of the L2-hit shortfall of the arms that fall behind sampled LRU;
+the rest is downstream-absent. Candidate next measurement, not scheduled: a
+per-block attribution that charges every absent block beyond the prefix to
+its own last removal (one more counter, one rerun of this grid). No new
+feature, policy or mechanism follows from this phase.
 
 ## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 

@@ -271,3 +271,288 @@ One linear ranker (logistic / ridge, L2 = 0.01) on the 23 causal history feature
 ## 8. Decision
 
 The decision-population hypothesis is refuted within this design: matching the training population to the retention decision does not convert the history representation's predictive quality into L2 utility, and the best learned L2 leaves 73–87% of the offline headroom in every real cell, at parity with the best generic heap policy. The B-versus-C diagnosis is Unresolved because the off-policy and on-policy views of "prediction adequate" disagree by more than the pre-registered tolerance. Per the pre-registration, this does not license non-history signal, additional heuristics, or a new policy. What the results point to instead is a narrower question about the decisions themselves: which evictions (rejecting the arriving victim, or removing a resident) led to lost reuse or to present-but-unusable KV, on the few cells where the loss is largest. That diagnostic is recorded in the plan as the candidate next step and is not scheduled here.
+
+
+## 9. Phase 0.98 — Eviction-decision attribution (diagnostic)
+
+Pre-registered in `docs/experiment-plan.md` (Phase 0.98) before the run;
+commit `bafce0a`, `scripts/run_decision_attribution.py`, 330 replays in
+1,346 s on 24 workers (1,405 s in all). Nothing is fitted or changed: the
+Phase 0.97 arms are rebuilt by the Phase 0.97 code and replayed with three
+read-only hooks. Every one of the 330 replays reproduces its Phase 0.97
+`avoided_prefill_tokens` exactly; the per-request partition (L2 hits + root
+loss + present-unusable + downstream-absent = every block beyond the L1
+prefix) and the equality of the present-unusable total with the replay's own
+counter are asserted in every replay; unexplained root losses (a previously
+requested state with no removal record) are 0 over the grid. Cells: 0.25% × 1,
+1% × 4, 2% × 4 on the two real traces; arms: sampled LRU (the mechanism
+control), sampled LFU, sampled 2-hit, and A_none / B / C_lru / C_union on the
+next-use and the binary target; five seeds; window = the last 40% of each
+trace. All shares below are of window input tokens, five-seed means; the
+binary-target arms are in the CSVs and summarised in the text.
+
+### 9.1 Where the reuse was lost
+
+Root loss = tokens of the first block beyond the L1 prefix that L2 does not
+hold, charged to the last decision that removed it (rejection of the arriving
+victim, eviction as a resident, or compulsory: never offered); present-unusable
+= blocks after it that L2 holds but the tree rule cannot use, charged to the
+same decision; downstream absent = blocks after it that L2 does not hold,
+not charged. "Decision loss" = rejected + evicted root loss + the two
+present-unusable classes; the difference to sampled LRU is per seed
+(CI95 over seeds); "dominant" is the pre-registered ≥ 50% rule on that
+difference; "wasted" = present-unusable / (L2 hits + present-unusable), the
+share of what L2 retained and was asked for that could not be used.
+
+| trace | L1 × L2 | arm | L2 hits | root: rejected / evicted / compulsory | unusable after rejection / eviction | downstream absent | decision loss − sampled LRU | dominant | wasted |
+|---|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | sampled LRU | 0.12 | 0.02 / 1.86 / 2.52 | 0.00 / 0.06 | 90.9 | +0.00 ± 0.00 | not worse | 0.34 |
+| conversation | 0.25% × 1 | sampled LFU | 1.09 | 1.56 / 0.33 / 2.51 | 0.08 / 0.48 | 89.4 | +0.51 ± 0.07 | rejected | 0.34 |
+| conversation | 0.25% × 1 | sampled 2-hit | 0.40 | 0.85 / 1.03 / 2.52 | 0.00 / 0.15 | 90.5 | +0.08 ± 0.02 | rejected | 0.27 |
+| conversation | 0.25% × 1 | A_none | 1.52 | 1.37 / 0.51 / 2.53 | 0.12 / 0.54 | 88.9 | +0.59 ± 0.05 | rejected | 0.30 |
+| conversation | 0.25% × 1 | B | 1.38 | 1.12 / 0.73 / 2.54 | 0.01 / 0.32 | 89.4 | +0.25 ± 0.03 | rejected | 0.19 |
+| conversation | 0.25% × 1 | C_lru | 1.55 | 1.16 / 0.69 / 2.55 | 0.02 / 0.42 | 89.1 | +0.35 ± 0.04 | rejected | 0.22 |
+| conversation | 0.25% × 1 | C_union | 1.05 | 1.31 / 0.55 / 2.54 | 0.03 / 0.21 | 89.8 | +0.16 ± 0.01 | rejected | 0.19 |
+| conversation | 1% × 4 | sampled LRU | 13.21 | 0.00 / 1.03 / 3.26 | 0.00 / 2.28 | 74.7 | +0.00 ± 0.00 | not worse | 0.15 |
+| conversation | 1% × 4 | sampled LFU | 9.64 | 0.90 / 0.86 / 2.61 | 0.55 / 1.02 | 78.9 | +0.02 ± 0.24 | rejected | 0.14 |
+| conversation | 1% × 4 | sampled 2-hit | 15.01 | 1.36 / 0.18 / 2.81 | 0.00 / 1.16 | 74.0 | -0.61 ± 0.17 | not worse | 0.07 |
+| conversation | 1% × 4 | A_none | 15.78 | 0.01 / 1.33 / 2.98 | 0.01 / 1.61 | 72.8 | -0.36 ± 0.32 | not worse | 0.09 |
+| conversation | 1% × 4 | B | 14.60 | 0.00 / 1.20 / 3.10 | 0.00 / 2.81 | 72.8 | +0.70 ± 0.32 | evicted | 0.16 |
+| conversation | 1% × 4 | C_lru | 13.56 | 0.46 / 1.05 / 2.83 | 0.26 / 2.08 | 74.3 | +0.54 ± 0.33 | rejected | 0.15 |
+| conversation | 1% × 4 | C_union | 16.19 | 0.06 / 1.33 / 2.93 | 0.12 / 1.21 | 72.7 | -0.59 ± 0.28 | not worse | 0.08 |
+| conversation | 2% × 4 | sampled LRU | 19.70 | 0.00 / 0.56 / 3.70 | 0.00 / 1.76 | 66.2 | +0.00 ± 0.00 | not worse | 0.08 |
+| conversation | 2% × 4 | sampled LFU | 12.36 | 0.69 / 0.78 / 2.85 | 1.09 / 1.16 | 72.9 | +1.40 ± 0.07 | rejected | 0.15 |
+| conversation | 2% × 4 | sampled 2-hit | 17.01 | 1.33 / 0.03 / 2.95 | 0.00 / 0.31 | 70.2 | -0.64 ± 0.10 | not worse | 0.02 |
+| conversation | 2% × 4 | A_none | 21.81 | 0.00 / 0.65 / 3.61 | 0.00 / 1.40 | 64.4 | -0.26 ± 0.12 | not worse | 0.06 |
+| conversation | 2% × 4 | B | 6.28 | 1.23 / 0.30 / 2.80 | 3.02 / 0.76 | 77.5 | +2.99 ± 0.04 | rejected | 0.38 |
+| conversation | 2% × 4 | C_lru | 21.90 | 0.00 / 0.62 / 3.64 | 0.00 / 1.43 | 64.3 | -0.26 ± 0.15 | not worse | 0.06 |
+| conversation | 2% × 4 | C_union | 21.97 | 0.00 / 0.65 / 3.61 | 0.00 / 1.28 | 64.4 | -0.39 ± 0.13 | not worse | 0.05 |
+| toolagent | 0.25% × 1 | sampled LRU | 0.78 | 0.01 / 1.32 / 3.91 | 0.00 / 0.05 | 58.5 | +0.00 ± 0.00 | not worse | 0.06 |
+| toolagent | 0.25% × 1 | sampled LFU | 1.41 | 1.08 / 0.26 / 3.91 | 0.07 / 0.30 | 57.6 | +0.33 ± 0.01 | rejected | 0.21 |
+| toolagent | 0.25% × 1 | sampled 2-hit | 1.03 | 0.62 / 0.71 / 3.91 | 0.00 / 0.11 | 58.2 | +0.06 ± 0.02 | rejected | 0.10 |
+| toolagent | 0.25% × 1 | A_none | 1.71 | 0.93 / 0.40 / 3.92 | 0.08 / 0.39 | 57.2 | +0.41 ± 0.04 | rejected | 0.21 |
+| toolagent | 0.25% × 1 | B | 1.50 | 0.86 / 0.46 / 3.92 | 0.01 / 0.28 | 57.6 | +0.23 ± 0.03 | rejected | 0.16 |
+| toolagent | 0.25% × 1 | C_lru | 1.60 | 0.85 / 0.47 / 3.92 | 0.02 / 0.32 | 57.4 | +0.27 ± 0.02 | rejected | 0.17 |
+| toolagent | 0.25% × 1 | C_union | 1.42 | 0.93 / 0.39 / 3.92 | 0.03 / 0.15 | 57.8 | +0.12 ± 0.02 | rejected | 0.11 |
+| toolagent | 1% × 4 | sampled LRU | 9.56 | 0.00 / 0.68 / 4.46 | 0.00 / 1.64 | 46.8 | +0.00 ± 0.00 | not worse | 0.15 |
+| toolagent | 1% × 4 | sampled LFU | 6.69 | 0.59 / 0.65 / 3.98 | 0.41 / 0.77 | 50.1 | +0.09 ± 0.14 | rejected | 0.15 |
+| toolagent | 1% × 4 | sampled 2-hit | 10.89 | 0.99 / 0.09 / 4.12 | 0.00 / 0.77 | 46.3 | -0.47 ± 0.16 | not worse | 0.07 |
+| toolagent | 1% × 4 | A_none | 11.07 | 0.01 / 0.93 / 4.23 | 0.01 / 1.29 | 45.6 | -0.09 ± 0.19 | not worse | 0.10 |
+| toolagent | 1% × 4 | B | 10.37 | 0.00 / 0.80 / 4.36 | 0.00 / 1.98 | 45.7 | +0.45 ± 0.17 | evicted | 0.16 |
+| toolagent | 1% × 4 | C_lru | 9.59 | 0.33 / 0.73 / 4.13 | 0.16 / 1.41 | 46.8 | +0.32 ± 0.20 | rejected | 0.14 |
+| toolagent | 1% × 4 | C_union | 11.21 | 0.03 / 0.96 / 4.19 | 0.05 / 1.13 | 45.6 | -0.14 ± 0.16 | not worse | 0.10 |
+| toolagent | 2% × 4 | sampled LRU | 14.07 | 0.00 / 0.32 / 4.79 | 0.00 / 1.25 | 40.8 | +0.00 ± 0.00 | not worse | 0.08 |
+| toolagent | 2% × 4 | sampled LFU | 8.66 | 0.43 / 0.57 / 4.16 | 0.81 / 1.00 | 45.6 | +1.25 ± 0.06 | rejected | 0.17 |
+| toolagent | 2% × 4 | sampled 2-hit | 11.81 | 0.94 / 0.01 / 4.21 | 0.00 / 0.10 | 44.2 | -0.52 ± 0.10 | not worse | 0.01 |
+| toolagent | 2% × 4 | A_none | 15.48 | 0.00 / 0.41 / 4.71 | 0.00 / 0.93 | 39.7 | -0.22 ± 0.10 | not worse | 0.06 |
+| toolagent | 2% × 4 | B | 4.53 | 0.60 / 0.45 / 4.12 | 1.25 / 1.60 | 48.7 | +2.33 ± 0.12 | rejected | 0.39 |
+| toolagent | 2% × 4 | C_lru | 15.66 | 0.00 / 0.40 / 4.72 | 0.00 / 0.99 | 39.5 | -0.18 ± 0.06 | not worse | 0.06 |
+| toolagent | 2% × 4 | C_union | 15.76 | 0.00 / 0.39 / 4.73 | 0.00 / 0.89 | 39.5 | -0.29 ± 0.08 | not worse | 0.05 |
+
+- **The pre-registered decision loss is a narrow band.** Rejected, evicted
+  and present-unusable tokens together are 1.0–5.3% of input for every arm,
+  compulsory roots 2.5–4.8%, and downstream-absent blocks 39–91%. Where an
+  arm is ≥ 1 point of input below sampled LRU in L2 hits, the decision loss
+  accounts for 22–41% of the shortfall (B at 2% × 4: 22–27% of a 9.0–13.4
+  point shortfall; C_lru / binary at 1% × 4: 34–41% of 1.9 points) and the
+  rest is downstream-absent. The root-only attribution charges one block per
+  broken chain; the blocks behind it were also removed, each by its own
+  decision, and are not charged. The dominant-failure labels therefore
+  describe the root block of each broken chain, not the whole chain.
+- **At 0.25% × 1 every arm other than sampled LRU reads "rejected"**,
+  including sampled LFU and 2-hit. They reject 71–99 thousand arrivals in the
+  window (sampled LRU: 2–3 thousand), which moves loss from resident
+  evictions (−0.6 to −1.5 points) to rejections (+0.6 to +1.6); the net
+  decision loss is +0.06 to +0.96 points above sampled LRU while their L2
+  hits are +0.1 to +1.4 points above it. The ≥ 50% rule names the largest
+  positive component when the components have opposite signs. Rejected
+  arrivals are reused within H at 0.26–0.30, evicted residents at 0.42–0.53
+  (Table 9.3), so rejecting is the less costly of the two decisions in that
+  cell.
+- **At 1% × 4 C_lru reads "rejected" on both traces and both targets**
+  (+0.3 to +0.8 points; 15–19 thousand rejections against ≤ 3 thousand for
+  A_none and C_union), B / next-use reads "evicted" (+0.45 / +0.70, from
+  present-unusable after evictions), A_none and C_union are not worse than
+  sampled LRU.
+- **At 2% × 4 B reads "rejected" on both traces and targets** (+2.3 to +3.0
+  points, CI ≤ 0.12): 23–31 thousand rejections, of which 22–24% are reused
+  within H, and 1.2–3.0 points of present-unusable tokens *after a
+  rejection* (sampled LRU: 0.00). B rejects arriving ancestors of blocks it
+  holds: L1 evicts leaves first, so an ancestor arrives after its
+  descendants, and B scores it below the residents. Its wasted-retention
+  share is 0.28–0.39 against 0.08 for sampled LRU. C_lru / binary reads
+  "evicted" (+0.85 / +0.90); A_none, C_lru / next-use and C_union are not
+  worse than sampled LRU.
+
+### 9.2 Orphaning: the present-but-unusable KV is mechanism-borne
+
+At every resident eviction, the blocks of the evicted state's L2-resident
+descendants (unusable from that instant under the tree rule); window only.
+
+| trace | L1 × L2 | arm | rejections (window) | resident evictions (window) | share of evictions that orphan | orphaned GB (window) | ratio to sampled LRU | reading |
+|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | sampled LRU | 3,194 | 108,587 | 0.47 | 254 | 1.00 | mechanism |
+| conversation | 0.25% × 1 | sampled LFU | 98,936 | 11,153 | 0.23 | 7 | 0.03 | mechanism |
+| conversation | 0.25% × 1 | sampled 2-hit | 70,771 | 40,575 | 0.47 | 100 | 0.39 | mechanism |
+| conversation | 0.25% × 1 | A_none | 90,734 | 18,745 | 0.25 | 15 | 0.06 | mechanism |
+| conversation | 0.25% × 1 | B | 87,533 | 22,471 | 0.29 | 19 | 0.08 | mechanism |
+| conversation | 0.25% × 1 | C_lru | 88,743 | 20,949 | 0.28 | 17 | 0.06 | mechanism |
+| conversation | 0.25% × 1 | C_union | 93,167 | 17,330 | 0.26 | 13 | 0.05 | mechanism |
+| conversation | 1% × 4 | sampled LRU | 0 | 93,115 | 0.48 | 236 | 1.00 | mechanism |
+| conversation | 1% × 4 | sampled LFU | 57,408 | 40,630 | 0.29 | 37 | 0.16 | mechanism |
+| conversation | 1% × 4 | sampled 2-hit | 70,451 | 21,870 | 0.48 | 54 | 0.23 | mechanism |
+| conversation | 1% × 4 | A_none | 1,830 | 89,115 | 0.45 | 184 | 0.78 | mechanism |
+| conversation | 1% × 4 | B | 31 | 90,889 | 0.45 | 191 | 0.81 | mechanism |
+| conversation | 1% × 4 | C_lru | 40,964 | 51,701 | 0.36 | 62 | 0.26 | mechanism |
+| conversation | 1% × 4 | C_union | 9,100 | 81,699 | 0.44 | 134 | 0.57 | mechanism |
+| conversation | 2% × 4 | sampled LRU | 0 | 83,241 | 0.47 | 211 | 1.00 | mechanism |
+| conversation | 2% × 4 | sampled LFU | 42,359 | 48,729 | 0.33 | 55 | 0.26 | mechanism |
+| conversation | 2% × 4 | sampled 2-hit | 68,736 | 19,225 | 0.47 | 46 | 0.22 | mechanism |
+| conversation | 2% × 4 | A_none | 31 | 81,206 | 0.44 | 162 | 0.77 | mechanism |
+| conversation | 2% × 4 | B | 75,988 | 20,315 | 0.30 | 17 | 0.08 | mechanism |
+| conversation | 2% × 4 | C_lru | 1,386 | 79,708 | 0.44 | 148 | 0.70 | mechanism |
+| conversation | 2% × 4 | C_union | 307 | 80,903 | 0.44 | 156 | 0.74 | mechanism |
+| toolagent | 0.25% × 1 | sampled LRU | 2,421 | 106,533 | 0.45 | 226 | 1.00 | mechanism |
+| toolagent | 0.25% × 1 | sampled LFU | 94,037 | 13,372 | 0.21 | 8 | 0.03 | mechanism |
+| toolagent | 0.25% × 1 | sampled 2-hit | 71,531 | 36,906 | 0.47 | 89 | 0.39 | mechanism |
+| toolagent | 0.25% × 1 | A_none | 85,218 | 21,558 | 0.23 | 14 | 0.06 | mechanism |
+| toolagent | 0.25% × 1 | B | 86,134 | 21,253 | 0.25 | 16 | 0.07 | mechanism |
+| toolagent | 0.25% × 1 | C_lru | 85,515 | 21,630 | 0.25 | 16 | 0.07 | mechanism |
+| toolagent | 0.25% × 1 | C_union | 88,778 | 18,922 | 0.24 | 13 | 0.06 | mechanism |
+| toolagent | 1% × 4 | sampled LRU | 0 | 89,769 | 0.45 | 201 | 1.00 | mechanism |
+| toolagent | 1% × 4 | sampled LFU | 49,457 | 45,774 | 0.28 | 37 | 0.18 | mechanism |
+| toolagent | 1% × 4 | sampled 2-hit | 71,047 | 18,022 | 0.47 | 44 | 0.22 | mechanism |
+| toolagent | 1% × 4 | A_none | 2,362 | 85,621 | 0.42 | 172 | 0.85 | mechanism |
+| toolagent | 1% × 4 | B | 2 | 87,971 | 0.41 | 158 | 0.79 | mechanism |
+| toolagent | 1% × 4 | C_lru | 36,010 | 53,884 | 0.34 | 63 | 0.32 | mechanism |
+| toolagent | 1% × 4 | C_union | 7,832 | 80,068 | 0.43 | 145 | 0.72 | mechanism |
+| toolagent | 2% × 4 | sampled LRU | 0 | 80,013 | 0.44 | 177 | 1.00 | mechanism |
+| toolagent | 2% × 4 | sampled LFU | 34,172 | 53,684 | 0.31 | 54 | 0.30 | mechanism |
+| toolagent | 2% × 4 | sampled 2-hit | 69,223 | 16,191 | 0.47 | 37 | 0.21 | mechanism |
+| toolagent | 2% × 4 | A_none | 73 | 78,164 | 0.40 | 151 | 0.85 | mechanism |
+| toolagent | 2% × 4 | B | 58,265 | 34,591 | 0.28 | 27 | 0.15 | mechanism |
+| toolagent | 2% × 4 | C_lru | 1,570 | 76,268 | 0.39 | 130 | 0.73 | mechanism |
+| toolagent | 2% × 4 | C_union | 1,049 | 76,797 | 0.40 | 145 | 0.82 | mechanism |
+
+- **Every arm and target reads "mechanism" (60 of 60): no learned score
+  orphans more than sampled LRU; the ratio is 0.03–1.05.** Sampled LRU
+  orphans most: 44–48% of its resident evictions remove a state with resident
+  descendants, 2.1–2.5 blocks per eviction, 177–254 GB per window. The heap
+  LRU of Phase 0.95 orphaned nothing; the sampled draw of 16 residents can
+  contain an ancestor without its descendants, and the LRU key then removes
+  the ancestor (the older state) first. The learned arms orphan at 0.23–0.46
+  of their evictions and 13–207 GB. The present-but-unusable tokens recorded
+  in Phase 0.97 are therefore a cost of the sampled mechanism, not of the
+  learned scores, and the readings refute the "learning-borne" alternative
+  in every cell.
+- The wasted-retention share (Table 9.1) tells the same story from the
+  request side: sampled LRU 0.06–0.34, the learned arms 0.05–0.52 at
+  0.25% × 1 and 0.05–0.20 at the larger budgets, B 0.28–0.39 where it
+  collapses.
+
+### 9.3 Decision-type regret and the ranking split
+
+Window decisions with `t + H ≤ end`, binary label (reuse within H = 600 s),
+seed rows aggregated; a "reused" rejection or eviction removed a state that
+was requested again within H. Victim-vs-residents = pairwise AUC of the
+arriving victim's label against each resident's under the store's own
+scores; residents-only = within-decision AUC on the decision set minus the
+arrival; victim rank fraction = the arrival's rank among the candidates
+(0 = lowest score).
+
+| trace | L1 × L2 | arm | rejections: n / reused within H | resident evictions: n / reused within H | victim-vs-residents AUC | residents-only AUC | whole-set AUC | victim rank fraction | reading |
+|---|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | sampled LRU | 1,010 / 0.19 | 38,990 / 0.33 | 0.51 | 0.50 | 0.50 | 0.84 | other |
+| conversation | 0.25% × 1 | sampled LFU | 35,763 / 0.29 | 4,237 / 0.48 | 0.90 | 0.32 | 0.48 | 0.03 | other |
+| conversation | 0.25% × 1 | sampled 2-hit | 0 / 0.50 | 22,074 / 0.53 | 0.50 | 0.50 | 0.50 | 0.92 | other |
+| conversation | 0.25% × 1 | A_none | 33,015 / 0.27 | 6,985 / 0.45 | 0.82 | 0.44 | 0.50 | 0.04 | other |
+| conversation | 0.25% × 1 | B | 31,592 / 0.26 | 8,408 / 0.52 | 0.81 | 0.41 | 0.47 | 0.07 | other |
+| conversation | 0.25% × 1 | C_lru | 32,293 / 0.26 | 7,707 / 0.50 | 0.81 | 0.45 | 0.51 | 0.06 | other |
+| conversation | 0.25% × 1 | C_union | 33,391 / 0.28 | 6,609 / 0.47 | 0.69 | 0.35 | 0.39 | 0.04 | other |
+| conversation | 1% × 4 | sampled LRU | 0 / – | 40,000 / 0.21 | 0.57 | 0.56 | 0.56 | 0.99 | other |
+| conversation | 1% × 4 | sampled LFU | 22,171 / 0.24 | 17,829 / 0.24 | 0.55 | 0.68 | 0.66 | 0.14 | other |
+| conversation | 1% × 4 | sampled 2-hit | 0 / – | 11,927 / 0.16 | 0.70 | 0.66 | 0.67 | 0.99 | other |
+| conversation | 1% × 4 | A_none | 503 / 0.02 | 39,497 / 0.19 | 0.69 | 0.68 | 0.68 | 0.55 | other |
+| conversation | 1% × 4 | B | 3 / 0.00 | 39,997 / 0.18 | 0.63 | 0.63 | 0.63 | 0.78 | other |
+| conversation | 1% × 4 | C_lru | 16,448 / 0.19 | 23,552 / 0.19 | 0.66 | 0.63 | 0.63 | 0.23 | other |
+| conversation | 1% × 4 | C_union | 2,390 / 0.07 | 37,610 / 0.19 | 0.71 | 0.68 | 0.68 | 0.45 | other |
+| conversation | 2% × 4 | sampled LRU | 0 / – | 40,000 / 0.12 | 0.66 | 0.60 | 0.61 | 1.00 | other |
+| conversation | 2% × 4 | sampled LFU | 16,799 / 0.21 | 23,201 / 0.17 | 0.52 | 0.66 | 0.63 | 0.20 | other |
+| conversation | 2% × 4 | sampled 2-hit | 0 / – | 10,059 / 0.02 | 0.85 | 0.80 | 0.81 | 1.00 | other |
+| conversation | 2% × 4 | A_none | 9 / 0.00 | 39,991 / 0.10 | 0.73 | 0.70 | 0.70 | 0.78 | other |
+| conversation | 2% × 4 | B | 30,596 / 0.24 | 9,404 / 0.17 | 0.31 | 0.63 | 0.56 | 0.06 | arrival placement |
+| conversation | 2% × 4 | C_lru | 614 / 0.01 | 39,386 / 0.09 | 0.73 | 0.70 | 0.70 | 0.68 | other |
+| conversation | 2% × 4 | C_union | 65 / 0.00 | 39,935 / 0.10 | 0.74 | 0.71 | 0.71 | 0.72 | other |
+| toolagent | 0.25% × 1 | sampled LRU | 942 / 0.18 | 39,058 / 0.32 | 0.51 | 0.48 | 0.49 | 0.84 | other |
+| toolagent | 0.25% × 1 | sampled LFU | 34,806 / 0.29 | 5,194 / 0.46 | 0.90 | 0.34 | 0.49 | 0.03 | other |
+| toolagent | 0.25% × 1 | sampled 2-hit | 1 / 0.50 | 20,386 / 0.56 | 0.51 | 0.50 | 0.50 | 0.92 | other |
+| toolagent | 0.25% × 1 | A_none | 31,548 / 0.27 | 8,452 / 0.42 | 0.83 | 0.45 | 0.51 | 0.05 | other |
+| toolagent | 0.25% × 1 | B | 31,396 / 0.27 | 8,604 / 0.46 | 0.76 | 0.37 | 0.42 | 0.06 | other |
+| toolagent | 0.25% × 1 | C_lru | 31,477 / 0.27 | 8,523 / 0.46 | 0.77 | 0.40 | 0.45 | 0.06 | other |
+| toolagent | 0.25% × 1 | C_union | 32,405 / 0.29 | 7,595 / 0.43 | 0.67 | 0.35 | 0.38 | 0.04 | other |
+| toolagent | 1% × 4 | sampled LRU | 0 / – | 40,000 / 0.20 | 0.59 | 0.56 | 0.56 | 0.99 | other |
+| toolagent | 1% × 4 | sampled LFU | 19,773 / 0.24 | 20,227 / 0.23 | 0.54 | 0.68 | 0.66 | 0.14 | other |
+| toolagent | 1% × 4 | sampled 2-hit | 0 / – | 10,087 / 0.13 | 0.74 | 0.68 | 0.69 | 0.99 | other |
+| toolagent | 1% × 4 | A_none | 849 / 0.02 | 39,151 / 0.18 | 0.70 | 0.68 | 0.68 | 0.55 | other |
+| toolagent | 1% × 4 | B | 1 / 0.00 | 39,999 / 0.17 | 0.62 | 0.62 | 0.62 | 0.82 | other |
+| toolagent | 1% × 4 | C_lru | 15,318 / 0.19 | 24,682 / 0.19 | 0.67 | 0.63 | 0.64 | 0.26 | other |
+| toolagent | 1% × 4 | C_union | 3,158 / 0.02 | 36,842 / 0.19 | 0.71 | 0.68 | 0.68 | 0.45 | other |
+| toolagent | 2% × 4 | sampled LRU | 0 / – | 40,000 / 0.10 | 0.69 | 0.61 | 0.62 | 1.00 | other |
+| toolagent | 2% × 4 | sampled LFU | 14,121 / 0.21 | 25,879 / 0.15 | 0.52 | 0.66 | 0.63 | 0.21 | other |
+| toolagent | 2% × 4 | sampled 2-hit | 0 / – | 8,794 / 0.00 | 0.87 | 0.84 | 0.84 | 1.00 | other |
+| toolagent | 2% × 4 | A_none | 17 / 0.00 | 39,983 / 0.08 | 0.74 | 0.71 | 0.72 | 0.78 | other |
+| toolagent | 2% × 4 | B | 23,980 / 0.23 | 16,020 / 0.20 | 0.36 | 0.58 | 0.54 | 0.10 | other |
+| toolagent | 2% × 4 | C_lru | 684 / 0.00 | 39,316 / 0.08 | 0.75 | 0.71 | 0.72 | 0.69 | other |
+| toolagent | 2% × 4 | C_union | 460 / 0.00 | 39,540 / 0.08 | 0.75 | 0.72 | 0.73 | 0.72 | other |
+
+- **"Arrival placement" fires for B at conversation 2% × 4 only** (both
+  targets: victim-vs-residents 0.31 / 0.39, residents-only 0.63 / 0.68). At
+  toolagent 2% × 4 B shows the same pattern on the arrival criterion (0.36 /
+  0.40) but its residents-only AUC (0.58 / 0.59) is below the 0.6 bar, so the
+  rule reads "other". B places the arrival at the bottom in 90–94% of its
+  first-round decisions; the victim-trained fit saw only L1 victims at their
+  eviction, never a resident, and orders an arriving ancestor below the
+  residents it would protect.
+- **At 0.25% × 1 the arrival is placed better than the residents are
+  ordered**: victim-vs-residents 0.67–0.83 for the learned arms against
+  residents-only 0.35–0.45. The on-policy inversion that Phase 0.97 reported
+  for this cell (whole-set AUC 0.24–0.27 at seed 0 for C_lfu / C_union;
+  here 0.39–0.51 over the arms and seeds evaluated) is among the residents,
+  and every arm except sampled LRU and 2-hit rejects 79–89% of arrivals
+  there.
+- A candidate not reused within H is available in 99–100% of the decisions
+  of every arm (Phase 0.97's "avoidable" share), so the regret shares above
+  are shares of avoidable removals.
+
+### 9.4 Reading against the pre-registration and limits
+
+- Orphaning: **mechanism-borne** in every cell, arm and target (Refuted:
+  that the learned scores add ancestor loss).
+- Dominant failure: **rejection of the arriving victim** for B at 2% × 4
+  and C_lru at 1% × 4 on both traces, and for every non-LRU arm at 0.25% × 1
+  where the sign-mixed components make the label a description of where
+  the loss moved rather than of a net cost; **resident eviction** for B /
+  next-use at 1% × 4 and C_lru / binary at 2% × 4; **not worse** than
+  sampled LRU for A_none and C_union at 1% × 4 and 2% × 4.
+- Ranking split: **arrival placement** for B at conversation 2% × 4; the
+  same pattern at toolagent 2% × 4 misses the residents-only bar by 0.01–0.02;
+  "other" everywhere else.
+- Limits: the decision loss covers 22–41% of the L2-hit shortfall of the
+  arms that fall behind sampled LRU, because the root-only attribution
+  charges one block per broken chain; the compulsory class also shifts
+  between arms (−0.4 to −0.9 points for the arms that fall behind) because
+  the first missing block of a first-occurrence request moves with the
+  prefix; five seeds, two real traces, three cells, H = 600 s, the sampled
+  width-16 mechanism; on-policy regret and ranking are on the reservoir of
+  40,000 window decisions per replay. Nothing here evaluates a new feature,
+  policy, or mechanism; the pre-registration does not let any reading
+  trigger one.
+- What the results leave: the arrival's own first-round decision is where
+  the non-LRU arms diverge from sampled LRU, and the one clear collapse (B)
+  is the rejection of arriving ancestors, an interaction between a score
+  that never saw residents and a mechanism that lets an ancestor leave while
+  its descendants stay. A per-block attribution (charging every absent
+  block beyond the prefix to its own last removal) would close the coverage
+  gap of §9.1 and needs one more counter and a rerun of this grid; it is
+  recorded in the plan as the candidate next measurement and is not
+  scheduled.

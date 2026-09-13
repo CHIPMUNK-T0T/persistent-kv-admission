@@ -1,0 +1,93 @@
+{
+  "git_head": "bafce0a3f8004df85b8aaace247697ed79534bd1",
+  "git_dirty": true,
+  "phase": "0.98",
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "generic_arms": [
+    "lru",
+    "lfu",
+    "lru_2hit"
+  ],
+  "learned_arms": [
+    "A_none",
+    "B",
+    "C_lru",
+    "C_union"
+  ],
+  "targets": [
+    "next_use",
+    "binary"
+  ],
+  "sample_width": 16,
+  "decision_cap": 40000,
+  "loss_floor": "lru_s",
+  "loss_categories": [
+    "rejected",
+    "evicted",
+    "compulsory",
+    "unexplained"
+  ],
+  "dominance_share": 0.5,
+  "orphan_mechanism_ratio": 1.2,
+  "orphan_learning_ratio": 2.0,
+  "victim_auc_ceiling": 0.5,
+  "residents_auc_floor": 0.6,
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "smoke": false,
+  "replays": 330,
+  "replay_seconds": 1345.5906052589417,
+  "phase097_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_population_replay_seeds.csv",
+  "phase097_matched": 330,
+  "phase097_missing": 0,
+  "phase097_mismatched": 0,
+  "unexplained_root_loss_tokens": 0,
+  "note": "Descriptive only. No fit, feature, policy or threshold in this phase changes anything the replay does: the three hooks are read-only, the arms are the Phase 0.97 arms rebuilt by the Phase 0.97 code at seed 0, and every replay is checked against decision_population_replay_seeds.csv before anything is written."
+}
