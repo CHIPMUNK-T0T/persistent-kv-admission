@@ -29,6 +29,20 @@ Outputs, written to --output-dir and copied to --paper-dir: the loss
 attribution per seed and aggregated with the pre-registered readings, the
 orphaning table, the decision-type regret and ranking split, the run
 configuration, and figure 17.
+
+Phase 0.98b addendum: the same grid is rerun with one more counter family and
+nothing else. Phase 0.98 charged one block per broken chain — the root — and
+covered only 22-41% of the L2-hit shortfall; the per-block charge sends every
+absent block beyond the L1 prefix to its own last removal, so the whole absent
+part of a request is attributed and the rejected / evicted split is taken on
+the full shortfall. Two checks decide whether the run is trustworthy and are
+run before anything is written: every pre-existing column of every seed row
+must reproduce the committed Phase 0.98 table (integers equal, floats within
+1e-9) on top of the Phase 0.97 reproduction, and the arm-independent parts of
+the decomposition (compulsory tokens, blocks beyond the prefix, tokens L1
+avoided) must be identical across the arms of a trace x cell x seed, which the
+run reports either way and never corrects. The per-block readings sit in the
+same CSVs next to the root-only ones, and figure 18 stacks them.
 """
 from __future__ import annotations
 
@@ -118,6 +132,18 @@ SMOKE_TARGETS = ("next_use",)
 # at the repository, not at the working directory, and never at --paper-dir: a
 # smoke run writing elsewhere is still checked against the published numbers.
 PHASE097_SEEDS = REPOSITORY / "results/paper/decision_population_replay_seeds.csv"
+# The committed Phase 0.98 per-seed loss table. Phase 0.98b adds columns to it
+# and must leave every column it already had untouched; anchored at the
+# repository for the same reason as the Phase 0.97 table above.
+PHASE098_SEEDS = REPOSITORY / "results/paper/decision_attribution_losses_seeds.csv"
+# Compared with a relative-or-absolute tolerance: the pre-existing columns are
+# integers or ratios of integers, so anything above this is a real change.
+COLUMN_TOLERANCE = 1e-9
+# Columns of the committed table that are not reproducible and are not checked.
+VOLATILE_COLUMNS = ("seconds",)
+# Per trace x cell x seed these must not depend on the arm: L1 is prefix-closed
+# and never consults L2, and a block L2 never held is compulsory for every arm.
+INVARIANT_COLUMNS = ("absent_compulsory_tokens", "beyond_prefix_tokens", "l1_avoided_tokens")
 
 # Pre-registered reading thresholds (docs/experiment-plan.md, Phase 0.98).
 DOMINANCE_SHARE = 0.5
@@ -130,12 +156,22 @@ RESIDENTS_AUC_FLOOR = 0.6
 TOKEN_COLUMNS = tuple(
     [f"root_{name}_tokens" for name in LOSS_CATEGORIES]
     + [f"unusable_after_{name}_tokens" for name in LOSS_CATEGORIES]
+    + [f"absent_{name}_tokens" for name in LOSS_CATEGORIES]
+    + [f"downstream_{name}_tokens" for name in LOSS_CATEGORIES]
     + ["downstream_absent_tokens", "l2_hit_tokens", "root_loss_tokens", "unusable_tokens",
-       "decision_loss_tokens"]
+       "decision_loss_tokens", "absent_loss_tokens", "perblock_decision_loss_tokens"]
+)
+# Block counts of the per-block charge. Aggregated over the seeds because the
+# tokens-per-absent-block reading divides by them; no difference to sampled LRU
+# is taken, since the reading is about the size of a block and not about an arm.
+BLOCK_COLUMNS = tuple(
+    [f"absent_{name}_blocks" for name in LOSS_CATEGORIES]
+    + [f"downstream_{name}_blocks" for name in LOSS_CATEGORIES]
 )
 LOSS_METRICS = tuple(
     list(TOKEN_COLUMNS)
     + [f"{column}_share" for column in TOKEN_COLUMNS]
+    + list(BLOCK_COLUMNS)
     + ["avoided_prefill_tokens", "l2_avoided_tokens", "extra_avoided_tokens",
        "extra_fraction_of_input", "unexplained_states", "seconds"]
 )
@@ -311,6 +347,103 @@ def check_reproduction(rows: list[dict], reference: dict[tuple, int]) -> tuple[i
     return matched, missing, mismatches
 
 
+def phase098_reference(path: Path) -> dict[tuple, dict[str, str]]:
+    """The committed Phase 0.98 seed rows, whole, keyed the same way."""
+    if not path.exists():
+        return {}
+    out: dict[tuple, dict[str, str]] = {}
+    with path.open(encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            key = (row["trace"], float(row["l1_fraction"]), float(row["l2_multiplier"]),
+                   row["arm"], row["target"], int(row["seed"]))
+            out[key] = row
+    return out
+
+
+def _same_value(mine, theirs: str) -> bool:
+    """Equal as the CSV holds them: exact as text, else within the tolerance.
+
+    The text comparison comes first so that labels, booleans and empty cells are
+    compared as themselves; only when it fails are both sides read as numbers,
+    which is where the integers and the ratios of integers are settled.
+    """
+    if str(mine) == theirs:
+        return True
+    left, right = _number(mine), _number(theirs)
+    if math.isnan(left) and math.isnan(right):
+        return True
+    if not (math.isfinite(left) and math.isfinite(right)):
+        return False
+    return abs(left - right) <= COLUMN_TOLERANCE * max(1.0, abs(left), abs(right))
+
+
+def check_phase098_columns(rows: list[dict],
+                           reference: dict[tuple, dict[str, str]]) -> tuple[int, int, list[str]]:
+    """Every column Phase 0.98 published must come back unchanged from this run.
+
+    The per-block counters are additions, so a pre-existing column that moved
+    means the replay itself moved and the phase is not the rerun it claims to
+    be. A column the committed table has and this run does not is a mismatch
+    too: dropping a column is as much a change as changing one.
+    """
+    matched = missing = 0
+    mismatches: list[str] = []
+    for row in rows:
+        key = (row["trace"], float(row["l1_fraction"]), float(row["l2_multiplier"]),
+               row["arm"], row["target"], int(row["seed"]))
+        expected = reference.get(key)
+        if expected is None:
+            missing += 1
+            continue
+        differing: list[str] = []
+        for column, theirs in expected.items():
+            if column in VOLATILE_COLUMNS:
+                continue
+            if column not in row:
+                differing.append(f"{column}: absent from this run")
+            elif not _same_value(row[column], theirs):
+                differing.append(f"{column}: {row[column]} != {theirs}")
+        if differing:
+            mismatches.append(
+                f"{row['trace']}/{row['cell']}/{row['arm']}/{row['target'] or '-'}/s{row['seed']}: "
+                + "; ".join(differing[:4])
+                + (f" (+{len(differing) - 4} more)" if len(differing) > 4 else "")
+            )
+        else:
+            matched += 1
+    return matched, missing, mismatches
+
+
+def check_compulsory_invariance(rows: list[dict]) -> tuple[bool, int, list[str]]:
+    """Are the arm-independent parts of the decomposition really arm-independent?
+
+    L1 is prefix-closed and never consults L2, and a block L2 never held is
+    compulsory whatever the arm decided, so within one trace x cell x seed the
+    tokens L1 avoided, the tokens beyond the prefix and the compulsory part of
+    the per-block charge should be one number shared by all arms. The
+    pre-registration says to report the answer either way and not to correct
+    it, so this counts the groups that vary and never raises.
+    """
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for row in rows:
+        groups[(row["trace"], row["l1_fraction"], row["l2_multiplier"], row["seed"])].append(row)
+    variant_groups = 0
+    lines: list[str] = []
+    for key, members in sorted(groups.items()):
+        varying = []
+        for column in INVARIANT_COLUMNS:
+            first = int(members[0][column])
+            if any(int(member[column]) != first for member in members):
+                low = min(int(member[column]) for member in members)
+                high = max(int(member[column]) for member in members)
+                varying.append(f"{column} in [{low}, {high}]")
+        if varying:
+            variant_groups += 1
+            lines.append(f"{key[0]}/l1={key[1]:g},l2x{key[2]:g}/s{key[3]} over "
+                         f"{len(members)} arms: " + "; ".join(varying))
+    return variant_groups == 0, variant_groups, lines
+
+
 # --- derivation ---------------------------------------------------------------
 
 
@@ -373,6 +506,12 @@ def attach_readings(losses: list[dict], orphaning: list[dict], decisions: list[d
     * ranking split — a victim-versus-resident AUC below 0.5 together with a
       residents-only AUC at or above 0.6 reads as a failure to place the
       arrival among the residents rather than to order the residents.
+
+    Phase 0.98b adds the same dominant-failure rule on the per-block charge,
+    next to the root-only one and never in place of it: `perblock_*` columns,
+    whether the two labels agree, the share of the per-block difference carried
+    by rejections, how much of the arm's L2-hit shortfall the per-block
+    decision loss covers, and the mean tokens per absent block by category.
     """
     cell_of = lambda row: (row["trace"], row["l1_fraction"], row["l2_multiplier"])
     orphan_by_arm = {cell_of(row) + (row["arm"], row["target"]): row for row in orphaning}
@@ -392,6 +531,38 @@ def attach_readings(losses: list[dict], orphaning: list[dict], decisions: list[d
         else:
             dominant = [name for name, value in parts.items() if value >= DOMINANCE_SHARE * total]
             entry["dominant_failure"] = dominant[0] if len(dominant) == 1 else "mixed"
+
+        perblock = {}
+        for name in DECISION_CATEGORIES:
+            perblock[name] = (_number(entry[f"diff_absent_{name}_tokens_mean"])
+                              + _number(entry[f"diff_unusable_after_{name}_tokens_mean"]))
+            entry[f"diff_{name}_perblock_loss_tokens_mean"] = perblock[name]
+        perblock_total = _number(entry["diff_perblock_decision_loss_tokens_mean"])
+        entry["diff_perblock_total_loss_tokens_mean"] = perblock_total
+        if not math.isfinite(perblock_total) or perblock_total <= 0:
+            entry["perblock_dominant_failure"] = (
+                "not_worse" if math.isfinite(perblock_total) else ""
+            )
+            entry["perblock_rejected_share"] = math.nan
+        else:
+            dominant = [name for name, value in perblock.items()
+                        if value >= DOMINANCE_SHARE * perblock_total]
+            entry["perblock_dominant_failure"] = dominant[0] if len(dominant) == 1 else "mixed"
+            entry["perblock_rejected_share"] = perblock["rejected"] / perblock_total
+        entry["dominant_agrees"] = bool(
+            entry["perblock_dominant_failure"] == entry["dominant_failure"]
+        )
+        # What the arm lost against sampled LRU is the L2 hits it did not get;
+        # the coverage says how much of that the charged decisions account for.
+        shortfall = -_number(entry["diff_l2_hit_tokens_mean"])
+        entry["perblock_shortfall_coverage"] = (
+            perblock_total / shortfall if shortfall > 0 else math.nan
+        )
+        for name in LOSS_CATEGORIES:
+            blocks = _number(entry[f"absent_{name}_blocks_mean"])
+            entry[f"tokens_per_absent_block_{name}"] = (
+                _number(entry[f"absent_{name}_tokens_mean"]) / blocks if blocks else math.nan
+            )
 
         key = cell_of(entry) + (entry["arm"], entry["target"])
         mine = orphan_by_arm.get(key)
@@ -445,6 +616,18 @@ FIGURE_STACK = (
 )
 FIGURE_ANNOTATION = "downstream_absent_tokens_share"
 FIGURE_TARGET = "next_use"
+# Figure 18, the Phase 0.98b counterpart: the same panels over the per-block
+# charge. There is no annotation and no leftover class, because every absent
+# block is now inside the stack; the two compulsory-and-unexplained classes of
+# the present-unusable part are left out because they are zero by construction
+# (nothing that L2 never held can be present in L2 and unusable).
+PERBLOCK_STACK = (
+    ("absent_rejected_tokens_share", "absent: rejected arrival", "tab:red"),
+    ("absent_evicted_tokens_share", "absent: evicted resident", "tab:orange"),
+    ("absent_compulsory_tokens_share", "absent: compulsory", "0.75"),
+    ("unusable_after_rejected_tokens_share", "present-unusable after rejection", "tab:purple"),
+    ("unusable_after_evicted_tokens_share", "present-unusable after eviction", "tab:pink"),
+)
 
 
 def figure_arms(rows: list[dict]) -> list[tuple[str, str]]:
@@ -455,11 +638,18 @@ def figure_arms(rows: list[dict]) -> list[tuple[str, str]]:
     return [item for item in order if item in present]
 
 
-def make_figure(paper_dir: Path, losses: list[dict]) -> None:
+def _stacked_figure(paper_dir: Path, losses: list[dict], stack, annotation: str | None,
+                    filename: str, suptitle: str) -> None:
+    """One panel per trace x cell, one stacked bar per arm, shares of the input.
+
+    Figures 17 and 18 are the same picture over two charges of the same
+    requests, so they are drawn by the same code and differ only in the stack
+    and in whether a leftover class is annotated above the bar.
+    """
     rows = [row for row in losses
             if row["target"] in ("", FIGURE_TARGET) and "synthetic" not in str(row["trace"])]
     if not rows:
-        print("  no real-trace rows: fig17 skipped", flush=True)
+        print(f"  no real-trace rows: {filename} skipped", flush=True)
         return
     traces = sorted({row["trace"] for row in rows})
     cells = sorted({(_number(row["l1_fraction"]), _number(row["l2_multiplier"])) for row in rows})
@@ -477,7 +667,7 @@ def make_figure(paper_dir: Path, losses: list[dict]) -> None:
         for column, cell in enumerate(cells):
             axis = axes[row_index][column]
             bottom = np.zeros(len(arms))
-            for field, label, color in FIGURE_STACK:
+            for field, label, color in stack:
                 values = np.nan_to_num(
                     np.array([share(name, cell, arm, target, field) for arm, target in arms]),
                     nan=0.0)
@@ -485,11 +675,13 @@ def make_figure(paper_dir: Path, losses: list[dict]) -> None:
                          label=label if (row_index == 0 and column == 0) else None)
                 bottom += values
             headroom = 1.22 * max(bottom.max(), 1e-9)
-            for position, (arm, target) in zip(positions, arms):
-                absent = share(name, cell, arm, target, FIGURE_ANNOTATION)
-                if math.isfinite(absent):
-                    axis.text(position, bottom[position] + 0.02 * headroom, f"{absent:.2f}",
-                              ha="center", va="bottom", fontsize=5.5, color="0.35", rotation=90)
+            if annotation is not None:
+                for position, (arm, target) in zip(positions, arms):
+                    absent = share(name, cell, arm, target, annotation)
+                    if math.isfinite(absent):
+                        axis.text(position, bottom[position] + 0.02 * headroom, f"{absent:.2f}",
+                                  ha="center", va="bottom", fontsize=5.5, color="0.35",
+                                  rotation=90)
             axis.set(xticks=positions, xticklabels=[arm for arm, _target in arms],
                      ylim=(0.0, headroom),
                      title=f"{name} — {100 * cell[0]:g}% x{cell[1]:g}",
@@ -498,12 +690,43 @@ def make_figure(paper_dir: Path, losses: list[dict]) -> None:
             axis.grid(True, axis="y", alpha=0.25)
     figure.legend(loc="lower center", ncol=2 if len(cells) < 2 else 3, fontsize=6.5,
                   frameon=False)
-    figure.suptitle(f"Where the reuse was lost ({FIGURE_TARGET} target, mean over seeds)\n"
-                    "above each bar: unattributed downstream-absent share",
-                    fontsize=9)
+    figure.suptitle(suptitle, fontsize=9)
     figure.tight_layout(rect=(0.0, 0.13, 1.0, 0.93))
-    figure.savefig(paper_dir / "fig17_decision_attribution.png", dpi=170)
+    figure.savefig(paper_dir / filename, dpi=170)
     plt.close(figure)
+
+
+def make_figure(paper_dir: Path, losses: list[dict]) -> None:
+    _stacked_figure(
+        paper_dir, losses, FIGURE_STACK, FIGURE_ANNOTATION,
+        "fig17_decision_attribution.png",
+        f"Where the reuse was lost ({FIGURE_TARGET} target, mean over seeds)\n"
+        "above each bar: unattributed downstream-absent share",
+    )
+
+
+def make_perblock_figure(paper_dir: Path, losses: list[dict]) -> None:
+    """Figure 18: the same panels with every absent block charged to its own removal."""
+    _stacked_figure(
+        paper_dir, losses, PERBLOCK_STACK, None,
+        "fig18_perblock_attribution.png",
+        f"Where the reuse was lost, block by block ({FIGURE_TARGET} target, mean over seeds)\n"
+        "every block beyond the L1 prefix that L2 did not hold, charged to its last removal",
+    )
+
+
+def print_readings(losses: list[dict]) -> None:
+    """The two dominant-failure labels side by side, so the log stands alone."""
+    print("  readings per arm (difference to sampled LRU, mean over seeds):", flush=True)
+    print(f"    {'trace':20s} {'cell':22s} {'arm':8s} {'target':8s} "
+          f"{'root-only':10s} {'per-block':10s} {'rej.share':>9s} {'coverage':>9s}", flush=True)
+    for entry in losses:
+        print(f"    {str(entry['trace'])[:20]:20s} {str(entry['cell'])[:22]:22s} "
+              f"{str(entry['arm'])[:8]:8s} {str(entry['target'] or '-')[:8]:8s} "
+              f"{str(entry['dominant_failure'] or '-'):10s} "
+              f"{str(entry['perblock_dominant_failure'] or '-'):10s} "
+              f"{_number(entry['perblock_rejected_share']):9.3f} "
+              f"{_number(entry['perblock_shortfall_coverage']):9.3f}", flush=True)
 
 
 # --- main ---------------------------------------------------------------------
@@ -529,8 +752,10 @@ def main() -> None:
     args.paper_dir.mkdir(parents=True, exist_ok=True)
     if args.figure_only:
         with (args.output_dir / "decision_attribution_losses.csv").open(encoding="utf-8") as handle:
-            make_figure(args.paper_dir, list(csv.DictReader(handle)))
-        print("fig17 redrawn", flush=True)
+            summary = list(csv.DictReader(handle))
+        make_figure(args.paper_dir, summary)
+        make_perblock_figure(args.paper_dir, summary)
+        print("fig17 and fig18 redrawn", flush=True)
         return
     if not args.traces:
         raise SystemExit("at least one trace file is required unless --figure-only is given")
@@ -652,7 +877,9 @@ def main() -> None:
     if mismatches:
         raise SystemExit("the replays did not reproduce Phase 0.97; nothing was written")
     unexplained = sum(int(row["root_unexplained_tokens"]) for row in loss_rows)
+    unexplained_absent = sum(int(row["absent_unexplained_tokens"]) for row in loss_rows)
     print(f"  unexplained root-loss tokens over the grid: {unexplained}", flush=True)
+    print(f"  unexplained per-block absent tokens over the grid: {unexplained_absent}", flush=True)
 
     sort_key = lambda row: (row["trace"], float(row["l1_fraction"]), float(row["l2_multiplier"]),
                             str(row["target"]), row["arm"], int(row["seed"]))
@@ -660,6 +887,23 @@ def main() -> None:
     loss_rows.sort(key=sort_key)
     orphan_rows.sort(key=sort_key)
     decision_rows.sort(key=lambda row: sort_key(row) + (row["label_target"],))
+
+    # Phase 0.98b must be the Phase 0.98 run with counters added, so every
+    # column that table already had has to come back unchanged.
+    p98_matched, p98_missing, p98_mismatches = check_phase098_columns(
+        loss_rows, phase098_reference(PHASE098_SEEDS))
+    print(f"  Phase 0.98 column reproduction: {p98_matched} matched, "
+          f"{p98_missing} not in the reference, {len(p98_mismatches)} mismatched", flush=True)
+    for line in p98_mismatches:
+        print(f"    MISMATCH {line}", flush=True)
+    if p98_mismatches:
+        raise SystemExit("the replays did not reproduce Phase 0.98; nothing was written")
+
+    invariant, variant_groups, variant_lines = check_compulsory_invariance(loss_rows)
+    print(f"  compulsory / prefix invariance across the arms: "
+          f"{'holds' if invariant else 'BROKEN'}, {variant_groups} varying groups", flush=True)
+    for line in variant_lines[:10]:
+        print(f"    VARIES {line}", flush=True)
 
     loss_summary = aggregate(loss_rows, IDENTITY, LOSS_METRICS + DIFF_METRICS,
                              carry=("requested_tokens", "l1_avoided_tokens"))
@@ -684,7 +928,7 @@ def main() -> None:
 
     config = {
         **git_head(),
-        "phase": "0.98",
+        "phase": "0.98b",
         "l1_policy": rdp.L1_POLICY, "hit_model": rdp.HIT_MODEL, "closure": rdp.CLOSURE,
         "cells": [list(cell) for cell in cells], "seeds": list(seeds),
         "generic_arms": list(generic), "learned_arms": list(learned), "targets": list(targets),
@@ -701,17 +945,31 @@ def main() -> None:
         "phase097_reference": str(PHASE097_SEEDS),
         "phase097_matched": matched, "phase097_missing": missing,
         "phase097_mismatched": len(mismatches),
+        "phase098_reference": str(PHASE098_SEEDS),
+        "phase098_matched": p98_matched, "phase098_missing": p98_missing,
+        "phase098_mismatched": len(p98_mismatches),
+        "column_tolerance": COLUMN_TOLERANCE,
+        "compulsory_arm_invariant": invariant,
+        "compulsory_variant_groups": variant_groups,
+        "invariant_columns": list(INVARIANT_COLUMNS),
         "unexplained_root_loss_tokens": unexplained,
+        "unexplained_absent_tokens": unexplained_absent,
         "note": "Descriptive only. No fit, feature, policy or threshold in this phase changes "
                 "anything the replay does: the three hooks are read-only, the arms are the "
                 "Phase 0.97 arms rebuilt by the Phase 0.97 code at seed 0, and every replay is "
-                "checked against decision_population_replay_seeds.csv before anything is written.",
+                "checked against decision_population_replay_seeds.csv before anything is written. "
+                "Phase 0.98b adds one read-only counter family to the same request hook - every "
+                "absent block beyond the L1 prefix charged to its own last removal, next to the "
+                "root-only charge, which the committed Phase 0.98 columns are checked to "
+                "reproduce exactly.",
     }
     text = json.dumps(config, indent=2, default=str) + "\n"
     (args.output_dir / "run_config.json").write_text(text, encoding="utf-8")
     (args.paper_dir / "decision_attribution_config.json").write_text(text, encoding="utf-8")
     rdp._write(args.output_dir / "decision_attribution_fits.csv", fit_rows)
     make_figure(args.paper_dir, loss_summary)
+    make_perblock_figure(args.paper_dir, loss_summary)
+    print_readings(loss_summary)
     print(f"done in {time.time()-clock:.0f}s", flush=True)
 
 

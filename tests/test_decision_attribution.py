@@ -158,6 +158,67 @@ class LossAttributionTests(unittest.TestCase):
         self.assertEqual(later.root_tokens["unexplained"], self.block)
         self.assertEqual(later.unexplained_states, {"int:7"})
 
+    def test_every_absent_block_is_charged_to_its_own_last_removal(self):
+        # The root int:4 was rejected and the downstream-absent int:6 was
+        # evicted, so the two charges differ: the root-only attribution names
+        # the rejection alone, the per-block one names both.
+        collector = self.collector()
+        collector.last_removal["int:4"] = "rejected"
+        collector.last_removal["int:6"] = "evicted"
+        self.one_request(collector, prefix=1, l2_hits=(1, 2), present=(1, 2, 4))
+        self.assertEqual(collector.root_tokens["rejected"], self.block)
+        self.assertEqual(collector.downstream_tokens["evicted"], self.block)
+        self.assertEqual(collector.downstream_blocks["evicted"], 1)
+        self.assertEqual(collector.downstream_tokens["rejected"], 0)
+        self.assertEqual(collector.absent_tokens["rejected"], self.block)
+        self.assertEqual(collector.absent_tokens["evicted"], self.block)
+        for name in LOSS_CATEGORIES:
+            self.assertEqual(collector.absent_tokens[name],
+                             collector.root_tokens[name] + collector.downstream_tokens[name], name)
+            self.assertEqual(collector.absent_blocks[name],
+                             collector.root_blocks[name] + collector.downstream_blocks[name], name)
+        self.assertEqual(sum(collector.absent_tokens.values()),
+                         sum(collector.root_tokens.values())
+                         + collector.downstream_absent_tokens)
+        # The present-unusable block keeps the root's decision under both charges.
+        self.assertEqual(collector.unusable_tokens["rejected"], self.block)
+        self.assertEqual(collector.unusable_tokens["evicted"], 0)
+
+    def test_a_downstream_block_at_its_first_occurrence_is_compulsory(self):
+        # int:2 was evicted and is the root; int:7 first occurs at this very
+        # request, so no decision could have kept it and the per-block charge
+        # says so instead of calling it unexplained.
+        collector = self.collector()
+        collector.last_removal["int:2"] = "evicted"
+        collector.on_request(("int:1", "int:2", "int:7"), 1, [], [], 1000.0, 1, True)
+        self.assertEqual(collector.absent_tokens["evicted"], self.block)
+        self.assertEqual(collector.absent_tokens["compulsory"], self.block)
+        self.assertEqual(collector.downstream_tokens["compulsory"], self.block)
+        self.assertEqual(collector.downstream_blocks["compulsory"], 1)
+        self.assertEqual(collector.root_tokens["compulsory"], 0)
+        self.assertEqual(collector.unexplained_states, set())
+
+    def test_the_loss_row_carries_the_per_block_columns(self):
+        collector = self.collector()
+        collector.last_removal["int:4"] = "rejected"
+        collector.last_removal["int:6"] = "evicted"
+        self.one_request(collector, prefix=1, l2_hits=(1, 2), present=(1, 2, 4))
+        row = collector.loss_row()
+        self.assertEqual(row["absent_rejected_tokens"], self.block)
+        self.assertEqual(row["absent_rejected_blocks"], 1)
+        self.assertEqual(row["downstream_evicted_tokens"], self.block)
+        self.assertEqual(row["downstream_evicted_blocks"], 1)
+        self.assertEqual(row["absent_loss_tokens"],
+                         row["root_loss_tokens"] + row["downstream_absent_tokens"])
+        self.assertEqual(row["perblock_decision_loss_tokens"],
+                         row["absent_rejected_tokens"] + row["absent_evicted_tokens"]
+                         + row["unusable_after_rejected_tokens"]
+                         + row["unusable_after_evicted_tokens"])
+        # Two absent blocks charged instead of one: the per-block loss is above
+        # the root-only loss by exactly the downstream block.
+        self.assertEqual(row["perblock_decision_loss_tokens"],
+                         row["decision_loss_tokens"] + self.block)
+
     def test_a_request_served_entirely_from_l2_attributes_nothing(self):
         collector = self.collector()
         collector.on_request(self.ids, 2, [2, 3, 4, 5], [2, 3, 4, 5], 2000.0, 2, True)
@@ -449,6 +510,35 @@ class ReplayIntegrationTests(unittest.TestCase):
                          row["root_rejected_tokens"] + row["root_evicted_tokens"]
                          + row["unusable_after_rejected_tokens"]
                          + row["unusable_after_evicted_tokens"])
+        self.assertEqual(row["absent_loss_tokens"],
+                         row["root_loss_tokens"] + row["downstream_absent_tokens"])
+        self.assertEqual(row["perblock_decision_loss_tokens"],
+                         row["absent_rejected_tokens"] + row["absent_evicted_tokens"]
+                         + row["unusable_after_rejected_tokens"]
+                         + row["unusable_after_evicted_tokens"])
+
+    def test_the_compulsory_charge_is_the_same_for_every_arm(self):
+        # A block beyond the L1 prefix at its first occurrence is in neither
+        # tier whatever L2 decided, and L1 never consults L2, so the compulsory
+        # part of the per-block charge and the blocks beyond the prefix are
+        # properties of the trace and the capacities alone. This is the
+        # invariance the Phase 0.98b run checks over the whole grid.
+        rows = []
+        for policy in ("lru", "lfu", "lru_2hit"):
+            collector = AttributionCollector(self.trace, bytes_per_token=1)
+            result = self._run(policy, l2_request_hook=collector.on_request,
+                               l2_removal_hook=collector)
+            collector.check_against(result)
+            rows.append(collector.loss_row())
+        for column in ("absent_compulsory_tokens", "absent_compulsory_blocks",
+                       "beyond_prefix_tokens", "beyond_prefix_blocks"):
+            values = [row[column] for row in rows]
+            self.assertEqual(values, [values[0]] * len(values), column)
+        self.assertGreater(rows[0]["absent_compulsory_tokens"], 0)
+        for row in rows:
+            self.assertEqual(row["absent_unexplained_tokens"], 0)
+            self.assertEqual(row["downstream_unexplained_tokens"], 0)
+            self.assertEqual(row["unexplained_states"], 0)
 
     def test_the_orphaning_walk_needs_the_store(self):
         collector = AttributionCollector(self.trace, bytes_per_token=1)

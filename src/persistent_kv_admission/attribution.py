@@ -17,6 +17,15 @@ Three measurements, all on the union closure under the tree hit rule:
   *downstream-absent* and are charged to nothing, because the root loss already
   explains why the request stopped. The four classes partition the blocks
   beyond the prefix exactly, which `LossPartitionError` enforces per request.
+  Phase 0.98b adds a second charge over the same requests, side by side with
+  the first: *every* absent block beyond the prefix — the root and each
+  downstream-absent block — is charged to its own last removal (`absent_*`),
+  so the whole absent part of a request is attributed instead of one block per
+  broken chain, and `absent_* = root_* + downstream_*` holds per category. The
+  present-unusable blocks keep the root's decision under both charges: no
+  decision removed them, they are in L2 now, and they become reachable again
+  exactly when the root does, so charging them to their own last removal would
+  name a decision that cost nothing while the hole above them stands.
 * **Orphaning.** When a resident is evicted, its L2-resident descendants become
   present-unusable at that instant. The descendants are walked from the evicted
   state downwards and the walk stops at a child L2 does not hold, because a
@@ -110,6 +119,13 @@ class AttributionCollector:
         self.unusable_blocks = {name: 0 for name in LOSS_CATEGORIES}
         self.downstream_absent_tokens = 0
         self.downstream_absent_blocks = 0
+        # --- Phase 0.98b: the same requests, charged block by block. Every
+        # absent block goes to its own last removal; `downstream_*` is the part
+        # of that charge the root-only attribution leaves unnamed.
+        self.absent_tokens = {name: 0 for name in LOSS_CATEGORIES}
+        self.absent_blocks = {name: 0 for name in LOSS_CATEGORIES}
+        self.downstream_tokens = {name: 0 for name in LOSS_CATEGORIES}
+        self.downstream_blocks = {name: 0 for name in LOSS_CATEGORIES}
         self.l2_hit_tokens = 0
         self.l2_hit_blocks = 0
         self.beyond_prefix_tokens = 0
@@ -178,9 +194,17 @@ class AttributionCollector:
                     f"every block beyond the prefix was an L2 hit but {hit_tokens} != {beyond}"
                 )
             return
+        # The per-block charge is read back out of the category dictionaries
+        # below, so a charge that landed outside `LOSS_CATEGORIES` would show up
+        # as a shortfall rather than as a silent miscount.
+        absent_before = {name: self.absent_tokens[name] for name in LOSS_CATEGORIES}
+        downstream_before = {name: self.downstream_tokens[name] for name in LOSS_CATEGORIES}
         category = self._category(ids[root], timestamp_ms)
-        self.root_tokens[category] += states[ids[root]].block_tokens
+        root_tokens = states[ids[root]].block_tokens
+        self.root_tokens[category] += root_tokens
         self.root_blocks[category] += 1
+        self.absent_tokens[category] += root_tokens
+        self.absent_blocks[category] += 1
         unusable_tokens = unusable_blocks = 0
         present_after = set()
         for index in present:
@@ -194,16 +218,35 @@ class AttributionCollector:
         for index in range(root + 1, len(ids)):
             if index in present_after:
                 continue
-            downstream_tokens += states[ids[index]].block_tokens
+            tokens = states[ids[index]].block_tokens
+            downstream_tokens += tokens
             downstream_blocks += 1
+            # A downstream-absent block left L2 by a decision of its own, which
+            # the root-only charge never names; this is the whole of Phase 0.98b.
+            name = self._category(ids[index], timestamp_ms)
+            self.downstream_tokens[name] += tokens
+            self.downstream_blocks[name] += 1
+            self.absent_tokens[name] += tokens
+            self.absent_blocks[name] += 1
         self.downstream_absent_tokens += downstream_tokens
         self.downstream_absent_blocks += downstream_blocks
-        total = hit_tokens + states[ids[root]].block_tokens + unusable_tokens + downstream_tokens
+        total = hit_tokens + root_tokens + unusable_tokens + downstream_tokens
         if total != beyond:
             raise LossPartitionError(
                 f"blocks beyond the prefix do not partition: {total} != {beyond} "
-                f"(hits {hit_tokens}, root {states[ids[root]].block_tokens}, "
+                f"(hits {hit_tokens}, root {root_tokens}, "
                 f"unusable {unusable_tokens}, downstream {downstream_tokens})"
+            )
+        charged_downstream = sum(self.downstream_tokens[name] - downstream_before[name]
+                                 for name in LOSS_CATEGORIES)
+        charged_absent = sum(self.absent_tokens[name] - absent_before[name]
+                             for name in LOSS_CATEGORIES)
+        expected_absent = root_tokens + downstream_tokens
+        if charged_downstream != downstream_tokens or charged_absent != expected_absent:
+            raise LossPartitionError(
+                "the per-block charge does not cover the absent blocks exactly: "
+                f"downstream {charged_downstream} != {downstream_tokens}, absent "
+                f"{charged_absent} != {expected_absent}"
             )
 
     def _category(self, state_id: str, timestamp_ms: float) -> str:
@@ -291,10 +334,20 @@ class AttributionCollector:
             row[f"root_{name}_blocks"] = self.root_blocks[name]
             row[f"unusable_after_{name}_tokens"] = self.unusable_tokens[name]
             row[f"unusable_after_{name}_blocks"] = self.unusable_blocks[name]
+            row[f"absent_{name}_tokens"] = self.absent_tokens[name]
+            row[f"absent_{name}_blocks"] = self.absent_blocks[name]
+            row[f"downstream_{name}_tokens"] = self.downstream_tokens[name]
+            row[f"downstream_{name}_blocks"] = self.downstream_blocks[name]
         row["root_loss_tokens"] = sum(self.root_tokens.values())
         row["unusable_tokens"] = sum(self.unusable_tokens.values())
         row["decision_loss_tokens"] = sum(
             self.root_tokens[name] + self.unusable_tokens[name] for name in DECISION_CATEGORIES
+        )
+        row["absent_loss_tokens"] = sum(self.absent_tokens.values())
+        # The Phase 0.98b counterpart of `decision_loss_tokens`: every absent
+        # block charged to a decision, plus the KV those decisions stranded.
+        row["perblock_decision_loss_tokens"] = sum(
+            self.absent_tokens[name] + self.unusable_tokens[name] for name in DECISION_CATEGORIES
         )
         return row
 
@@ -341,6 +394,27 @@ class AttributionCollector:
         for name, mine, theirs in checks:
             if mine != theirs:
                 raise LossPartitionError(f"{name}: attribution {mine} != replay {theirs}")
+        # Phase 0.98b: the per-block charge re-partitions exactly the blocks the
+        # root-only charge already counted, so the two must agree category by
+        # category and in total.
+        for name in LOSS_CATEGORIES:
+            for unit, absent, root, downstream in (
+                ("tokens", self.absent_tokens, self.root_tokens, self.downstream_tokens),
+                ("blocks", self.absent_blocks, self.root_blocks, self.downstream_blocks),
+            ):
+                if absent[name] != root[name] + downstream[name]:
+                    raise LossPartitionError(
+                        f"absent_{name}_{unit}: {absent[name]} != root {root[name]} + "
+                        f"downstream {downstream[name]}"
+                    )
+        absent_total = sum(self.absent_tokens.values())
+        expected_absent = sum(self.root_tokens.values()) + self.downstream_absent_tokens
+        if absent_total != expected_absent:
+            raise LossPartitionError(
+                f"absent_loss_tokens: {absent_total} != root loss "
+                f"{sum(self.root_tokens.values())} + downstream absent "
+                f"{self.downstream_absent_tokens}"
+            )
 
 
 # --- decision-type regret and the ranking split -------------------------------
