@@ -171,26 +171,46 @@ alone and headroom closure = (arm − sampled L2-LRU) / (heap offline −
 sampled L2-LRU), mean over seeds. Secondary are predictive metrics on the
 test split of each population (observed, victims, candidates): AUC for the
 binary target, Spearman for the graded targets, and inside each logged
-decision set the pairwise concordance between score and label and the share
-of decisions whose evicted state has the lowest label. The central figure
+decision set the within-decision AUC (binary) or Spearman (graded, decisions
+with ≥ 2 distinct labels) and the share of decisions whose evicted state
+has the lowest label. Two candidate evaluations are reported: off-policy
+(every model scored on the LRU / LFU behaviour logs, a common condition) and
+on-policy (each sampled arm's own decisions at seed 0, with the scores the
+store actually used, since a learned policy changes the retained set).
+Train-split candidate metrics and fit convergence are recorded so that a
+null result can be told from a fitting failure. The central figure
 follows one target from global → victim → candidate predictive quality to
 global-trained → victim-trained → candidate-trained replay utility on the
 same budget axis, against LRU, LFU, 2-hit, and the offline comparator.
 
-Interpretation, fixed before the run, per target on the two real traces:
+Interpretation, fixed before the run and amended on 2026-09-13 before any
+result was inspected (the amendment adds absolute-accuracy, convergence, and
+on-policy conditions after an external review of the design). R is the
+ranking metric on the matched candidate population (test-split decisions of
+the sampled L2-LRU behaviour log of the same cell): within-decision AUC
+(macro) for the binary target, mean within-decision Spearman over decisions
+with ≥ 2 distinct labels for the graded targets; R_high = 0.70 (AUC) /
+0.30 (Spearman). Closure differences are taken against A_none, the global
+fit under the same standardisation as B and C; the best generic sampled L2
+is the floor. Per target on the two real traces:
 
-- **Case A (mismatch was the problem):** candidate-trained closure exceeds
-  global-trained closure by ≥ 0.10 and is at least the best generic L2's
-  closure in ≥ 4 of the 6 real-trace cells.
-- **Case B (prediction improves, retention does not):** the candidate
-  population ranking metric improves by ≥ 0.05 over the global-trained model
-  while closure improves by < 0.05 in most cells.
-- **Case C (representation is the limit):** the candidate population ranking
-  metric improves by < 0.05 even when fitted on that population. Only this
-  case justifies adding non-history signal later; even then the claim is
-  limited to "the evaluated causal per-state history representation does not
-  provide sufficient ranking signal on the actual retention-decision
-  population", not "history is useless".
+- **Case A (mismatch was the problem):** candidate-trained closure ≥
+  A_none closure + 0.10 and ≥ the best generic L2's closure in ≥ 4 of the 6
+  cells.
+- **Case B (prediction adequate, retention not converted):** R(C) ≥ R_high,
+  or R(C) − R(A_none) ≥ 0.05, while closure improves by < 0.05 over A_none in
+  most cells.
+- **Case C (representation is the limit):** R(C) < R_high and
+  R(C) − R(A_none) < 0.05, the fit converged and its train-split R is also
+  < R_high (so it is not an optimisation or overfitting failure), and
+  closure(C) < best generic + 0.05. Only this case justifies adding
+  non-history signal later; even then the claim is limited to "the
+  evaluated causal per-state history representation does not provide
+  sufficient ranking signal on the actual retention-decision population",
+  not "history is useless".
+- Otherwise **Unresolved**. In every case the on-policy R of the learned arm
+  on the decisions it actually faced (seed 0) is reported next to the
+  off-policy R; a difference above 0.05 flags the off-policy diagnosis.
 
 Not done here: new temporal features, byte-clock or time studies, prefix
 dependency, new candidate-search algorithms, semantic or embedding features,
