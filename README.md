@@ -287,11 +287,22 @@ seeds, sampled LRU as the mechanism control.
   below the residents (victim-vs-residents AUC 0.31–0.40), the one cell pair
   where "arrival placement" fires. A_none and C_union are not worse than
   sampled LRU at 1% × 4 and 2% × 4.
-- **Limit:** the pre-registered root-only attribution charges one block per
-  broken chain and covers 22–41% of the L2-hit shortfall of the arms that
-  fall behind; the rest is downstream-absent. A per-block attribution is the
-  candidate next measurement, not scheduled. No new feature, policy or
-  mechanism follows from this phase.
+- **Limit, then closed (Phase 0.98b, findings §9.5):** the pre-registered
+  root-only attribution charges one block per broken chain and covers
+  22–41% of the L2-hit shortfall of the arms that fall behind. The
+  pre-registered per-block rerun (same grid, one more counter, Phase 0.97
+  and Phase 0.98 reproduced exactly) charges every absent block to its own
+  last removal and closes the shortfall to the token, because the
+  compulsory share is arm-invariant: 59.65% (conversation) and 40.80%
+  (toolagent) of window input is first-occurrence and reachable by no
+  decision. Under the full charge the root-only labels hold in 31 of 60
+  rows: every non-LRU arm at 0.25% × 1 and B / next-use at 1% × 4 are not
+  worse than sampled LRU (the root-only "rejected" / "evicted" named where
+  the loss moved, not a net cost), B's collapse at 2% × 4 and C_lru /
+  binary's losses stand as rejections and evictions respectively, and
+  sampled 2-hit at 2% × 4 loses 2.3–2.7 points to sampled LRU entirely
+  through its first-arrival rule, which the root-only charge did not show.
+  No new feature, policy or mechanism follows from this phase.
 
 ## Repository layout
 

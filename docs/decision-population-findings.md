@@ -554,5 +554,144 @@ arrival; victim rank fraction = the arrival's rank among the candidates
   its descendants stay. A per-block attribution (charging every absent
   block beyond the prefix to its own last removal) would close the coverage
   gap of §9.1 and needs one more counter and a rerun of this grid; it is
-  recorded in the plan as the candidate next measurement and is not
-  scheduled.
+  recorded in the plan as the candidate next measurement and was run
+  as Phase 0.98b (§9.5).
+
+### 9.5 Phase 0.98b — Per-block attribution: the whole shortfall, charged
+
+Pre-registered in `docs/experiment-plan.md` (Phase 0.98b, commit `4bd41be`)
+before the run; code `6db9fb3`; the Phase 0.98 grid rerun unchanged with one
+more counter family (330 replays in 1,355 s, 1,413 s in all). Every block
+beyond the L1 prefix that L2 does not hold — the root of each broken chain
+and every downstream-absent block behind it — is charged to its own last
+removal (`absent_{rejected, evicted, compulsory}`); present-unusable blocks
+keep the root's charge. Checks, all passed before anything was written: 330
+of 330 replays reproduce Phase 0.97; every pre-existing column of the 330
+committed Phase 0.98 seed rows reproduces exactly (integers equal, floats
+within 1e-9); unexplained absent tokens 0; and the arm-invariance the
+pre-registration expected holds in all 30 trace × cell × seed groups
+(`absent_compulsory`, `beyond_prefix`, `l1_avoided` identical across the 11
+arms). The per-block columns sit next to the root-only ones in the same
+CSVs; `fig18_perblock_attribution.png` stacks them.
+
+**The first-occurrence floor.** The compulsory share is the same in every
+cell and arm of a trace: 59.65% of window input on conversation, 40.80% on
+toolagent. These blocks are being seen for the first time and no L1 or L2
+decision can serve them. With L1 taking 4.5–8.1% (conversation) and
+35.4–38.8% (toolagent), the part of the window that any L2 decision can
+reach is 32.2–35.8% and 20.5–23.8% of input respectively.
+
+**Coverage is closed by construction.** Because the compulsory and L1 parts
+are arm-invariant, the per-block decision loss difference to sampled LRU
+equals the arm's L2-hit shortfall to the token: `perblock_shortfall_coverage`
+is 1.000 in all 15 rows where an arm is below sampled LRU in L2 hits. The
+22–41% of §9.1 was the root-only charge's share of that shortfall, not a
+missing part of the accounting.
+
+Per arm and cell, next-use target (binary in the CSV and summarised below);
+shares of window input in %, five-seed means, difference to sampled LRU per
+seed with CI95; "rejected share" = the rejection part of the per-block
+difference over the whole per-block difference (above 1 when the arm evicts
+fewer residents than sampled LRU, so the eviction part is negative).
+
+| trace | L1 × L2 | arm | L2 hits | absent: rejected / evicted / compulsory | unusable after rejection / eviction | per-block decision loss − sampled LRU | root-only label | per-block label | rejected share |
+|---|---|---|---|---|---|---|---|---|---|
+| conversation | 0.25% × 1 | sampled LRU | 0.12 | 0.66 / 34.99 / 59.65 | 0.00 / 0.06 | +0.00 ± 0.00 | not worse | not worse | – |
+| conversation | 0.25% × 1 | sampled LFU | 1.09 | 29.14 / 5.03 / 59.65 | 0.08 / 0.48 | −0.97 ± 0.07 | rejected | not worse | – |
+| conversation | 0.25% × 1 | sampled 2-hit | 0.40 | 16.06 / 19.21 / 59.65 | 0.00 / 0.15 | −0.28 ± 0.02 | rejected | not worse | – |
+| conversation | 0.25% × 1 | A_none | 1.52 | 25.86 / 7.78 / 59.65 | 0.12 / 0.54 | −1.40 ± 0.05 | rejected | not worse | – |
+| conversation | 0.25% × 1 | B | 1.38 | 23.73 / 10.38 / 59.65 | 0.01 / 0.32 | −1.27 ± 0.03 | rejected | not worse | – |
+| conversation | 0.25% × 1 | C_lru | 1.55 | 24.58 / 9.25 / 59.65 | 0.02 / 0.42 | −1.43 ± 0.05 | rejected | not worse | – |
+| conversation | 0.25% × 1 | C_union | 1.05 | 26.71 / 7.82 / 59.65 | 0.03 / 0.21 | −0.93 ± 0.01 | rejected | not worse | – |
+| conversation | 1% × 4 | sampled LRU | 13.21 | 0.00 / 19.39 / 59.65 | 0.00 / 2.28 | +0.00 ± 0.00 | not worse | not worse | – |
+| conversation | 1% × 4 | sampled LFU | 9.64 | 13.57 / 10.09 / 59.65 | 0.55 / 1.02 | +3.56 ± 0.24 | rejected | rejected | 3.96 |
+| conversation | 1% × 4 | sampled 2-hit | 15.01 | 15.71 / 3.00 / 59.65 | 0.00 / 1.16 | −1.80 ± 0.18 | not worse | not worse | – |
+| conversation | 1% × 4 | A_none | 15.78 | 0.03 / 17.44 / 59.65 | 0.01 / 1.61 | −2.58 ± 0.30 | not worse | not worse | – |
+| conversation | 1% × 4 | B | 14.60 | 0.00 / 17.46 / 59.65 | 0.00 / 2.81 | −1.40 ± 0.32 | evicted | not worse | – |
+| conversation | 1% × 4 | C_lru | 13.56 | 8.24 / 10.74 / 59.65 | 0.26 / 2.08 | −0.35 ± 0.31 | rejected | not worse | – |
+| conversation | 1% × 4 | C_union | 16.19 | 1.01 / 16.34 / 59.65 | 0.12 / 1.21 | −2.99 ± 0.25 | not worse | not worse | – |
+| conversation | 2% × 4 | sampled LRU | 19.70 | 0.00 / 10.77 / 59.65 | 0.00 / 1.76 | +0.00 ± 0.00 | not worse | not worse | – |
+| conversation | 2% × 4 | sampled LFU | 12.36 | 8.66 / 8.96 / 59.65 | 1.09 / 1.16 | +7.33 ± 0.08 | rejected | rejected | 1.33 |
+| conversation | 2% × 4 | sampled 2-hit | 17.01 | 14.47 / 0.44 / 59.65 | 0.00 / 0.31 | +2.68 ± 0.10 | not worse | rejected | 5.39 |
+| conversation | 2% × 4 | A_none | 21.81 | 0.00 / 9.02 / 59.65 | 0.00 / 1.40 | −2.11 ± 0.12 | not worse | not worse | – |
+| conversation | 2% × 4 | B | 6.28 | 18.63 / 3.54 / 59.65 | 3.02 / 0.76 | +13.42 ± 0.05 | rejected | rejected | 1.61 |
+| conversation | 2% × 4 | C_lru | 21.90 | 0.00 / 8.89 / 59.65 | 0.00 / 1.43 | −2.21 ± 0.15 | not worse | not worse | – |
+| conversation | 2% × 4 | C_union | 21.97 | 0.00 / 8.99 / 59.65 | 0.00 / 1.28 | −2.27 ± 0.14 | not worse | not worse | – |
+| toolagent | 0.25% × 1 | sampled LRU | 0.78 | 0.33 / 22.64 / 40.80 | 0.00 / 0.05 | +0.00 ± 0.00 | not worse | not worse | – |
+| toolagent | 0.25% × 1 | sampled LFU | 1.41 | 18.09 / 3.93 / 40.80 | 0.07 / 0.30 | −0.63 ± 0.01 | rejected | not worse | – |
+| toolagent | 0.25% × 1 | sampled 2-hit | 1.03 | 9.63 / 13.03 / 40.80 | 0.00 / 0.11 | −0.25 ± 0.02 | rejected | not worse | – |
+| toolagent | 0.25% × 1 | A_none | 1.71 | 15.80 / 5.82 / 40.80 | 0.08 / 0.39 | −0.93 ± 0.03 | rejected | not worse | – |
+| toolagent | 0.25% × 1 | B | 1.50 | 15.52 / 6.49 / 40.80 | 0.01 / 0.28 | −0.72 ± 0.02 | rejected | not worse | – |
+| toolagent | 0.25% × 1 | C_lru | 1.60 | 15.46 / 6.39 / 40.80 | 0.02 / 0.32 | −0.82 ± 0.02 | rejected | not worse | – |
+| toolagent | 0.25% × 1 | C_union | 1.42 | 16.78 / 5.42 / 40.80 | 0.03 / 0.15 | −0.64 ± 0.02 | rejected | not worse | – |
+| toolagent | 1% × 4 | sampled LRU | 9.56 | 0.00 / 11.17 / 40.80 | 0.00 / 1.64 | +0.00 ± 0.00 | not worse | not worse | – |
+| toolagent | 1% × 4 | sampled LFU | 6.69 | 7.70 / 6.81 / 40.80 | 0.41 / 0.77 | +2.88 ± 0.14 | rejected | rejected | 2.82 |
+| toolagent | 1% × 4 | sampled 2-hit | 10.89 | 9.37 / 1.34 / 40.80 | 0.00 / 0.77 | −1.33 ± 0.20 | not worse | not worse | – |
+| toolagent | 1% × 4 | A_none | 11.07 | 0.02 / 9.99 / 40.80 | 0.01 / 1.29 | −1.50 ± 0.22 | not worse | not worse | – |
+| toolagent | 1% × 4 | B | 10.37 | 0.00 / 10.03 / 40.80 | 0.00 / 1.98 | −0.80 ± 0.17 | evicted | not worse | – |
+| toolagent | 1% × 4 | C_lru | 9.59 | 4.37 / 6.84 / 40.80 | 0.16 / 1.41 | −0.02 ± 0.22 | rejected | not worse | – |
+| toolagent | 1% × 4 | C_union | 11.21 | 0.20 / 9.78 / 40.80 | 0.05 / 1.13 | −1.64 ± 0.18 | not worse | not worse | – |
+| toolagent | 2% × 4 | sampled LRU | 14.07 | 0.00 / 5.14 / 40.80 | 0.00 / 1.25 | +0.00 ± 0.00 | not worse | not worse | – |
+| toolagent | 2% × 4 | sampled LFU | 8.66 | 4.55 / 5.43 / 40.80 | 0.81 / 1.00 | +5.40 ± 0.06 | rejected | rejected | 0.99 |
+| toolagent | 2% × 4 | sampled 2-hit | 11.81 | 8.45 / 0.08 / 40.80 | 0.00 / 0.10 | +2.26 ± 0.10 | not worse | rejected | 3.75 |
+| toolagent | 2% × 4 | A_none | 15.48 | 0.00 / 4.03 / 40.80 | 0.00 / 0.93 | −1.41 ± 0.10 | not worse | not worse | – |
+| toolagent | 2% × 4 | B | 4.53 | 8.38 / 4.69 / 40.80 | 1.25 / 1.60 | +9.54 ± 0.11 | rejected | rejected | 1.01 |
+| toolagent | 2% × 4 | C_lru | 15.66 | 0.00 / 3.80 / 40.80 | 0.00 / 0.99 | −1.60 ± 0.06 | not worse | not worse | – |
+| toolagent | 2% × 4 | C_union | 15.76 | 0.00 / 3.79 / 40.80 | 0.00 / 0.89 | −1.70 ± 0.08 | not worse | not worse | – |
+
+- **Reading 1, label agreement: 31 of 60 non-LRU rows.** The 29
+  disagreements are of three kinds. (a) All 20 rows at 0.25% × 1 (every
+  non-LRU arm, both targets): root-only "rejected", per-block "not worse".
+  These arms hold 0.1–1.4 points more L2 hits than sampled LRU; they move
+  the absent blocks from evictions (3.9–19.2% against sampled LRU's
+  22.6–35.0%) to rejections (9.6–29.1% against 0.3–0.7%) and end with fewer
+  absent blocks in all. The root-only label named where the loss moved, as
+  §9.1 already noted; the per-block charge says the move was a net gain.
+  (b) Seven rows at 1% × 4 where the root-only charge read a loss and the
+  per-block charge reads none: B / next-use on both traces ("evicted" →
+  not worse; +1.40 and +0.80 points of L2 hits above sampled LRU), C_lru /
+  next-use on both traces ("rejected" → not worse; −0.35 ± 0.31 and
+  −0.02 ± 0.22, i.e. at sampled LRU within the CI), A_none / binary and
+  C_union / binary on toolagent ("evicted" → not worse; +1.47 and +1.19
+  points of hits); and one row the other way, B / binary on toolagent
+  (not worse → "rejected", +0.06 ± 0.20: at zero, the label is not stable).
+  (c) Sampled 2-hit at 2% × 4 on both traces: root-only "not worse",
+  per-block "rejected". Two-hit is 2.68 ± 0.10 and 2.26 ± 0.10 points below
+  sampled LRU in L2 hits there, entirely through the blocks it declined on
+  first arrival (absent-rejected 14.5% and 8.5% against 0 for sampled LRU;
+  absent-evicted 0.44% and 0.08% against 10.8% and 5.1%). The root-only
+  charge read it as not worse (−0.64, −0.52) because the compulsory root
+  moved with the prefix; the per-block charge is not affected by that.
+- **Reading 2, the named arms.** B at 2% × 4 keeps "rejected" on both traces
+  and both targets: per-block difference +13.42 ± 0.05 / +10.82 ± 0.08
+  (conversation, next-use / binary) and +9.54 ± 0.11 / +8.97 ± 0.09
+  (toolagent), rejected share 0.97–1.76. C_lru / binary at 1% × 4 keeps
+  "rejected" (+1.92 ± 0.22 and +1.95 ± 0.17, rejected share 5.2 and 2.7:
+  it also evicts fewer residents than sampled LRU). C_lru / binary at 2% × 4
+  keeps "evicted" (+0.47 ± 0.14 and +0.56 ± 0.03, rejected share 0.26 and
+  0.08). Replaced: B / next-use at 1% × 4 is not worse than sampled LRU on
+  either trace (the Phase 0.98 "evicted" was the present-unusable after its
+  evictions, 2.8 and 2.0 points, set against fewer absent blocks), and
+  C_lru / next-use at 1% × 4 is at sampled LRU rather than "rejected" (the
+  binary rows of C_lru keep it).
+- **Reading 3.** Tokens per absent block: evicted 508–512, compulsory
+  473–494, rejected 297–512 (block size 512; rejected blocks include the
+  short leaf blocks of the chains L1 evicted first).
+- The rejected share is above 1 in most rows that read "rejected" (sampled
+  LFU 1.3–4.0, sampled 2-hit 3.7–5.4, B 1.0–1.8 at 2% × 4, C_lru / binary
+  2.7–5.2 at 1% × 4): these arms evict fewer residents than sampled LRU, so
+  their entire shortfall, and more, is in the arrivals they declined.
+
+What changes against §9.4: the "rejected" reading at 0.25% × 1 and the
+"evicted" reading for B / next-use at 1% × 4 do not survive the full charge;
+no learned arm is worse than sampled LRU at 0.25% × 1, and at 1% × 4 only
+C_lru / binary is (through rejections). The B collapse at 2% × 4 (rejection
+of arriving ancestors) and the C_lru / binary readings stand. New: sampled
+2-hit loses 2.3–2.7 points to sampled LRU at 2% × 4 entirely through its
+first-arrival rule, which the root-only charge did not show. The
+first-occurrence floor (59.65% / 40.80% of window input) bounds what any
+L2 decision can reach at 32–36% (conversation) and 20–24% (toolagent) of
+window input after L1. Limits as in §9.4 (five seeds, two real traces, three
+cells, H = 600 s, the width-16 sampled mechanism). Nothing here evaluates a
+new feature, policy, or mechanism, and the pre-registration lets no reading
+trigger one.

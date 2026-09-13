@@ -89,6 +89,8 @@ are not tracked.
 - `decision_attribution_decisions.csv`: window decisions split into rejections and resident evictions with reuse-within-H and avoidable shares; victim-vs-residents pairwise AUC / Spearman, residents-only and whole-set within-decision metrics, victim rank fraction; binary and next-use labels.
 - `decision_attribution_config.json`: grid, arms, seeds, thresholds, git HEAD.
 - `fig17_decision_attribution.png`: stacked attributed-loss classes per arm and cell (next-use target), downstream-absent share annotated.
+- Phase 0.98b (same script, rerun; `phase = "0.98b"` in the config): the losses CSVs also carry the per-block charge — `absent_{rejected,evicted,compulsory,unexplained}_tokens/_blocks` (every block beyond the L1 prefix that L2 does not hold, charged to its own last removal), `downstream_*` (the part of it the root-only charge leaves unnamed), `perblock_decision_loss_tokens`, their shares and differences to sampled LRU, and the readings `perblock_dominant_failure`, `dominant_agrees`, `perblock_rejected_share`, `perblock_shortfall_coverage`, `tokens_per_absent_block_*`. The config records the Phase 0.98 column reproduction (`phase098_*`) and the arm-invariance check (`compulsory_arm_invariant`).
+- `fig18_perblock_attribution.png`: the per-block charge stacked per arm and cell (next-use target); no leftover class.
 
 The full event logs and raw replay rows are written to `results/two_tier/`
 and are not tracked.

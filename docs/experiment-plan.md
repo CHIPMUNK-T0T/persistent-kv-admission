@@ -315,7 +315,7 @@ per-block attribution that charges every absent block beyond the prefix to
 its own last removal (one more counter, one rerun of this grid). No new
 feature, policy or mechanism follows from this phase.
 
-### Phase 0.98b — Per-block attribution (pre-registered 2026-09-13, before the run; diagnostic, no new policy)
+### Phase 0.98b — Per-block attribution (done 2026-09-13; diagnostic, no new policy)
 
 Question, fixed before the run: does the root-only dominant-failure label of
 Phase 0.98 hold when every absent block beyond the L1 prefix is charged to its
@@ -375,6 +375,27 @@ otherwise nothing is written), `decision_attribution_config.json` with
 attributed classes, downstream no longer separate). Findings appended to
 `docs/decision-population-findings.md` §9.5. No threshold in this phase
 triggers a new feature, policy or mechanism.
+
+**Outcome (pre-registration `4bd41be`, code `6db9fb3`, results in
+`results/paper/decision_attribution_*`, findings §9.5).** 330 of 330 replays
+reproduce Phase 0.97; every pre-existing Phase 0.98 column reproduces
+exactly; unexplained 0; the arm-invariance holds in all 30 groups, so the
+per-block decision loss equals the L2-hit shortfall to the token (coverage
+1.000 in the 15 rows where an arm is below sampled LRU). Reading 1: the
+per-block label agrees with the root-only label in 31 of 60 rows; the 29
+disagreements are the 20 rows at 0.25% × 1 (every non-LRU arm: "rejected" →
+not worse, they hold more L2 hits than sampled LRU), seven rows at 1% × 4
+where a root-only loss is no loss under the full charge (B / next-use on
+both traces, C_lru / next-use on both, A_none and C_union / binary on
+toolagent) plus B / binary on toolagent at zero, and sampled 2-hit at 2% × 4
+on both traces (not worse → "rejected": 2.3–2.7 points below sampled LRU,
+all in first-arrival rejections). Reading 2: B at 2% × 4 keeps "rejected"
+(rejected share 0.97–1.76), C_lru / binary keeps "rejected" at 1% × 4 and
+"evicted" at 2% × 4; B / next-use at 1% × 4 and C_lru / next-use at 1% × 4
+are replaced by "not worse". The compulsory share is the first-occurrence
+floor of the window, 59.65% (conversation) and 40.80% (toolagent) of input,
+identical across cells and arms. No new feature, policy or mechanism
+follows from this phase.
 
 ## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 

@@ -1,7 +1,7 @@
 {
-  "git_head": "bafce0a3f8004df85b8aaace247697ed79534bd1",
+  "git_head": "6db9fb3557388f9a1b647ac8b2da904492e76d91",
   "git_dirty": true,
-  "phase": "0.98",
+  "phase": "0.98b",
   "l1_policy": "lru",
   "hit_model": "tree",
   "closure": "union",
@@ -83,11 +83,24 @@
   },
   "smoke": false,
   "replays": 330,
-  "replay_seconds": 1345.5906052589417,
+  "replay_seconds": 1355.1163284778595,
   "phase097_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_population_replay_seeds.csv",
   "phase097_matched": 330,
   "phase097_missing": 0,
   "phase097_mismatched": 0,
+  "phase098_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_attribution_losses_seeds.csv",
+  "phase098_matched": 330,
+  "phase098_missing": 0,
+  "phase098_mismatched": 0,
+  "column_tolerance": 1e-09,
+  "compulsory_arm_invariant": true,
+  "compulsory_variant_groups": 0,
+  "invariant_columns": [
+    "absent_compulsory_tokens",
+    "beyond_prefix_tokens",
+    "l1_avoided_tokens"
+  ],
   "unexplained_root_loss_tokens": 0,
-  "note": "Descriptive only. No fit, feature, policy or threshold in this phase changes anything the replay does: the three hooks are read-only, the arms are the Phase 0.97 arms rebuilt by the Phase 0.97 code at seed 0, and every replay is checked against decision_population_replay_seeds.csv before anything is written."
+  "unexplained_absent_tokens": 0,
+  "note": "Descriptive only. No fit, feature, policy or threshold in this phase changes anything the replay does: the three hooks are read-only, the arms are the Phase 0.97 arms rebuilt by the Phase 0.97 code at seed 0, and every replay is checked against decision_population_replay_seeds.csv before anything is written. Phase 0.98b adds one read-only counter family to the same request hook - every absent block beyond the L1 prefix charged to its own last removal, next to the root-only charge, which the committed Phase 0.98 columns are checked to reproduce exactly."
 }
