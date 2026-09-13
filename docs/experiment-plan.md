@@ -229,9 +229,16 @@ established. Verdict: the primary question is refuted, the B / C diagnosis is
 unresolved between the two decision populations; no non-history signal, new
 heuristic or new policy follows from this phase. Best learned L2 closes
 0.13–0.27 of the headroom, at parity with the best generic heap policy
-(−0.8 to +0.7 input-token points). Open design question, not scheduled: on
-which decision population a retention ranker must be judged, given that the
-learned policy's own retained set is the population that decides utility.
+(−0.8 to +0.7 input-token points). The refuted statement is the pre-registered one (same features and model,
+training set replaced by the LRU / LFU behaviour logs); mismatch with the
+learned policy's own decisions is untreated. Candidate next step, not
+scheduled: on the few cells where the learned or victim-trained L2 loses
+most, separate rejections of the arriving victim from evictions of
+residents, split the ranking evaluation into victim-versus-resident and
+resident-versus-resident, and map each evicted state to its later reuse and
+to present-but-unusable KV (`l2_present_unusable_tokens`, zero for the heap
+policies, 0.05–3.9% of input under the sampled mechanism). No new features
+or policies before that diagnostic.
 
 ## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 

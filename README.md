@@ -226,13 +226,17 @@ L1 alone, share of evaluation-window input tokens, L1 = LRU:
 | 1%, 4 × | 16.2 / 16.1 (2-hit) / 34.4 | 11.3 / 11.7 (2-hit) / 22.4 |
 | 2%, 4 × | 22.3 / 21.6 (LRU) / 32.2 | 15.8 / 15.3 (LRU) / 20.4 |
 
-- **Refuted:** that the training-population mismatch was what kept the
-  history representation from improving retention (pre-registered Case A).
-  No candidate-trained ranker reaches closure(A) + 0.10 together with the
-  best generic sampled arm in more than 1 of 6 cells, for any target. The
-  best learned L2 on any population closes 0.13–0.27 of the headroom, leaves
-  73–87% of it in every real cell, and is within −0.8 to +0.7 input-token
-  points of the best generic heap policy. The victim-trained ranker
+- **Refuted:** that, with the same features and model, training on the
+  decision sets that sampled L2-LRU / L2-LFU generate converts the history
+  representation's predictive quality into retention (pre-registered Case
+  A). No candidate-trained ranker reaches closure(A) + 0.10 together with
+  the best generic sampled arm in more than 1 of 6 cells, for any target.
+  This does not refute population mismatch in general: the mismatch with
+  the decisions the learned policy creates for itself is untreated. The
+  best learned L2 on any population closes 0.13–0.27 of the headroom,
+  leaves 73–87% of it in every real cell, and is within −0.8 to +0.7
+  input-token points of the best generic heap policy (above it in five
+  cells, two of them inside the seed CI). The victim-trained ranker
   collapses at L1 = 2% (closure −0.27 to −1.87).
 - **Confirmed, with a flag:** off-policy, on the LRU behaviour log, the
   global and the LRU-log-trained rankers clear the pre-registered accuracy
@@ -246,9 +250,15 @@ L1 alone, share of evaluation-window input tokens, L1 = LRU:
 - **Unresolved:** whether the limit is "prediction adequate but not
   converted" (Case B, met by its letter) or "representation insufficient"
   (Case C, not established): the two decision populations give opposite
-  answers, and the on-policy one determines utility. Per the
-  pre-registration this does not license non-history signal, new heuristics,
-  or a new policy.
+  answers, a policy's own decisions differ in difficulty from policy to
+  policy, and a whole-set ranking metric does not weight the one state
+  actually dropped. Per the pre-registration this does not license
+  non-history signal, new heuristics, or a new policy. One recorded lead:
+  under the sampled mechanism every arm, generic or learned, leaves
+  0.05–3.9% of input tokens present in L2 but unusable for a missing
+  ancestor, a cost that was exactly zero for the heap policies of Phase
+  0.95; the victim-trained ranker is highest where it collapses. It is an
+  upper bound on recoverable reuse, not an estimate.
 
 ## Repository layout
 
