@@ -315,6 +315,67 @@ per-block attribution that charges every absent block beyond the prefix to
 its own last removal (one more counter, one rerun of this grid). No new
 feature, policy or mechanism follows from this phase.
 
+### Phase 0.98b — Per-block attribution (pre-registered 2026-09-13, before the run; diagnostic, no new policy)
+
+Question, fixed before the run: does the root-only dominant-failure label of
+Phase 0.98 hold when every absent block beyond the L1 prefix is charged to its
+own last removal, and how is the whole L2-hit shortfall of an arm split
+between rejections of the arriving victim and evictions of a resident? Phase
+0.98 charged one block per broken chain and covered 22–41% of the shortfall;
+this measurement charges all of them.
+
+Fixed: everything of Phase 0.98 (grid, arms, targets, seeds, fits, hooks,
+readings, thresholds), which is rerun unchanged with one more counter family.
+Nothing is fitted, no feature, policy, mechanism or threshold is added.
+
+Measured, per trace × cell × arm × seed, in the same request hook: for every
+measured request, every block beyond the L1 prefix that L2 does not hold (the
+root block and the downstream-absent blocks) is charged to its own last
+removal record — `absent_{rejected, evicted, compulsory, unexplained}` tokens
+and blocks. The present-unusable blocks keep the Phase 0.98 charge (the root's
+decision). Identities asserted per replay: `absent_* = root_* + downstream_*`
+per category, `sum(absent_*) = root_loss + downstream_absent`, and the Phase
+0.98 partition. The per-block decision loss is
+`absent_rejected + absent_evicted + unusable_after_rejected +
+unusable_after_evicted`; its difference to sampled LRU of the same cell and
+seed, and the per-block dominant-failure label by the Phase 0.98 ≥ 50% rule on
+that difference, are added next to the root-only columns.
+
+Expected by construction, checked in the run and reported either way: L1 is
+prefix-closed and independent of L2, so `beyond_prefix`, `l1_avoided` and
+`root_compulsory + downstream_compulsory` should be identical across the 11
+arms of each trace × cell × seed (Phase 0.98 already shows `beyond_prefix` and
+`l1_avoided` identical, and `unusable_after_compulsory` = 0). If that holds,
+the per-block decision loss difference to sampled LRU equals the L2-hit
+shortfall to the token (unexplained is 0), the coverage of Phase 0.98 §9.1 is
+closed by construction, and the informative output is the rejected / evicted
+split of the full shortfall. If it does not hold, the discrepancy is reported
+as a finding about the mechanism and not corrected.
+
+Reading, fixed before the run, per arm × target × cell on the two real traces,
+against sampled LRU in the same cell and seed:
+
+1. Per-block dominant failure by the Phase 0.98 rule ("rejected", "evicted",
+   "mixed", "not_worse"), and whether it agrees with the root-only label of
+   the same row. Reported as the count of agreeing rows out of the 60 non-LRU
+   readings; every disagreement listed.
+2. For the arms that Phase 0.98 named ("rejected" for B at 2% × 4 and C_lru at
+   1% × 4; "evicted" for B / next-use at 1% × 4 and C_lru / binary at 2% × 4):
+   the share of the per-block decision-loss difference carried by rejections.
+   ≥ 0.5 keeps the Phase 0.98 statement for that arm; < 0.5 replaces it with
+   the per-block label in the findings.
+3. Tokens per absent block by category (absent tokens / absent blocks), for
+   the record.
+
+Outputs: the same four CSVs with the new columns added (the pre-existing
+columns must reproduce the committed Phase 0.98 values exactly — integers
+equal, floats within 1e-9 — and every replay must again reproduce Phase 0.97;
+otherwise nothing is written), `decision_attribution_config.json` with
+`phase = "0.98b"`, and `fig18_perblock_attribution.png` (stack of the five
+attributed classes, downstream no longer separate). Findings appended to
+`docs/decision-population-findings.md` §9.5. No threshold in this phase
+triggers a new feature, policy or mechanism.
+
 ## Phase 1 — Policy simulator (planned; contents depend on the user's decision after Phase 0.97)
 
 Policies to compare under the corrected objective:
