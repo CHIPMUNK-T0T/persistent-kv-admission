@@ -60,6 +60,7 @@ L2_POLICIES = ("lru", "lfu", "lru_2hit", "offline_next_use")
 # same for every scored arm and only the scoring function differs.
 L2_SCORED_POLICIES = ("learned",)
 L2_EVICTIONS = ("heap", "sampled")
+ARRIVAL_PROTECTIONS = ("none", "direct_child", "all")
 HIT_MODELS = ("tree", "independent")
 CLOSURES = ("union", "standalone")
 
@@ -88,6 +89,12 @@ L2RequestHook = Callable[[tuple[str, ...], int, list[int], list[int], float, int
 # that removed the state, and -1 where no decision set was scored.
 L2RemovalHook = Callable[[str, str, float, int, int], None]
 L2_REMOVAL_KINDS = ("rejected", "evicted", "promoted")
+
+# Phase 1 intervention diagnostics. The event is one of
+# protected_offer, protected_overflow_offer, first_round_override, or
+# oversized_ineligible, followed by the offer timestamp and group index.
+# The hook only observes the eligibility intervention.
+L2ProtectionHook = Callable[[str, float, int], None]
 
 # Tie-break between two L2 blocks with the same next use under the offline
 # comparator. "prefix_first" (default, the published setting) keeps the longer
@@ -275,6 +282,8 @@ class _VictimStore:
         frequency: dict[str, int] | None = None,
         last_group: dict[str, int] | None = None,
         removal_hook: L2RemovalHook | None = None,
+        arrival_protection: str = "none",
+        protection_hook: L2ProtectionHook | None = None,
     ) -> None:
         if eviction not in L2_EVICTIONS:
             raise ValueError(f"unknown L2 eviction mechanism {eviction!r}")
@@ -285,6 +294,12 @@ class _VictimStore:
             raise ValueError(f"a scored L2 store needs a scored policy name, got {policy!r}")
         if scorer is not None and eviction != "sampled":
             raise ValueError("an L2 scorer needs sampled eviction: heap keys would be stale")
+        if arrival_protection not in ARRIVAL_PROTECTIONS:
+            raise ValueError(f"unknown arrival protection {arrival_protection!r}")
+        if arrival_protection != "none" and eviction != "sampled":
+            raise ValueError("arrival protection needs sampled L2 eviction")
+        if arrival_protection != "none" and sample_width <= 0:
+            raise ValueError("arrival protection needs a positive sample width")
         if eviction == "sampled":
             if policy == "offline_next_use":
                 raise ValueError("the offline L2 comparator runs on the heap path only")
@@ -314,6 +329,8 @@ class _VictimStore:
         self.scorer = scorer
         self.decision_hook = decision_hook
         self.removal_hook = removal_hook
+        self.arrival_protection = arrival_protection
+        self.protection_hook = protection_hook
         self.frequency = frequency
         self.last_group = last_group
         self.decisions = 0
@@ -397,28 +414,92 @@ class _VictimStore:
         return True
 
     def _admit_sampled(self, arriving: str, group_index: int, timestamp_ms: float) -> bool:
+        # Snapshot the Phase 1 predicate before any eviction round. Although
+        # admit has appended the arrival, the residency of all direct children
+        # is still exactly the residency at offer start. Set iteration cannot
+        # reach sampling or tie-breaking; this is only an order-free boolean.
+        feasible = self.state_bytes(arriving) <= self.capacity_bytes
+        if self.arrival_protection != "none" and not feasible:
+            protected = False
+            if self.protection_hook is not None:
+                self.protection_hook("oversized_ineligible", timestamp_ms, group_index)
+        elif self.arrival_protection == "all":
+            protected = True
+        elif self.arrival_protection == "direct_child":
+            protected = any(
+                child in self.cached for child in self.trace.children.get(arriving, ())
+            )
+        else:
+            protected = False
+        if protected and self.protection_hook is not None:
+            self.protection_hook("protected_offer", timestamp_ms, group_index)
+
+        protected_overflow_recorded = False
         first_round = True
         while self.current_bytes > self.capacity_bytes and self.cached:
-            # `cached` is insertion-ordered and the arrival was just appended,
-            # so dropping the last key leaves exactly the other residents,
-            # in insertion order, without a per-element Python scan.
+            # cached is insertion-ordered and the arrival was just appended, so
+            # dropping the last key leaves exactly the other residents in the
+            # original insertion order.
             residents = list(self.cached)
             if first_round:
                 others = residents[:-1]
                 if len(others) > self.sample_width:
+                    # The protected arm deliberately preserves the original
+                    # first-round resident draw and its RNG consumption.
                     others = self.rng.sample(others, self.sample_width)
-                candidates = [arriving] + others
-                arriving_index = 0
+                if protected:
+                    if not others:
+                        raise AssertionError(
+                            "feasible protected arrival overflowed without an eligible resident"
+                        )
+                    full_candidates = [arriving] + others
+                    full_scores = [
+                        self._sampled_key(state_id, timestamp_ms)
+                        for state_id in full_candidates
+                    ]
+                    original_victim = min(
+                        range(len(full_candidates)), key=full_scores.__getitem__
+                    )
+                    if original_victim == 0 and self.protection_hook is not None:
+                        self.protection_hook(
+                            "first_round_override", timestamp_ms, group_index
+                        )
+                    candidates = others
+                    scores = full_scores[1:]
+                    arriving_index = -1
+                else:
+                    candidates = [arriving] + others
+                    scores = [
+                        self._sampled_key(state_id, timestamp_ms) for state_id in candidates
+                    ]
+                    arriving_index = 0
             else:
-                candidates = (
-                    residents
-                    if len(residents) <= self.sample_width
-                    else self.rng.sample(residents, self.sample_width)
-                )
+                if protected:
+                    eligible = [state_id for state_id in residents if state_id != arriving]
+                    if not eligible:
+                        raise AssertionError(
+                            "feasible protected arrival overflowed without an eligible resident"
+                        )
+                    candidates = (
+                        eligible
+                        if len(eligible) <= self.sample_width
+                        else self.rng.sample(eligible, self.sample_width)
+                    )
+                else:
+                    candidates = (
+                        residents
+                        if len(residents) <= self.sample_width
+                        else self.rng.sample(residents, self.sample_width)
+                    )
+                scores = [self._sampled_key(state_id, timestamp_ms) for state_id in candidates]
                 arriving_index = -1
-            scores = [self._sampled_key(state_id, timestamp_ms) for state_id in candidates]
-            # First minimum in draw order, which is what min(candidates, key=...)
-            # would pick; kept explicit so the hook sees the same scores.
+            if protected and not protected_overflow_recorded:
+                protected_overflow_recorded = True
+                if self.protection_hook is not None:
+                    self.protection_hook(
+                        "protected_overflow_offer", timestamp_ms, group_index
+                    )
+            # First minimum in draw order, unchanged within the eligible set.
             victim_index = min(range(len(candidates)), key=scores.__getitem__)
             self.decisions += 1
             if self.decision_hook is not None:
@@ -426,17 +507,15 @@ class _VictimStore:
                     candidates, scores, victim_index, timestamp_ms, group_index, arriving_index
                 )
             victim = candidates[victim_index]
-            # Declining the arrival in its own first round is a rejection, not
-            # an eviction; the test is made before the removal so that the
-            # removal hook can name the kind, and is otherwise unchanged.
+            # Active protection never exposes the arrival as an eligible
+            # victim. In the original path an arrival losing its own first
+            # round remains a rejection exactly as before.
             rejected = first_round and victim == arriving
             self._remove(victim)
             if self.removal_hook is not None:
                 self.removal_hook(victim, "rejected" if rejected else "evicted",
                                   timestamp_ms, group_index, self.decisions - 1)
             if rejected:
-                # Declining the arrival returns the store to the size it had
-                # before, so the loop is over; undo the admission counter.
                 self.admissions -= 1
                 self.rejections += 1
                 return False
@@ -497,6 +576,8 @@ def run_two_tier(
     victim_hook: Callable[[str, float, int], None] | None = None,
     l2_request_hook: L2RequestHook | None = None,
     l2_removal_hook: L2RemovalHook | None = None,
+    l2_arrival_protection: str = "none",
+    l2_protection_hook: L2ProtectionHook | None = None,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -523,6 +604,12 @@ def run_two_tier(
     nothing about the run or its result changes. A removal hook carrying an
     `attach` method is shown the union store, the way a learning scorer is, so
     that it can read the resident set at the instant of a removal.
+
+    l2_arrival_protection is the Phase 1 sampled-eviction intervention. Its
+    default, none, leaves the original path unchanged. direct_child protects a
+    feasible arrival for its own overflow rounds when a direct child is resident
+    at offer start; all applies the same eligibility change to every feasible
+    arrival. l2_protection_hook only records intervention events.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -536,7 +623,13 @@ def run_two_tier(
         raise ValueError("standalone closure is defined for the tree hit model only")
     if l2_eviction not in L2_EVICTIONS:
         raise ValueError(f"unknown L2 eviction mechanism {l2_eviction!r}")
+    if l2_arrival_protection not in ARRIVAL_PROTECTIONS:
+        raise ValueError(f"unknown arrival protection {l2_arrival_protection!r}")
     use_l2 = l2_capacity_bytes > 0 and l2_policy != "none"
+    if use_l2 and l2_arrival_protection != "none" and l2_eviction != "sampled":
+        raise ValueError("arrival protection needs sampled L2 eviction")
+    if use_l2 and l2_arrival_protection != "none" and l2_sample_width <= 0:
+        raise ValueError("arrival protection needs a positive sample width")
     if use_l2 and l2_policy not in L2_POLICIES + L2_SCORED_POLICIES:
         raise ValueError(f"unknown L2 policy {l2_policy!r}")
     if use_l2 and closure == "standalone" and l2_policy == "lru_2hit":
@@ -649,7 +742,9 @@ def run_two_tier(
                                     sample_width=l2_sample_width, seed=l2_seed, scorer=l2_scorer,
                                     decision_hook=l2_decision_hook,
                                     frequency=l1.frequency, last_group=l1.last_group,
-                                    removal_hook=l2_removal_hook)
+                                    removal_hook=l2_removal_hook,
+                                    arrival_protection=l2_arrival_protection,
+                                    protection_hook=l2_protection_hook)
             l2_bytes_by_depth = l2_union.bytes_by_depth
         else:
             l2_standalone = _PrefixClosedCache(
