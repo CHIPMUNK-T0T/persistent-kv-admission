@@ -122,7 +122,12 @@ class FixedModelScorer:
         self.history.observe_requests(requests, timestamp_ms)
         if self.groups_seen % self.refresh_every == 0:
             population = self.history.observed_state_ids()
-            if self.normalize_on == "cached" and self.cache is not None and self.cache.cached:
+            # A population of one has no scale, so `refresh` would decline it
+            # and the normaliser would keep statistics from an older, unrelated
+            # moment. Fall back to the observed population instead, as an empty
+            # retained set already does. Only reachable while the ranked set is
+            # still filling up; with two or more members nothing changes.
+            if self.normalize_on == "cached" and self.cache is not None and len(self.cache.cached) >= 2:
                 population = list(self.cache.cached)
             if len(population) >= 2:
                 if len(population) > self.sample_size:
@@ -238,7 +243,7 @@ def _row(trace: Trace, result, working_set_bytes: int, eviction: str) -> dict[st
     }
 
 
-STANDARDIZATIONS = ("per_decision", "train_global", "none")
+STANDARDIZATIONS = ("per_decision", "train_global", "none", "ranker")
 
 # What the fitted ranker predicts. `binary` is the Phase 0.5 target. The other
 # two are the graded alternatives the gap decomposition pointed at; changing
@@ -284,6 +289,12 @@ def _normalize(matrix: np.ndarray, standardization: str) -> np.ndarray:
       *source* workload's feature scales onto the target.
     * `none`: no normalisation anywhere; the ranker is fitted on raw features
       with the L2 penalty acting on raw-unit coefficients.
+    * `ranker`: no per-point normalisation either, but the ranker keeps its own
+      training mean and scale, so the penalty acts on standardised
+      coefficients exactly as under `per_decision`. The difference from
+      `per_decision` is then the *population* the scales come from (the whole
+      training set rather than each decision point), which is what a scorer
+      that applies no population normaliser at replay time reproduces.
     """
     from .temporal import standardize_rows
 
@@ -362,14 +373,17 @@ def fit_fixed_model(
 
     stacked_features = np.vstack(features_buffer)
     stacked_labels = np.concatenate(labels_buffer)
+    # Only `none` asks the ranker to skip its own standardisation; `ranker`
+    # feeds it raw rows and lets it keep the training scales.
+    standardize = standardization != "none"
     if target == "binary":
         ranker = LogisticRanker(
-            indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
+            indices=model_indices(model_name), l2=l2, standardize=standardize
         ).fit(stacked_features, stacked_labels)
         positives = int(stacked_labels.sum())
     else:
         ranker = RidgeRanker(
-            indices=model_indices(model_name), l2=l2, standardize=standardization != "none"
+            indices=model_indices(model_name), l2=l2, standardize=standardize
         ).fit(stacked_features, stacked_labels)
         positives = int((stacked_labels > stacked_labels.min()).sum())
     return ranker, horizon, split_ms, positives, len(stacked_labels)

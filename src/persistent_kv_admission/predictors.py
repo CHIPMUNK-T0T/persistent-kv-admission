@@ -141,6 +141,10 @@ class RidgeRanker:
     intercept: float = 0.0
     converged: bool = True
     iterations: int = 1
+    # Condition number of the regularised normal matrix actually solved. A
+    # closed-form fit never fails to converge, so this is the diagnostic that
+    # says whether the solution is well determined.
+    condition_number: float = float("nan")
 
     def fit(self, features: np.ndarray, targets: np.ndarray) -> "RidgeRanker":
         selected = features[:, self.indices].astype(float)
@@ -157,6 +161,7 @@ class RidgeRanker:
         centred_target = targets - targets.mean()
         penalty = self.l2 * len(design) * np.eye(design.shape[1])
         gram = design.T @ design + penalty
+        self.condition_number = float(np.linalg.cond(gram))
         self.coefficients = np.linalg.solve(gram, design.T @ centred_target)
         self.intercept = float(targets.mean())
         return self

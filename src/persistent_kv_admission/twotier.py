@@ -30,6 +30,13 @@ event, since the same state can be evicted several times). Fields known at
 eviction time are causal; reuse-time fields are filled when the state is next
 requested and are evaluation-only. An event whose state is not requested
 again before the trace ends is right-censored, not "never reused".
+
+The union-closure store evicts in one of two ways. The heap path of Phase 0.95
+is unchanged and stays the reference. The sampled path of Phase 0.97 re-scores
+a small decision set at the moment of the decision, which is what an L2 arm
+whose score varies with the clock (a learned ranker reading history features)
+needs, and it is the mechanism every scored arm shares with the generic ones so
+that a difference between arms is a difference in the score alone.
 """
 
 from __future__ import annotations
@@ -37,6 +44,7 @@ from __future__ import annotations
 import bisect
 import heapq
 import math
+import random
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import Callable
@@ -47,8 +55,21 @@ from .trace import Request, Trace
 
 L1_POLICIES = ("lru", "lfu")
 L2_POLICIES = ("lru", "lfu", "lru_2hit", "offline_next_use")
+# L2 policy names whose order comes from a scorer instead of a built-in key.
+# One name, because the arm identity belongs in `l2_arm`: the mechanism is the
+# same for every scored arm and only the scoring function differs.
+L2_SCORED_POLICIES = ("learned",)
+L2_EVICTIONS = ("heap", "sampled")
 HIT_MODELS = ("tree", "independent")
 CLOSURES = ("union", "standalone")
+
+# Called once per sampled L2 eviction decision with the candidate states, their
+# score tuples in the same order, the index of the chosen victim, the current
+# timestamp, the current timestamp-group index, and the position of the
+# arriving victim in the candidate list (-1 after the first round of an
+# admission, where the arrival is an ordinary resident).
+L2DecisionHook = Callable[[list[str], list[tuple[float, ...]], int, float, int, int], None]
+
 # Tie-break between two L2 blocks with the same next use under the offline
 # comparator. "prefix_first" (default, the published setting) keeps the longer
 # prefix; "deeper_first" evicts it. Diagnostic only: the default is unchanged.
@@ -169,6 +190,14 @@ class TwoTierResult:
     # admission and no rejection, so the three add up to l1_evictions.
     l2_already_held: int = 0
     offline_tiebreak: str = "prefix_first"
+    # How L2 chose its victims, and which arm this was. `l2_policy` names the
+    # mechanism ("learned" for every scored arm); `l2_arm` names the arm, so
+    # two arms that share the mechanism stay distinguishable in the CSV.
+    l2_eviction: str = "heap"
+    l2_sample_width: int = 16
+    l2_seed: int = 0
+    l2_arm: str = ""
+    l2_decisions: int = 0
     l2_byte_seconds_by_depth: dict[str, float] = field(default_factory=dict)
     l2_avoided_tokens_by_depth: dict[str, int] = field(default_factory=dict)
     l2_admitted_bytes_by_depth: dict[str, int] = field(default_factory=dict)
@@ -185,10 +214,30 @@ class TwoTierResult:
 class _VictimStore:
     """Exclusive lower tier under union closure.
 
-    Priorities are computed once at admission from the state's history at
-    eviction (recency, lifetime frequency) or from its next occurrence
-    (offline). They cannot go stale: any later request of the state moves it
-    back to L1 and out of this store.
+    Two eviction mechanisms, selected by `eviction`:
+
+    * ``"heap"`` (Phase 0.95, the default and the reference). Priorities are
+      computed once at admission from the state's history at eviction (recency,
+      lifetime frequency) or from its next occurrence (offline). They cannot go
+      stale: any later request of the state moves it back to L1 and out of this
+      store.
+    * ``"sampled"`` (Phase 0.97). Every candidate is re-scored at the instant of
+      the decision, which a score that ages with the clock needs. The decision
+      set of the first round of an admission is the arriving victim, always
+      included and placed first, plus a uniform sample without replacement of up
+      to `sample_width` other residents; later rounds of the same admission draw
+      up to `sample_width` residents and treat the arrival as an ordinary one.
+      The lowest score leaves. When that is the arriving victim in the first
+      round the admission is a *rejection*, not an eviction: a persistent tier
+      declining the block is not the same event as it dropping one it held.
+      The first index attaining the minimum wins, so a tie inside a decision is
+      broken by draw order, and in the first round in favour of rejecting the
+      arrival.
+
+    The sampled path reads the L1 cache's live `frequency` and `last_group`
+    dicts. Under union closure that is exactly the history a resident had when
+    it left L1: a request for it promotes it out of this store before L1's
+    counters move, so the values cannot drift while it is held here.
     """
 
     def __init__(
@@ -199,9 +248,28 @@ class _VictimStore:
         occurrence_groups: dict[str, list[int]],
         state_bytes: Callable[[str], int],
         offline_tiebreak: str = "prefix_first",
+        eviction: str = "heap",
+        sample_width: int = 16,
+        seed: int = 0,
+        scorer=None,
+        decision_hook: L2DecisionHook | None = None,
+        frequency: dict[str, int] | None = None,
+        last_group: dict[str, int] | None = None,
     ) -> None:
-        if policy not in L2_POLICIES:
-            raise ValueError(f"unknown L2 policy {policy!r}")
+        if eviction not in L2_EVICTIONS:
+            raise ValueError(f"unknown L2 eviction mechanism {eviction!r}")
+        if scorer is None:
+            if policy not in L2_POLICIES:
+                raise ValueError(f"unknown L2 policy {policy!r}")
+        elif policy not in L2_SCORED_POLICIES:
+            raise ValueError(f"a scored L2 store needs a scored policy name, got {policy!r}")
+        if scorer is not None and eviction != "sampled":
+            raise ValueError("an L2 scorer needs sampled eviction: heap keys would be stale")
+        if eviction == "sampled":
+            if policy == "offline_next_use":
+                raise ValueError("the offline L2 comparator runs on the heap path only")
+            if frequency is None or last_group is None:
+                raise ValueError("sampled L2 eviction needs L1's frequency and last_group")
         if offline_tiebreak not in OFFLINE_TIEBREAKS:
             raise ValueError(f"unknown offline tie-break {offline_tiebreak!r}")
         self.offline_tiebreak = offline_tiebreak
@@ -210,6 +278,8 @@ class _VictimStore:
         self.policy = policy
         self.groups = occurrence_groups
         self.state_bytes = state_bytes
+        # Insertion-ordered dict, never a set: the sampled draw reads it as a
+        # list, so its order must not depend on per-process hash randomisation.
         self.cached: dict[str, None] = {}
         self.current_bytes = 0
         self.heap: list[tuple[tuple[float, ...], int, int, str]] = []
@@ -218,6 +288,14 @@ class _VictimStore:
         self.admissions = 0
         self.rejections = 0
         self.evictions = 0
+        self.eviction = eviction
+        self.sample_width = sample_width
+        self.rng = random.Random(seed)
+        self.scorer = scorer
+        self.decision_hook = decision_hook
+        self.frequency = frequency
+        self.last_group = last_group
+        self.decisions = 0
         # Live residency by depth. Admitted bytes by depth are accumulated by
         # the caller, which knows whether the eviction that caused the
         # admission falls inside the evaluation window.
@@ -239,7 +317,30 @@ class _VictimStore:
             return (-float(next_group), -prefix_tokens)
         return (-float(next_group), prefix_tokens)
 
-    def admit(self, state_id: str, frequency: int, last_group: int, group_index: int) -> bool:
+    def _sampled_key(self, state_id: str, timestamp_ms: float) -> tuple[float, ...]:
+        """The candidate's priority as of `timestamp_ms`, recomputed every time."""
+        last = float(self.last_group[state_id])
+        if self.scorer is not None:
+            return (self.scorer.score(state_id, timestamp_ms), last)
+        if self.policy in {"lru", "lru_2hit"}:
+            return (last,)
+        if self.policy == "lfu":
+            return (float(self.frequency[state_id]), last)
+        raise ValueError(f"policy {self.policy!r} has no sampled key")
+
+    def admit(
+        self,
+        state_id: str,
+        frequency: int,
+        last_group: int,
+        group_index: int,
+        timestamp_ms: float = 0.0,
+    ) -> bool:
+        """Offer one L1 victim to the store. True when it is kept for now.
+
+        `timestamp_ms` is the decision time the sampled path scores at; the
+        heap path ignores it, since its keys are fixed at admission.
+        """
         if self.policy == "lru_2hit" and frequency < 2:
             self.rejections += 1
             return False
@@ -247,10 +348,14 @@ class _VictimStore:
             raise RuntimeError(f"{state_id} evicted from L1 while resident in exclusive L2")
         size = self.state_bytes(state_id)
         label = depth_bin(self.trace.states[state_id].depth)
+        # The arrival is charged first and ranked against the residents after,
+        # so an admission and a rejection differ only in who loses the round.
         self.cached[state_id] = None
         self.current_bytes += size
         self.bytes_by_depth[label] += size
         self.admissions += 1
+        if self.eviction == "sampled":
+            return self._admit_sampled(state_id, group_index, timestamp_ms)
         self.serial += 1
         heapq.heappush(
             self.heap,
@@ -262,6 +367,47 @@ class _VictimStore:
                 continue
             self._remove(candidate)
             self.evictions += 1
+        return True
+
+    def _admit_sampled(self, arriving: str, group_index: int, timestamp_ms: float) -> bool:
+        first_round = True
+        while self.current_bytes > self.capacity_bytes and self.cached:
+            # `cached` is insertion-ordered and the arrival was just appended,
+            # so dropping the last key leaves exactly the other residents,
+            # in insertion order, without a per-element Python scan.
+            residents = list(self.cached)
+            if first_round:
+                others = residents[:-1]
+                if len(others) > self.sample_width:
+                    others = self.rng.sample(others, self.sample_width)
+                candidates = [arriving] + others
+                arriving_index = 0
+            else:
+                candidates = (
+                    residents
+                    if len(residents) <= self.sample_width
+                    else self.rng.sample(residents, self.sample_width)
+                )
+                arriving_index = -1
+            scores = [self._sampled_key(state_id, timestamp_ms) for state_id in candidates]
+            # First minimum in draw order, which is what min(candidates, key=...)
+            # would pick; kept explicit so the hook sees the same scores.
+            victim_index = min(range(len(candidates)), key=scores.__getitem__)
+            self.decisions += 1
+            if self.decision_hook is not None:
+                self.decision_hook(
+                    candidates, scores, victim_index, timestamp_ms, group_index, arriving_index
+                )
+            victim = candidates[victim_index]
+            self._remove(victim)
+            if first_round and victim == arriving:
+                # Declining the arrival returns the store to the size it had
+                # before, so the loop is over; undo the admission counter.
+                self.admissions -= 1
+                self.rejections += 1
+                return False
+            self.evictions += 1
+            first_round = False
         return True
 
     def _remove(self, state_id: str) -> None:
@@ -301,6 +447,14 @@ def run_two_tier(
     occurrence_groups: dict[str, list[int]] | None = None,
     event_sink: list[VictimEvent] | None = None,
     offline_tiebreak: str = "prefix_first",
+    l2_eviction: str = "heap",
+    l2_sample_width: int = 16,
+    l2_seed: int = 0,
+    l2_scorer=None,
+    l2_decision_hook: L2DecisionHook | None = None,
+    l2_arm: str = "",
+    observer=None,
+    victim_hook: Callable[[str, float, int], None] | None = None,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -310,6 +464,15 @@ def run_two_tier(
     standalone closure, which uses the replay engine's own offline key.
     `TwoTierResult` documents which returned fields are restricted to the
     evaluation window and which cover the whole trace.
+
+    `l2_eviction="sampled"` runs the union store's sampled mechanism (see
+    `_VictimStore`); `l2_scorer` supplies a time-varying L2 score and needs it.
+    `observer` and `l2_scorer` are both shown every timestamp group immediately
+    before L1's own history update, which is where `replay.py` shows a scorer
+    its observations, so anything reading `observe` sees exactly the history a
+    deployed scorer would see when the evictions of that group are decided.
+    `victim_hook` is called for every L1 eviction, before the victim is offered
+    to L2, so a logger can record the victim stream at that same instant.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -321,11 +484,20 @@ def run_two_tier(
         raise ValueError(f"unknown offline tie-break {offline_tiebreak!r}")
     if closure == "standalone" and hit_model != "tree":
         raise ValueError("standalone closure is defined for the tree hit model only")
+    if l2_eviction not in L2_EVICTIONS:
+        raise ValueError(f"unknown L2 eviction mechanism {l2_eviction!r}")
     use_l2 = l2_capacity_bytes > 0 and l2_policy != "none"
-    if use_l2 and l2_policy not in L2_POLICIES:
+    if use_l2 and l2_policy not in L2_POLICIES + L2_SCORED_POLICIES:
         raise ValueError(f"unknown L2 policy {l2_policy!r}")
     if use_l2 and closure == "standalone" and l2_policy == "lru_2hit":
         raise ValueError("lru_2hit is not defined for the standalone closure")
+    if l2_eviction == "sampled":
+        if closure != "union":
+            raise ValueError("sampled L2 eviction is defined for the union closure only")
+        if l2_policy == "offline_next_use":
+            raise ValueError("the offline L2 comparator runs on the heap path only")
+    if use_l2 and (l2_scorer is not None) != (l2_policy in L2_SCORED_POLICIES):
+        raise ValueError(f"l2_policy {l2_policy!r} and l2_scorer must be given together")
     groups = occurrence_groups or _occurrence_groups(trace)
     states = trace.states
 
@@ -347,22 +519,10 @@ def run_two_tier(
         counters["l2_evictions"] += 1
         l2_bytes_by_depth[depth_bin(states[state_id].depth)] -= state_bytes(state_id)
 
-    if use_l2:
-        if closure == "union":
-            l2_union = _VictimStore(trace, l2_capacity_bytes, l2_policy, groups, state_bytes,
-                                    offline_tiebreak=offline_tiebreak)
-            l2_bytes_by_depth = l2_union.bytes_by_depth
-        else:
-            l2_standalone = _PrefixClosedCache(
-                trace, l2_capacity_bytes, bytes_per_token, l2_policy, groups, size_model,
-                eviction="heap", evict_hook=on_l2_evict,
-            )
-    l2_cached: dict[str, None] = (
-        l2_union.cached if l2_union is not None else l2_standalone.cached if l2_standalone is not None else {}
-    )
-
     def on_l1_evict(state_id: str, timestamp_ms: float, group_index: int) -> None:
         counters["l1_evictions"] += 1
+        if victim_hook is not None:
+            victim_hook(state_id, timestamp_ms, group_index)
         meta = states[state_id]
         # Admitted bytes by depth are attributed to the eviction that caused
         # them, so they are counted only for evictions inside the window.
@@ -393,7 +553,8 @@ def run_two_tier(
             open_events[state_id] = event
         eviction_counts[state_id] += 1
         if l2_union is not None:
-            if l2_union.admit(state_id, l1.frequency[state_id], l1.last_group[state_id], group_index):
+            if l2_union.admit(state_id, l1.frequency[state_id], l1.last_group[state_id],
+                              group_index, timestamp_ms):
                 counters["l2_admissions"] += 1
                 if measured_eviction:
                     l2_admitted_by_depth[depth_bin(meta.depth)] += state_bytes(state_id)
@@ -425,10 +586,32 @@ def run_two_tier(
                 # them, so add unconditionally to keep the running total exact.
                 l2_bytes_by_depth[label] += size
 
+    # L1 is built before L2 because the sampled store reads L1's live history
+    # dicts; nothing is consumed at construction, so the heap path is unchanged.
     l1 = _PrefixClosedCache(
         trace, l1_capacity_bytes, bytes_per_token, l1_policy, groups, size_model,
         eviction="heap", evict_hook=on_l1_evict,
     )
+    if use_l2:
+        if closure == "union":
+            l2_union = _VictimStore(trace, l2_capacity_bytes, l2_policy, groups, state_bytes,
+                                    offline_tiebreak=offline_tiebreak, eviction=l2_eviction,
+                                    sample_width=l2_sample_width, seed=l2_seed, scorer=l2_scorer,
+                                    decision_hook=l2_decision_hook,
+                                    frequency=l1.frequency, last_group=l1.last_group)
+            l2_bytes_by_depth = l2_union.bytes_by_depth
+        else:
+            l2_standalone = _PrefixClosedCache(
+                trace, l2_capacity_bytes, bytes_per_token, l2_policy, groups, size_model,
+                eviction="heap", evict_hook=on_l2_evict,
+            )
+    l2_cached: dict[str, None] = (
+        l2_union.cached if l2_union is not None else l2_standalone.cached if l2_standalone is not None else {}
+    )
+    if l2_scorer is not None and l2_union is not None and hasattr(l2_scorer, "attach"):
+        # A learning scorer normalises on the population it actually ranks,
+        # which here is the set of states L2 holds, not every state ever seen.
+        l2_scorer.attach(l2_union)
 
     previous_ms: float | None = None
     for group_index, (timestamp_ms, requests) in enumerate(trace.timestamp_groups()):
@@ -510,6 +693,14 @@ def run_two_tier(
         if l2_union is not None:
             for state_id in promote:
                 l2_union.promote(state_id)
+        # Same instant as `replay.update_history` shows a scorer its
+        # observations: after the group has been served and before anything is
+        # inserted or evicted, so the evictions of this group are decided on a
+        # history that includes it.
+        if observer is not None:
+            observer.observe(requests, timestamp_ms)
+        if l2_scorer is not None:
+            l2_scorer.observe(requests, timestamp_ms)
         l1.update_history(requests, group_index, timestamp_ms)
         if l2_standalone is not None:
             l2_standalone.update_history(requests, group_index, timestamp_ms)
@@ -538,6 +729,11 @@ def run_two_tier(
         l2_rejections=counters["l2_rejections"],
         l2_already_held=counters["l2_already_held"],
         offline_tiebreak=offline_tiebreak,
+        l2_eviction=l2_eviction if use_l2 else "heap",
+        l2_sample_width=l2_sample_width,
+        l2_seed=l2_seed,
+        l2_arm=l2_arm,
+        l2_decisions=l2_union.decisions if l2_union is not None else 0,
         l2_evictions=l2_union.evictions if l2_union is not None else counters["l2_evictions"],
         l2_ancestor_copy_bytes=counters["l2_ancestor_copy_bytes"],
         l2_byte_seconds=sum(byte_seconds_by_depth.values()),
