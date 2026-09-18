@@ -329,20 +329,24 @@ def make_net_figure(output_dir: Path, pairs: dict) -> Path:
         ncol=4,
         fontsize=7.5,
         frameon=False,
-        bbox_to_anchor=(0.5, 0.94),
+        bbox_to_anchor=(0.5, 0.91),
     )
     figure.supxlabel("L1 working-set fraction × L2/L1 multiplier", fontsize=9)
-    figure.suptitle("Phase 1 arrival protection: paired net avoided input", fontsize=11)
+    figure.suptitle(
+        "Phase 1 arrival protection: paired net avoided input",
+        fontsize=11,
+        y=0.99,
+    )
     figure.text(
         0.5,
-        0.955,
+        0.95,
         "points are five-seed means; error bars are 95% t intervals over seeds",
         ha="center",
         va="bottom",
         fontsize=7.5,
         color="0.3",
     )
-    figure.tight_layout(rect=(0.0, 0.04, 1.0, 0.88))
+    figure.tight_layout(rect=(0.0, 0.04, 1.0, 0.85))
     path = output_dir / "fig19_phase1_intervention.png"
     figure.savefig(path, dpi=170, metadata={"Software": "matplotlib"})
     plt.close(figure)
@@ -449,20 +453,24 @@ def make_saved_lost_figure(output_dir: Path, pairs: dict) -> Path:
         ncol=3,
         fontsize=7.3,
         frameon=False,
-        bbox_to_anchor=(0.5, 0.945),
+        bbox_to_anchor=(0.5, 0.91),
     )
     figure.supxlabel("L1 working-set fraction × L2/L1 multiplier", fontsize=9)
-    figure.suptitle("Phase 1 request outcomes: saved tokens, lost tokens, and net", fontsize=11)
+    figure.suptitle(
+        "Phase 1 request outcomes: saved tokens, lost tokens, and net",
+        fontsize=11,
+        y=0.99,
+    )
     figure.text(
         0.5,
-        0.955,
+        0.95,
         "bars and diamonds are five-seed means; diamond intervals show seed variability",
         ha="center",
         va="bottom",
         fontsize=7.5,
         color="0.3",
     )
-    figure.tight_layout(rect=(0.0, 0.04, 1.0, 0.85))
+    figure.tight_layout(rect=(0.0, 0.04, 1.0, 0.81))
     path = output_dir / "fig20_phase1_saved_lost.png"
     figure.savefig(path, dpi=170, metadata={"Software": "matplotlib"})
     plt.close(figure)

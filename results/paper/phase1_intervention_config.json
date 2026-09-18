@@ -1,0 +1,174 @@
+{
+  "phase": "1",
+  "smoke": false,
+  "preregistration_commit": "2490b112582fa6e26e2a651260e05be7a3567678",
+  "code_commit": "bcea65681cfe6432400488cb1c79ed8aabb2ccfc",
+  "git_head_start": "bcea65681cfe6432400488cb1c79ed8aabb2ccfc",
+  "git_head_end": "bcea65681cfe6432400488cb1c79ed8aabb2ccfc",
+  "git_dirty": true,
+  "source_manifest_start": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_phase1_intervention.py": "fd1ceaab08d0ce4dd204bd8ac52598cba23ed3140ac0391f21bf22ad724594fd",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "c5eb1bc9df80869bf62177e9399ac5fdc7c8b721edc9ba2fcc5c084682060f7a"
+    },
+    "sha256": "538c6fdd1c42837e8abea4507fa0302e8d7daba265d0f508319315c9ab9c0d40"
+  },
+  "source_manifest_end": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_phase1_intervention.py": "fd1ceaab08d0ce4dd204bd8ac52598cba23ed3140ac0391f21bf22ad724594fd",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "c5eb1bc9df80869bf62177e9399ac5fdc7c8b721edc9ba2fcc5c084682060f7a"
+    },
+    "sha256": "538c6fdd1c42837e8abea4507fa0302e8d7daba265d0f508319315c9ab9c0d40"
+  },
+  "preexisting_document_diff_sha256_start": {
+    "README.md": "fd5bc4d837cfb010b63b56b618eae44e3c5ccc70e2760eb1a659db195e5230a9",
+    "docs/decision-population-findings.md": "2b64c4508540ce1391bd0ff9cb50e93f86be2bb567feb794dbb6109921424c68",
+    "docs/experiment-plan.md": "10096cb78c3f3dc507eff92f09ba7dbde722ab6ad66c9abfeb6b8f37ee248f6c"
+  },
+  "preexisting_document_diff_sha256_end": {
+    "README.md": "fd5bc4d837cfb010b63b56b618eae44e3c5ccc70e2760eb1a659db195e5230a9",
+    "docs/decision-population-findings.md": "2b64c4508540ce1391bd0ff9cb50e93f86be2bb567feb794dbb6109921424c68",
+    "docs/experiment-plan.md": "10096cb78c3f3dc507eff92f09ba7dbde722ab6ad66c9abfeb6b8f37ee248f6c"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "targets": [
+    "next_use",
+    "binary"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "variants": [
+    "none",
+    "direct_child",
+    "all"
+  ],
+  "pair_directions": [
+    [
+      "direct_child",
+      "none"
+    ],
+    [
+      "all",
+      "none"
+    ],
+    [
+      "direct_child",
+      "all"
+    ]
+  ],
+  "replays": 180,
+  "paired_tasks": 60,
+  "workers": 20,
+  "replay_seconds": 843.2196617126465,
+  "wall_seconds": 846.4775793552399,
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "size_model": "packed",
+  "bytes_per_token": 2048,
+  "sample_width": 16,
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "phase097_config": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_population_config.json",
+  "phase097_config_verified": true,
+  "phase097_fit_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_population_fits.csv",
+  "fit_checks": 12,
+  "fit_max_coefficient_deviation": 0.0,
+  "phase097_replay_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_population_replay_seeds.csv",
+  "phase097_original_b_matched": 60,
+  "phase098b_replay_reference": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/decision_attribution_losses_seeds.csv",
+  "phase098b_original_b_matched": 60,
+  "generic_offline_reference_rows": 210,
+  "reference_tolerance": 1e-09,
+  "note": "The three variants use the same reconstructed and coefficient-verified Phase 0.97 B ranker. Request differences are paired trajectory outcomes, not one-decision causal attributions. Seed intervals describe sampling-seed variability only."
+}

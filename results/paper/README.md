@@ -94,3 +94,39 @@ are not tracked.
 
 The full event logs and raw replay rows are written to `results/two_tier/`
 and are not tracked.
+
+## Phase 1 artifacts (`scripts/run_phase1_intervention.py`)
+
+- `phase1_intervention_replay.csv`, `phase1_intervention_replay_seeds.csv`:
+  five-seed aggregate and per-seed replay outcomes for original B (`none`),
+  direct-child arrival protection, and all-arrival protection.
+- `phase1_intervention_pairs.csv`, `phase1_intervention_pairs_seeds.csv`:
+  fixed-direction paired comparisons (`direct_child − none`, `all − none`, and
+  `direct_child − all`), including saved/lost request and token totals.
+- `phase1_intervention_attribution.csv`,
+  `phase1_intervention_attribution_seeds.csv`: the unchanged Phase 0.98b
+  request and per-block accounting applied to every Phase 1 replay.
+- `phase1_intervention_references.csv`: the matched Phase 0.97 generic and
+  offline reference rows used for policy context.
+- `phase1_intervention_fit_checks.csv`, `phase1_intervention_fits.json`:
+  checks against the published B coefficients and the fully reconstructed fixed
+  fit parameters.
+- `phase1_intervention_config.json`: fixed grid, trace hashes, source manifest,
+  commits, reference reproduction counts, and elapsed time.
+- `fig19_phase1_intervention.png`: paired net avoided-input differences.
+- `fig20_phase1_saved_lost.png`: paired saved/lost token shares and net.
+
+The result and its limits are documented in
+`docs/phase1-intervention-findings.md`. Redraw both figures from the summary
+CSVs with:
+
+```bash
+.venv/bin/python scripts/plot_phase1_intervention.py \
+  --input-dir results/paper \
+  --output-dir results/paper
+```
+
+The confirmatory runner additionally needs the ignored Phase 0.97
+`results/decision_population/logs/victims_*.npz` inputs. See `scripts/README.md`
+for the prerequisite command that generates them without replacing the
+published Phase 0.97 reference CSVs.

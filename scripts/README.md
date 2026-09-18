@@ -122,3 +122,43 @@ rows and the rebuilt decision logs go to `results/decision_attribution/`
 `decision_population_replay_seeds.csv` and the run aborts before writing if any
 arm does not reproduce Phase 0.97 exactly. The full grid is 330 replays, about
 25 minutes on 24 workers.
+
+Run the pre-registered Phase 1 arrival-protection intervention on the fixed B
+arm. The public raw traces and the Phase 0.97 victim-row `.npz` files are
+ignored. If the victim files are absent, generate them first while sending the
+prerequisite run's paper copies to a temporary directory, so the checked-in
+Phase 0.97 reference CSVs remain unchanged:
+
+```bash
+./scripts/download_mooncake_traces.sh data/raw
+mkdir -p /tmp/phase1-prerequisite-paper
+.venv/bin/python scripts/run_decision_population.py \
+  data/raw/conversation_trace.jsonl \
+  data/raw/toolagent_trace.jsonl \
+  --workers 24 \
+  --output-dir results/decision_population \
+  --paper-dir /tmp/phase1-prerequisite-paper
+
+.venv/bin/python scripts/run_phase1_intervention.py \
+  data/raw/conversation_trace.jsonl \
+  data/raw/toolagent_trace.jsonl \
+  --workers 20 \
+  --output-dir results/phase1_intervention \
+  --paper-dir results/paper
+
+.venv/bin/python scripts/plot_phase1_intervention.py \
+  --input-dir results/paper \
+  --output-dir results/paper
+```
+
+The Phase 1 runner uses the prerequisite only for
+`results/decision_population/logs/victims_*.npz`. It verifies the existing
+published Phase 0.97 config, B coefficients and replay rows, plus the Phase
+0.98b original-B rows, before publishing output. Its grid is fixed at two real
+traces × three cells × two targets × five seeds × three variants (180
+replays). Outputs are `phase1_intervention_replay*.csv`,
+`phase1_intervention_pairs*.csv`, `phase1_intervention_attribution*.csv`,
+`phase1_intervention_references.csv`, `phase1_intervention_fit_checks.csv`,
+`phase1_intervention_fits.json`, `phase1_intervention_config.json`, and figures
+19–20 in `results/paper/`. The full raw run remains under
+`results/phase1_intervention/` and is untracked.
