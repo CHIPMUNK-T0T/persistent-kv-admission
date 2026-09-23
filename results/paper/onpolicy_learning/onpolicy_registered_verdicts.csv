@@ -1,0 +1,25 @@
+trace,l1_fraction,l2_multiplier,cell,target,label,utility_pass,heldout_ranking_pass,fit_population_ranking_pass,own_policy_direction_all_positive,strong_support,reasons,fit_to_terminal_train_shift,test_population_cap_bound_any,test_constant_label_share_max,population_dominance_manual_review,same_cell_both_traces_A,primary_next_use_cross_capacity_two_cells
+conversation_trace,0.0025,1.0,"l1=0.0025,l2x1",next_use,unresolved,False,False,False,False,False,"('pattern does not satisfy A-D',)",False,True,2.5e-05,True,False,False
+conversation_trace,0.0025,1.0,"l1=0.0025,l2x1",binary,unresolved,False,False,True,False,False,"('dynamics unresolved',)",True,True,0.0002,True,False,False
+conversation_trace,0.0025,4.0,"l1=0.0025,l2x4",next_use,C,False,False,False,False,False,(),False,True,2.5e-05,True,False,False
+conversation_trace,0.0025,4.0,"l1=0.0025,l2x4",binary,D,False,False,True,False,False,(),False,True,5e-05,True,False,False
+conversation_trace,0.01,1.0,"l1=0.01,l2x1",next_use,C,False,False,False,False,False,(),False,True,2.5e-05,True,False,False
+conversation_trace,0.01,1.0,"l1=0.01,l2x1",binary,D,False,False,True,False,False,(),False,True,0.0001,True,False,False
+conversation_trace,0.01,4.0,"l1=0.01,l2x4",next_use,unresolved,True,False,False,True,False,"('material utility gain without registered ranking gain',)",False,True,0.001225,True,False,False
+conversation_trace,0.01,4.0,"l1=0.01,l2x4",binary,C,False,False,False,True,False,(),False,True,0.001025,True,False,False
+conversation_trace,0.02,1.0,"l1=0.02,l2x1",next_use,unresolved,True,False,True,True,False,"('material utility gain without registered ranking gain',)",False,True,0.00045,True,False,False
+conversation_trace,0.02,1.0,"l1=0.02,l2x1",binary,B,False,True,False,True,False,(),False,True,0.00035,True,False,False
+conversation_trace,0.02,4.0,"l1=0.02,l2x4",next_use,unresolved,True,False,False,True,False,"('material utility gain without registered ranking gain',)",False,True,0.014975,True,False,False
+conversation_trace,0.02,4.0,"l1=0.02,l2x4",binary,unresolved,False,False,False,True,False,"('mixed seed signs in utility',)",False,True,0.015,True,False,False
+toolagent_trace,0.0025,1.0,"l1=0.0025,l2x1",next_use,unresolved,False,False,False,False,False,"('pattern does not satisfy A-D',)",False,True,2.5e-05,True,False,False
+toolagent_trace,0.0025,1.0,"l1=0.0025,l2x1",binary,unresolved,False,False,True,False,False,"('dynamics unresolved',)",True,True,0.000225,True,False,False
+toolagent_trace,0.0025,4.0,"l1=0.0025,l2x4",next_use,C,False,False,False,False,False,(),False,True,2.5e-05,True,False,False
+toolagent_trace,0.0025,4.0,"l1=0.0025,l2x4",binary,D,False,False,True,False,False,(),False,True,5e-05,True,False,False
+toolagent_trace,0.01,1.0,"l1=0.01,l2x1",next_use,C,False,False,False,False,False,(),False,True,5e-05,True,False,False
+toolagent_trace,0.01,1.0,"l1=0.01,l2x1",binary,D,False,False,True,False,False,(),False,True,0.000175,True,False,False
+toolagent_trace,0.01,4.0,"l1=0.01,l2x4",next_use,unresolved,False,False,False,False,False,"('mixed seed signs in utility',)",False,True,0.001,True,False,False
+toolagent_trace,0.01,4.0,"l1=0.01,l2x4",binary,B,False,True,False,True,False,(),False,True,0.00105,True,False,False
+toolagent_trace,0.02,1.0,"l1=0.02,l2x1",next_use,unresolved,True,False,True,False,False,"('mixed seed signs in heldout ranking', 'material utility gain without registered ranking gain')",False,True,0.000275,True,False,False
+toolagent_trace,0.02,1.0,"l1=0.02,l2x1",binary,B,False,True,True,True,False,(),False,True,0.0002,True,False,False
+toolagent_trace,0.02,4.0,"l1=0.02,l2x4",next_use,unresolved,True,False,False,True,False,"('material utility gain without registered ranking gain',)",False,True,0.015725,True,False,False
+toolagent_trace,0.02,4.0,"l1=0.02,l2x4",binary,unresolved,True,False,False,True,False,"('material utility gain without registered ranking gain',)",False,True,0.01735,True,False,False
