@@ -1,0 +1,40 @@
+{
+  "analysis": "posthoc_retention_decisions",
+  "analysis_git_head": "3f362908442bb39d7e9341095c50f4defb1e63f3",
+  "new_fit": false,
+  "new_replay": false,
+  "outputs_sha256": {
+    "population_integrity.csv": "5b308012cfd840b062eb326216b138f42ede160018d20eb876da7c4f48463945",
+    "terminal_fixed_population_choices.csv": "81daaa2b0da0294012daf119d7a5e307448ea791ab3c2b9d111dbe7f8214a6ec",
+    "victim_proxy_positive_rate.png": "6eccaeea416cfe7f403832e95479e50e48ae52f32551167065fde311eabc0643",
+    "victim_quality_seeds.csv": "d5bfd2ca4f02371ffdfee297c900cf3e7e2f938d4c1e791fed3d615d18644893",
+    "window_sensitivity.png": "8654e0d579995d02e9ef45bde5443b82c00aaaeb34c2badc8054efe926e3a8d0",
+    "window_utility_aggregate.csv": "04457d9307a076ec68794b9d69f86b11ee321c8253a6fe03bcc6e7aad5110ef6",
+    "window_utility_seeds.csv": "bd3c3e7ef99f035bac77705b7029d83c4d90fb2c125859f51b8c2830965674da"
+  },
+  "population_files_verified": 240,
+  "population_iterations": [
+    0,
+    3
+  ],
+  "sampled_decisions_verified": 9600000,
+  "script_sha256": "3b813dcc4d0257161bec1b889da840e8db4dc8022dd8e948895dc7eeb7d61bf2",
+  "source_config_sha256": "a5d26748d13d6f303f92c02452547d45dcd9f3e1aa8e342d1aabf27236f543e2",
+  "source_csv_sha256": {
+    "onpolicy_model_links.csv": "d4aac009c31061995b066f52bd40d0cbd3928d20a5cfff754313e487b41447f1",
+    "onpolicy_seed_utility.csv": "c015d9aeff46f4106bb957f0fa311e89d180c1e5d1d63db7543af5222b499151",
+    "onpolicy_terminal_ranking.csv": "b156de226fe1fd3e9b7038dbe7607d079e66cdb580d0ed00d6c9463f2b6b4846",
+    "onpolicy_test_populations.csv": "60bbec0386e97bbea3333762ddd272e6c7058773f06d639b37c56037174558f6"
+  },
+  "source_module_sha256": {
+    "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+    "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+    "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123"
+  },
+  "source_run_code_commit": "feb30eb8ed4336ee24ff94382defa9f69b881a0a",
+  "trace_sha256": {
+    "conversation_trace": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df",
+    "toolagent_trace": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+  },
+  "workers": 1
+}
