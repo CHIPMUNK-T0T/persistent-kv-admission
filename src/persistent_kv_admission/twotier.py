@@ -578,6 +578,7 @@ def run_two_tier(
     l2_removal_hook: L2RemovalHook | None = None,
     l2_arrival_protection: str = "none",
     l2_protection_hook: L2ProtectionHook | None = None,
+    stop_before_ms: float | None = None,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -610,6 +611,11 @@ def run_two_tier(
     feasible arrival for its own overflow rounds when a direct child is resident
     at offer start; all applies the same eligibility change to every feasible
     arrival. l2_protection_hook only records intervention events.
+
+    `stop_before_ms` is an exclusive replay cutoff used by training-only
+    collectors. A timestamp group at or after the cutoff is not observed,
+    measured, integrated into byte-seconds, inserted, or evicted. The default
+    None preserves the published whole-trace path.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -765,6 +771,8 @@ def run_two_tier(
 
     previous_ms: float | None = None
     for group_index, (timestamp_ms, requests) in enumerate(trace.timestamp_groups()):
+        if stop_before_ms is not None and timestamp_ms >= stop_before_ms:
+            break
         # Residency is integrated over intervals whose start falls inside the
         # evaluation window, so the byte-seconds match the window every token
         # counter is restricted to.
