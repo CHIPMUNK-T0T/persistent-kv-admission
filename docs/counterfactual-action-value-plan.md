@@ -126,6 +126,13 @@ observed Q. Within-decision rank correlations are secondary; compare the
 retention score with -Q(evict), using average ties and marking constant
 rankings undefined.
 
+For each exact-label selector additionally report the minimum and maximum
+regret among candidates tied for its best label before the causal tie-break.
+These are hindsight diagnostic envelopes, not alternative deployable
+selectors. They distinguish label-order error from information missing within
+a label tie. The sensitivity mean averages the three separately paired
+stream-specific regrets; it is not a maximization over pooled random streams.
+
 Keep trace/cell/policy strata separate. Report all five lineage-seed summaries
 and decision-level values; do not count candidates from one snapshot as
 independent observations. Decisions share future requests and traces share a
