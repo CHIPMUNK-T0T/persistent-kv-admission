@@ -1,0 +1,19 @@
+{
+  "input_sha256": {
+    "decision_regrets.csv": "26ba84ec9c0133af59597527cd6679683b1b786659596b01721ec7f5c6c41c37",
+    "run_config.json": "175970ef039c76e930398745c633598b3463109b8205191a6c90ce0f66ebbb7a",
+    "stratified_regrets.csv": "d8255bef8379b5284aed7696c629ee57d91be2bc9ebf211c2221c60803a235ff"
+  },
+  "output_sha256": {
+    "primary_600s_label_tie_reviewed.png": "26638ca4221aaf2bdfbfe21d66d2c51ffa113218b5a5c321966f13f3c83d243f",
+    "primary_600s_regret_reviewed.png": "a5762e31d840012ee0ab4b89c482f1a23495d091d6322e44bbfe3669c6f04e8a",
+    "secondary_trace_end_regret_reviewed.png": "339ce8c3e9513421a47ad7bf78272ac0f142ba775d292e629897dc1ac13619ac"
+  },
+  "purpose": "layout correction and preregistered label-tie diagnostic from frozen CSVs",
+  "script_sha256": "791ae5e729d4b12db12af29d89add10b99bb56d61fd01891339ea8052f57e784",
+  "source_manifest_sha256": "5db02a59c058a5934d308b8f893cec855021a62fe1284071ade9d08f50ba80be",
+  "tie_best_is_hindsight": true,
+  "tie_plot_decisions_per_stratum": 40,
+  "tie_plot_replicate": 0,
+  "tie_plot_window": "(t,t+600 seconds]"
+}
