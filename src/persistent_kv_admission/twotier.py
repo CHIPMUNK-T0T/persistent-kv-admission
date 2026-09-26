@@ -70,6 +70,10 @@ CLOSURES = ("union", "standalone")
 # arriving victim in the candidate list (-1 after the first round of an
 # admission, where the arrival is an ordinary resident).
 L2DecisionHook = Callable[[list[str], list[tuple[float, ...]], int, float, int, int], None]
+# Optional experimental override of one sampled decision. ``None`` keeps the
+# original first tuple minimum. The hook runs after the ordinary observer and
+# before the selected state is removed.
+L2OverrideHook = Callable[[list[str], list[tuple[float, ...]], int, float, int, int], int | None]
 
 # Called once per request, immediately after the L1 prefix and the L2 hit sets
 # of that request have been computed, with those variables exactly as the
@@ -284,6 +288,7 @@ class _VictimStore:
         removal_hook: L2RemovalHook | None = None,
         arrival_protection: str = "none",
         protection_hook: L2ProtectionHook | None = None,
+        override_hook: L2OverrideHook | None = None,
     ) -> None:
         if eviction not in L2_EVICTIONS:
             raise ValueError(f"unknown L2 eviction mechanism {eviction!r}")
@@ -328,6 +333,7 @@ class _VictimStore:
         self.rng = random.Random(seed)
         self.scorer = scorer
         self.decision_hook = decision_hook
+        self.override_hook = override_hook
         self.removal_hook = removal_hook
         self.arrival_protection = arrival_protection
         self.protection_hook = protection_hook
@@ -506,6 +512,14 @@ class _VictimStore:
                 self.decision_hook(
                     candidates, scores, victim_index, timestamp_ms, group_index, arriving_index
                 )
+            if self.override_hook is not None:
+                override = self.override_hook(
+                    candidates, scores, victim_index, timestamp_ms, group_index, arriving_index
+                )
+                if override is not None:
+                    if type(override) is not int or not 0 <= override < len(candidates):
+                        raise ValueError("sampled L2 override must be a legal candidate index")
+                    victim_index = override
             victim = candidates[victim_index]
             # Active protection never exposes the arrival as an eligible
             # victim. In the original path an arrival losing its own first
@@ -579,6 +593,7 @@ def run_two_tier(
     l2_arrival_protection: str = "none",
     l2_protection_hook: L2ProtectionHook | None = None,
     stop_before_ms: float | None = None,
+    l2_override_hook: L2OverrideHook | None = None,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -616,6 +631,13 @@ def run_two_tier(
     collectors. A timestamp group at or after the cutoff is not observed,
     measured, integrated into byte-seconds, inserted, or evicted. The default
     None preserves the published whole-trace path.
+
+    `l2_override_hook` is an experimental sampled-union hook. It sees the
+    original candidate scores after `l2_decision_hook` and may return one legal
+    candidate index to remove; returning None preserves the original decision.
+    A decision observer records the original index, not an overridden action.
+    An object with `attach(l1, l2, counters)` receives the live stores before
+    replay so a fork can inspect their complete state.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -645,6 +667,10 @@ def run_two_tier(
             raise ValueError("sampled L2 eviction is defined for the union closure only")
         if l2_policy == "offline_next_use":
             raise ValueError("the offline L2 comparator runs on the heap path only")
+    if l2_override_hook is not None and (
+        not use_l2 or closure != "union" or l2_eviction != "sampled"
+    ):
+        raise ValueError("L2 override requires an active sampled union store")
     if use_l2 and (l2_scorer is not None) != (l2_policy in L2_SCORED_POLICIES):
         raise ValueError(f"l2_policy {l2_policy!r} and l2_scorer must be given together")
     groups = occurrence_groups or _occurrence_groups(trace)
@@ -747,6 +773,7 @@ def run_two_tier(
                                     offline_tiebreak=offline_tiebreak, eviction=l2_eviction,
                                     sample_width=l2_sample_width, seed=l2_seed, scorer=l2_scorer,
                                     decision_hook=l2_decision_hook,
+                                    override_hook=l2_override_hook,
                                     frequency=l1.frequency, last_group=l1.last_group,
                                     removal_hook=l2_removal_hook,
                                     arrival_protection=l2_arrival_protection,
@@ -768,6 +795,8 @@ def run_two_tier(
         # The orphaning measure needs the resident set as it stands at the
         # instant a state is removed, which only the store holds.
         l2_removal_hook.attach(l2_union)
+    if l2_override_hook is not None and l2_union is not None and hasattr(l2_override_hook, "attach"):
+        l2_override_hook.attach(l1, l2_union, counters)
 
     previous_ms: float | None = None
     for group_index, (timestamp_ms, requests) in enumerate(trace.timestamp_groups()):
