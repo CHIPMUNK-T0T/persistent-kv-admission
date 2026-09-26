@@ -1,0 +1,112 @@
+{
+  "analysis_checkout_head": "3362c7b1ec6ab60f277e65009c260667b81c6dd5",
+  "analysis_script_sha256": "334322538082daac40577df77f364043b9534fee59c4d29ae7539c6973d80d68",
+  "input_sha256": {
+    "results/paper/counterfactual_action_001/selected_decisions.csv": "331c0ea0fb2d68501d755b4fbaf8ff7095037e7f6616f981eafce232fc187d11",
+    "results/paper/counterfactual_action_001/branch_actions.csv": "c184880b0d0093da743c9a8d545600cd0f01b693987ad9c55926d8c9613ed88f",
+    "results/paper/counterfactual_action_001/decision_regrets.csv": "26ba84ec9c0133af59597527cd6679683b1b786659596b01721ec7f5c6c41c37",
+    "results/paper/counterfactual_action_001/sensitivity.csv": "121d38d763fe410cd3adbffca25f89f19104f6e11da14f80444924cc2a67baec",
+    "results/paper/counterfactual_action_001/run_config.json": "175970ef039c76e930398745c633598b3463109b8205191a6c90ce0f66ebbb7a",
+    "scripts/run_counterfactual.py": "5cf06f832c57904e8c5e9a4a32ad76279e2f08919a54814bee50d055cedab170",
+    "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d"
+  },
+  "published_source_manifest_sha256": "cbc133ff3904d623ac7dfd374e09671b5422c0962e3bf04ae66ac438dfb3540a",
+  "published_plan_commit": "75add46",
+  "definition": {
+    "subset": "hash_rank 0 or 1 per each of 40 lineages",
+    "label_tie": "minimum count_within_h (600-second exact count label)",
+    "fixed_exact_tiebreak": "minimum last_group, then minimum action_index",
+    "heldout_q_tiebreak": "minimum action_index among source-stream Q maxima",
+    "regret": "target-stream max Q over all legal actions minus target-stream Q of chosen action",
+    "spearman": "mean of per-state Spearman rank correlations over unordered stream pairs; average ranks for Q ties"
+  },
+  "metrics": {
+    "600": {
+      "states": 80,
+      "state_streams": 240,
+      "ordered_heldout_directions": 480,
+      "unordered_stream_pairs": 240,
+      "mean_regret_tokens": {
+        "fixed_exact": 34419.275,
+        "within_stream_hindsight_best_tie": 4114.145833333333,
+        "heldout_best_tie": 35613.254166666666,
+        "heldout_best_all": 37359.78958333333,
+        "actual_learned": 35106.8875
+      },
+      "mean_cross_stream_q_spearman": 0.07111611052742196,
+      "q_max_tie_counts": {
+        "all_unique": 223,
+        "within_tie_multiple": 30,
+        "within_tie_unique": 210,
+        "all_multiple": 17
+      },
+      "heldout_mean_with_max_action_index_on_source_q_tie": {
+        "best_tie": 35659.88125,
+        "best_all": 37413.42916666667
+      },
+      "heldout_directions_changed_by_max_index_tiebreak": {
+        "best_tie": 12,
+        "best_all": 14
+      },
+      "mean_min_count_tie_size": 9.9625,
+      "all_state_min_counts_are_zero": true,
+      "rounded_expected_comparison": {
+        "fixed_exact": {
+          "claimed": 34419,
+          "observed_round": 34419,
+          "matches": true
+        },
+        "within_stream_hindsight_best_tie": {
+          "claimed": 4114,
+          "observed_round": 4114,
+          "matches": true
+        },
+        "heldout_best_tie": {
+          "claimed": 35613,
+          "observed_round": 35613,
+          "matches": true
+        },
+        "heldout_best_all": {
+          "claimed": 37360,
+          "observed_round": 37360,
+          "matches": true
+        },
+        "actual_learned": {
+          "claimed": 35107,
+          "observed_round": 35107,
+          "matches": true
+        }
+      }
+    },
+    "end": {
+      "states": 80,
+      "state_streams": 240,
+      "ordered_heldout_directions": 480,
+      "unordered_stream_pairs": 240,
+      "mean_regret_tokens": {
+        "fixed_exact": 46174.07083333333,
+        "within_stream_hindsight_best_tie": 6201.716666666666,
+        "heldout_best_tie": 46211.475,
+        "heldout_best_all": 47002.175,
+        "actual_learned": 45642.025
+      },
+      "mean_cross_stream_q_spearman": 0.03196740333828058,
+      "q_max_tie_counts": {
+        "all_unique": 218,
+        "within_tie_multiple": 29,
+        "within_tie_unique": 211,
+        "all_multiple": 22
+      },
+      "heldout_mean_with_max_action_index_on_source_q_tie": {
+        "best_tie": 46251.42291666667,
+        "best_all": 46909.6875
+      },
+      "heldout_directions_changed_by_max_index_tiebreak": {
+        "best_tie": 14,
+        "best_all": 16
+      },
+      "mean_min_count_tie_size": 9.9625,
+      "all_state_min_counts_are_zero": true
+    }
+  }
+}

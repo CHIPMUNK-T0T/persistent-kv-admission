@@ -3,6 +3,16 @@
 Status markers: **done** means the code, results, and findings document are in
 the repository; **current** is the experiment in progress; the rest is planned.
 
+Current navigation: [on-policy findings](onpolicy-learning-findings.md),
+[post hoc retention diagnostics](retention-decision-diagnostics.md),
+[one-step counterfactual findings](counterfactual-action-value-findings.md),
+and the [fresh-stream pre-registration](counterfactual-randomness-plan.md)
+with its [implementation guide](counterfactual-randomness-implementation.md).
+The fresh-stream run is in progress per the user; its outcomes have not
+been reviewed at this documentation checkpoint. The [old three-stream
+CSV audit](counterfactual-randomness-reanalysis.md) is post hoc and does
+not replace that registered result.
+
 ## Phase 0 — Trace characterization (done)
 
 - obtain public KV/prefix traces (Mooncake FAST'25: conversation, tool-agent, synthetic)
@@ -228,8 +238,11 @@ and below R_high in most cells. Case C not
 established. Verdict: the primary question is refuted, the B / C diagnosis is
 unresolved between the two decision populations; no non-history signal, new
 heuristic or new policy follows from this phase. Best learned L2 closes
-0.13–0.27 of the headroom, at parity with the best generic heap policy
-(−0.8 to +0.7 input-token points). The refuted statement is the pre-registered one (same features and model,
+0.13–0.27 of the headroom and differs from the best generic heap policy by
+−0.8 to +0.7 input-token points. Its mean is above that policy in five of 12
+real cells; the five-seed CIs measure sampling-seed variability, and the
+post-hoc best-arm / target comparison is not a formal significance test. The
+refuted statement is the pre-registered one (same features and model,
 training set replaced by the LRU / LFU behaviour logs); mismatch with the
 learned policy's own decisions is untreated. Candidate next step, not
 scheduled: on the few cells where the learned or victim-trained L2 loses
@@ -418,3 +431,17 @@ across policies.
 
 Optional system metrics: GPU power / energy, TTFT p50 / p95, storage overhead
 as a control variable, not the research contribution.
+
+## Current research status (documentation checkpoint)
+
+The later [fixed three-update on-policy study](onpolicy-learning-findings.md)
+reported complete held-out replay gains in some cells without passing its
+registered common-terminal-population ranking threshold. The
+[one-step counterfactual study](counterfactual-action-value-findings.md)
+measured realized regret under captured continuation streams; its 80-state,
+three-stream [post hoc CSV reanalysis](counterfactual-randomness-reanalysis.md)
+checks arithmetic and cross-stream ranks, not expected action values. The
+[16-fresh-stream pre-registration](counterfactual-randomness-plan.md) and
+[implementation guide](counterfactual-randomness-implementation.md) define
+the current run. Its outcome is pending at this documentation checkpoint, so
+no final conclusion or change to the registered gate follows here.
