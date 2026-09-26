@@ -1,17 +1,16 @@
 # Experiment Plan
 
 Status markers: **done** means the code, results, and findings document are in
-the repository; **current** is the experiment in progress; the rest is planned.
+the repository; **current** marks an experiment in progress when one exists;
+the rest is planned.
 
 Current navigation: [on-policy findings](onpolicy-learning-findings.md),
 [post hoc retention diagnostics](retention-decision-diagnostics.md),
 [one-step counterfactual findings](counterfactual-action-value-findings.md),
-and the [fresh-stream pre-registration](counterfactual-randomness-plan.md)
-with its [implementation guide](counterfactual-randomness-implementation.md).
-The fresh-stream run is in progress per the user; its outcomes have not
-been reviewed at this documentation checkpoint. The [old three-stream
-CSV audit](counterfactual-randomness-reanalysis.md) is post hoc and does
-not replace that registered result.
+and the completed fresh-stream [pre-registration](counterfactual-randomness-plan.md),
+[implementation guide](counterfactual-randomness-implementation.md), and
+[findings](counterfactual-randomness-findings.md). The [old three-stream CSV
+audit](counterfactual-randomness-reanalysis.md) is a separate post hoc calculation.
 
 ## Phase 0 — Trace characterization (done)
 
@@ -432,7 +431,7 @@ across policies.
 Optional system metrics: GPU power / energy, TTFT p50 / p95, storage overhead
 as a control variable, not the research contribution.
 
-## Current research status (documentation checkpoint)
+## Current research status
 
 The later [fixed three-update on-policy study](onpolicy-learning-findings.md)
 reported complete held-out replay gains in some cells without passing its
@@ -440,8 +439,11 @@ registered common-terminal-population ranking threshold. The
 [one-step counterfactual study](counterfactual-action-value-findings.md)
 measured realized regret under captured continuation streams; its 80-state,
 three-stream [post hoc CSV reanalysis](counterfactual-randomness-reanalysis.md)
-checks arithmetic and cross-stream ranks, not expected action values. The
-[16-fresh-stream pre-registration](counterfactual-randomness-plan.md) and
-[implementation guide](counterfactual-randomness-implementation.md) define
-the current run. Its outcome is pending at this documentation checkpoint, so
-no final conclusion or change to the registered gate follows here.
+checks arithmetic and cross-stream ranks. The registered
+[16-fresh-stream experiment](counterfactual-randomness-findings.md) completed
+40 fixed states and 10,888 branches. Unrestricted action selection averaged
++15,003.0 training-fold tokens versus the original action but −267.8 held-out;
+exact-tie selection averaged +13,567.2 training and +90.3 held-out. These
+descriptive results weaken the stable-gain reading of single-stream hindsight
+maxima. They do not prove equal expected action values or establish a
+trace-wide policy gain; further stages require separate designs.

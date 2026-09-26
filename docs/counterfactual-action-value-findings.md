@@ -46,3 +46,8 @@ To reproduce the additional figures, follow the [aggregate instructions](counter
     .venv/bin/python scripts/plot_counterfactual_review.py --paper-dir results/paper/counterfactual_action_002
 
 The plotting script rejects existing review outputs and records its input, script, and output hashes.
+
+The registered [16-fresh-stream follow-up](counterfactual-randomness-findings.md)
+selects actions on eight streams and evaluates them on the other eight. Its
+held-out results qualify how the single-stream hindsight maxima above should
+be read.

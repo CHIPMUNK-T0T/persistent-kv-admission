@@ -1,8 +1,8 @@
 # 研究の現在地
 
 この文書はREADMEから参照する現状の地図である。観測値と解釈を分ける。
-新しいfresh-stream実験は[事前登録](counterfactual-randomness-plan.md)と
-[実装説明](counterfactual-randomness-implementation.md)があるが、ここでは実測完了と扱わない。
+fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿って完了し、
+[結果](counterfactual-randomness-findings.md)と[出力](../results/paper/counterfactual_randomness_001/README.md)を収録した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -11,9 +11,9 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 有限容量のpersistent KV tierがL1から追い出されたstateを受け取るとき、到着stateと
 既存L2 residentのどれを捨てるべきか。過去の再利用履歴から作ったスコア、600秒内の
 正確な次回利用ラベル、そして「その1回の捨て方を変え、その後は元のpolicyを続ける」
-場合の将来回避token価値 `Q` は、どの条件で同じ選択をするのか。現在の直近gateは、
-単一の将来サンプリング実現で見た`Q`差が、独立の将来サンプリング列でも保たれるかを
-調べることにある。将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
+場合の将来回避token価値 `Q` は、どの条件で同じ選択をするのか。直近の実験では、
+単一の将来サンプリング実現で見た`Q`差が、別の将来サンプリング列でも保たれるかを
+調べた。将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
 現在は目標を変える段階ではなく、既存の選択と説明の検証を深めている。
 
 ## 仮説と証拠の台帳
@@ -31,7 +31,7 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | per-block attributionで損失原因を特定できる | 失われたblockを最後の除去へ帰属させる会計はL2-hit差をtoken単位で閉じた。ただし一つの判断を変えたときの因果的回収量ではない。 | [Phase 0.98b](decision-population-findings.md)。rejection/eviction/compulsoryの内訳と介入効果は区別する。 |
 | 自分の決定を学習する反復で改善する | `next_use` の固定3更新で、完全な後半40%のrequest windowの2%×1・2%×4は両実トレースでpi3がpi0を平均上回った。一方、事前登録した共通終端母集団の順位改善+0.05は全cellで未達。 | [on-policy findings](onpolicy-learning-findings.md)。40,000決定のreservoir cap、既使用test window、3更新での打切り、短いlabel-observable windowとの差を考慮する。 |
 | 正確な次回利用ラベルなら1回の捨て方の価値を順序づけられる | 固定320状態の単一将来実現では、exactラベルの固定tie-breakにも大きな事後regretがある。しかしexpected `Q`の順位失敗とはまだ言えない。 | [反実仮想findings](counterfactual-action-value-findings.md)。最小ラベルtie内の事後最良は、将来の実現値を見て選んだ下界であり実装可能なselectorではない。 |
-| 事後最大との差は継続サンプリングに対して安定 | 未解決。旧80状態・3 streamはばらつきを示す予備診断で、期待値推定にも「randomnessが何%を説明」との主張にも足りない。 | [旧sensitivity](counterfactual-action-value-findings.md)と次の[16 stream計画](counterfactual-randomness-plan.md)。 |
+| 事後最大との差は継続サンプリングに対して安定 | 固定40状態・16本の新しいstreamの交差評価では、全候補選択の学習側平均+15,003.0 tokenに対しheld-outは−267.8、exact tie内の選択は+13,567.2に対し+90.3。層と状態で符号が混在し、旧実現値での事後最大を安定した選択利得と読む根拠は弱まった。ただしexpected `Q`の等価性は示さない。 | [事前登録](counterfactual-randomness-plan.md)、[fresh-stream結果](counterfactual-randomness-findings.md)。旧[3 stream監査](counterfactual-randomness-reanalysis.md)は別の事後計算。 |
 
 ## 数値を読むための分母
 
@@ -79,30 +79,32 @@ Q最大の同点は最小action indexを選ぶと提示値に一致した。再�
 branch replayの正しさや新しい実験結果は検証していない。3 streamから安定した
 expected `Q`差や「regretの93%はrandomness」といった割合を確定できない。
 
-## 次のgate（計画・実装済み、実行結果未確認）
+## fresh-stream実験の結果と境界
 
-[事前登録](counterfactual-randomness-plan.md)は、旧runの40 lineageそれぞれの
-hash順位1位だけを固定し、40状態・678合法候補を対象にする。各状態で16本の新しい
-post-draw L2 sampling streamを作り、全候補に同じstream seedを与える。旧captured
-streamと旧sensitivity streamは推定から除く。fresh branchは10,848本、元actionの
-captured整合性確認が40本。source policy、モデル、既に抽出済み候補、現在の決定時点は
-変えない。
+[事前登録](counterfactual-randomness-plan.md)どおり、40 lineageからhash順位0の
+40状態・678候補を固定した。各状態の16本の新しいpost-draw L2 sampling streamで
+全候補を評価した10,848 branchと、推定に使わないcaptured元action確認40 branchの
+全10,888 branchが完了し、失敗lineageはない。15個の公開出力のSHA256は
+[run config](../results/paper/counterfactual_randomness_001/run_config.json)と一致する。
+旧captured/旧sensitivity streamはこの推定に含めていない。
 
-stream 1–8をA、9–16をBと固定し、Aの平均`Q600`で選んだ候補をBの各streamで
-元actionとpaired比較する。Bで選びAで評価する方向も作り、両方向のheld-out平均を
-等重みで記述する。exact next-use/count最小tie内でも同じ制約付き選択を行う。
-主統計は**8 streamで選ぶ手続き**の条件付き評価であり、真の期待`Q`最大候補の
-値そのものではない。各方向の小標本区間は条件付きであり、2方向を単純に16標本へ
-poolしない。固定trace/stateに対する正のheld-out差は継続サンプリングに対する
-安定性を支持し、差が不確かなら期待価値の同等性までは結論しない。新policy・新特徴・
-新しい意味信号を試す実験ではない。幅変更、ICC、結果を見たstream追加はこの登録に
-含まれない。[実装説明](counterfactual-randomness-implementation.md)には
-prepare→smoke→full→aggregateの手順と固定manifestの検査があるが、この文書は
-その実行と成果の確認を主張しない。
+stream 1–8をA、9–16をBとして、片方の平均`Q600`で選び、もう片方で元actionと
+paired比較した。折り返して得た40状態等重みの記述平均は、全候補で学習側
++15,003.0 token、held-out側−267.8（正17・負23状態）。exact next-use/countの
+最小ラベルtieは40状態すべてで同じ候補集合・選択となり、学習側+13,567.2、
+held-out側+90.3（正20・ゼロ1・負19）であった。固定exact actionは同じ640
+state/streamペアで元actionより平均+2,350.1 tokenだが、未来の利用を知る比較器で
+あり実装可能なpolicyではない。8 stratum別の値と符号は
+[findings](counterfactual-randomness-findings.md)に示す。
 
-次の判断はこのgateの結果と完全性検査を読んでから行う。正のheld-out差があっても、
-後段の単純なresidence機構の切り分けは別の計画・実験である。負または不確かな結果も
-報告対象であり、その場で実験幅を変えない。
+この結果は、旧単一実現の事後最大を転用可能な利得と読む根拠を弱める。一方、
+固定状態・固定将来requestにおける8 stream選択手続きの条件付き評価であり、
+expected `Q`が等しい証明ではない。各方向の8 stream区間や共有requestを持つ
+5 seedから、独立workloadへの有意差やtrace-wide回収量は推論しない。
+600秒で選んだ同じactionのtrace-end報酬は副次評価である。
+旧[3 stream公開監査](counterfactual-randomness-reanalysis.md)は別の事後計算であり、
+「regretの93%はrandomness」といった割合を確定しない。後段のresidence機構、
+sampling、意味信号、新policyの実験は今回行っていない。
 
 ## 実験モデルの境界
 

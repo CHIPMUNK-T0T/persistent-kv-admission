@@ -13,7 +13,7 @@ The current question is whether the exact reuse labels used to train a
 retention score rank those *actions* by downstream avoided-prefill value, and
 whether apparent action-value differences persist across future L2 sampling
 streams. The [research status](docs/research-status.md) separates supported
-findings, unresolved mechanisms, and the next registered experiment.
+findings, unresolved mechanisms, and the current measurement boundary.
 
 The observations so far are:
 
@@ -31,10 +31,15 @@ The observations so far are:
   both learned and exact-label choices. It used a single captured
   continuation for its main 320-state comparison; expected action values
   remain unresolved.
+- The registered 16-fresh-stream cross-fit on 40 fixed states found a
+  descriptive unrestricted held-out mean gain of −267.8 tokens versus the
+  original action, after +15,003.0 on the selection folds. Exact-label-tie
+  restriction gave +90.3 held-out after +13,567.2 on selection folds.
+  Stratum effects and state signs vary; this does not establish equal
+  expected action values.
 
 No result here establishes that a semantic signal, a new policy, or a
-particular tree-aware allocation is necessary. The next registered experiment
-changes only the continuation-stream measurement, not the deployed policy.
+particular tree-aware allocation is necessary.
 
 ## Representative results and how to read them
 
@@ -44,6 +49,7 @@ changes only the continuation-stream measurement, not the deployed policy.
 | [Decision-population learning](docs/decision-population-findings.md) | The post hoc best learned L2 exceeds the best generic **heap** mean in five of 12 real-trace cells, by at most 0.7 input-token points, while closing 0.13–0.27 of that phase's headroom. | Best model/target selected after inspection; five sampling-seed intervals do not establish formal superiority. This is separate from on-policy `pi3`. |
 | [On-policy updates](docs/onpolicy-learning-findings.md) | Primary `next_use` `pi3 − pi0` complete-last-40% utility at 2%×4 is +0.538 / +0.483 input-token points, with 5/5 positive paired seeds on conversation / tool-agent. The common `D_test(pi3)` ranking gains are +0.005 / +0.014, below the registered +0.05 threshold. | Fixed three updates, reused trace windows, capped decision reservoirs. In the shorter label-observable window the corresponding utility gains are +0.143 (3/5) / +0.198 (5/5), an exploratory time-window diagnostic. |
 | [One-step counterfactual Q](docs/counterfactual-action-value-findings.md) | 320 fixed decisions and 8,143 action/stream continuations. The exact 600-second next-use selector has lower mean realized regret than the learned selector in five of eight source-policy strata, higher in three. Its minimum-label tie averages 9.8875 actions; the hindsight best tied action has lower realized regret on these states. | Each branch forces one action, then resumes the source policy. The maximum over actions is chosen after observing a continuation. It is not expected-Q superiority or recoverable trace-wide gain. |
+| [Fresh-stream cross-fit](docs/counterfactual-randomness-findings.md) | On 40 fixed states and 16 new streams, unrestricted training/held-out gain is +15,003.0 / −267.8 tokens; exact-tie gain is +13,567.2 / +90.3. Fixed exact next use gains +2,350.1 tokens on the same paired streams. | Eight streams select and the other eight evaluate, then folds swap. Pooled state means are descriptive, the future-informed exact comparator is not deployable, and no trace-wide gain follows. |
 
 Here `2%×4` means L1 capacity is 2% of the packed unique-state working set
 and L2 capacity is four times L1. “Input-token points” means percentage points
@@ -76,19 +82,14 @@ reports; this page states the current interpretation.
 | Two-tier population and decisions | [victim stream](docs/two-tier-victim-findings.md), [decision-population results](docs/decision-population-findings.md), [per-block attribution](docs/decision-population-findings.md) |
 | Local arrival intervention | [Phase 1 findings](docs/phase1-intervention-findings.md): capacity-local gain for the weak B arm; general arrival protection gave similar gain, so ancestry-specific benefit was not established. |
 | Policy-created populations and action values | [on-policy findings](docs/onpolicy-learning-findings.md), [post hoc diagnostics](docs/retention-decision-diagnostics.md), [counterfactual findings](docs/counterfactual-action-value-findings.md) |
-| Next gate | [fresh-stream pre-registration](docs/counterfactual-randomness-plan.md) and [implementation guide](docs/counterfactual-randomness-implementation.md); the [old three-stream CSV audit](docs/counterfactual-randomness-reanalysis.md) is a separate post hoc calculation. |
+| Fresh-stream measurement | [pre-registration](docs/counterfactual-randomness-plan.md), [implementation guide](docs/counterfactual-randomness-implementation.md), [findings](docs/counterfactual-randomness-findings.md), and [paper output](results/paper/counterfactual_randomness_001/README.md). The [old three-stream CSV audit](docs/counterfactual-randomness-reanalysis.md) is a separate post hoc calculation. |
 
-The fresh-stream cross-fit design and code are present, but **real-run outcomes
-are not confirmed in this documentation checkpoint**. It fixes the first
-hash-ranked state from each of 40 lineages (40 states, 678 legal actions),
-16 new streams per state, and A/B folds of eight streams each. Its primary
-statistic evaluates an action selected on one fold against the original action
-on the other and swaps the folds. The full grid calls for 10,848 fresh action
-branches and 40 captured-action validation branches. The result will test
-conditional stability for these fixed traces/states and this eight-stream
-selection procedure; it will not estimate the best action for arbitrary future
-workloads. No width, ICC, or outcome-triggered stream expansion is part of
-this registration.
+The fresh-stream run completed all 40 lineages and 10,888 branches without
+recorded failures. Its primary statistic evaluates an action selected on one
+eight-stream fold against the original action on the other and swaps folds.
+The near-zero pooled held-out means and mixed state signs weaken the
+interpretation of in-stream hindsight maxima as selectable gains. They do not
+estimate the best action for arbitrary future workloads.
 
 ## Model and measurement
 

@@ -11,6 +11,11 @@ python3 scripts/run_characterization.py \
 
 The run uses 24 causal snapshots, ridge `0.001`, precision@100, seven cache-budget fractions from 0.1% to 10% of packed unique-state bytes, and both packed and fixed-block charging at the same absolute capacity. Raw traces and large per-state/generated outputs remain ignored.
 
+The completed [fresh continuation randomness output](counterfactual_randomness_001/README.md)
+contains the 40-state, 16-stream cross-fit tables, figures, and hashed run
+config. Its interpretation is in the [findings](../../docs/counterfactual-randomness-findings.md);
+the earlier three-stream CSV reanalysis remains separate.
+
 ## Files
 
 - `online_policy_comparison.csv` and `online_policy_comparison.png`: causal online policies only, including 2-hit + LRU. The offline comparator is excluded.
