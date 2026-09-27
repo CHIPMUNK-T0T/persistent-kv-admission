@@ -1,0 +1,42 @@
+# Counterfactual residence and downstream-divergence diagnostic
+
+Status: pre-registration. No new trajectory outcomes have been generated under this plan. Commit this file before implementation, and commit reviewed code/tests before real-trace execution.
+
+## Question and interpretation
+
+The [randomness experiment](counterfactual-randomness-findings.md) showed large in-sample hindsight gains but near-zero pooled eight-stream held-out gains. It did **not** establish equal expected action values. The next approved falsification step asks a narrower question: when two candidates have **zero own reuse within 600 seconds**, can the realized action-value difference be traced to the time one unproductive block occupies L2, or does it arise after subsequent L2 decisions change the cache trajectory? This is a mechanism diagnostic, not a new retention policy, expectation estimator, or independent workload confirmation. The later label-representation/sampling control is outside this phase.
+
+## Frozen population, actions, and streams
+
+Use the same 40 first-hash-ranked snapshots, trace/model/state-size/replay settings, fork boundary, and 16 post-draw common-random-number streams in `results/paper/counterfactual_randomness_001/run_config.json` (source commit `a02d67e`). The underlying frozen run is the complete ignored `results/counterfactual_randomness_001/`; reject missing or hash-mismatched inputs. The real traces, cells, pi0/pi3 sources and five lineage seeds are unchanged. Prior action outcomes have been inspected, so results are conditional follow-up evidence.
+
+At each state, use the published exact-count minimum tie set. Verify it equals the exact-next-use minimum tie set and that every member has `count_within_h=0`; abort if not. Fix two distinct forced-victim actions before reading their Q values:
+
+* **E:** published fixed exact-next-use action, with the original selector key and tie-break (minimum live `last_group`, then candidate index).
+* **Z:** among the same zero-reuse tie set, maximum live `last_group`, then maximum candidate index.
+
+Both actions differ in all 40 frozen snapshots, as checked from label/identity columns only. Z is a deliberate opposite tie-break **control**, not a proposed online policy or a purported good action. Do not select snapshots, actions, streams, or thresholds by observed Q. For each state and stream 1–16, replay E and Z, for exactly **1,280 instrumented branches**. Each pair starts at the same verified snapshot and uses the same frozen post-draw RNG seed. After one forced victim, both resume the unchanged source policy; future requests are identical. No extra streams or outcome-driven expansions.
+
+## Measurements and accounting
+
+Record read-only observations from the existing request, decision, and L2-removal hooks. Do not change admission, sampling, scoring, cache mutation, or reward semantics. Save event-level data in ignored results and lightweight aggregate tables for publication. Timestamp-group events at the action's own timestamp are excluded from future reward and residence exposure; note any immediate overflow removals separately.
+
+For every branch, report original `Q600`, `Qend`, L2-only rewards and reward digest; compare them **exactly** with that action/stream's hash-verified branch in the previous frozen run. Record every future request's group/order, L1/L2 avoided-token increments and whether each focal state is requested, plus later L2 decision/removal events. The reward increments must sum exactly to the existing Q totals, including the same-timestamp boundary. The two focal states are the E and Z candidates. Since neither is requested in the 600-second window, any paired Q difference within that window is indirect rather than a hit on those focal states; verify this from the fixed trace and the new request observations.
+
+For each branch, define the **focal survivor** as the candidate evicted by the other branch. Record whether it survives immediate overflow and the first subsequent time it leaves L2 (eviction, rejection if applicable, promotion), censoring at 600 seconds and trace end. Report elapsed milliseconds, timestamp groups, and block-byte × resident-seconds within `(t,t+600s]`; use actual packed block bytes. A survivor later re-admitted is a separate episode and is not part of first-residence duration. Record the candidate block-size difference and number of immediate overflow rounds, because they can confound a simple one-block-occupancy reading.
+
+Pair E and Z by state and stream. Report `DeltaQ = Q600(Z)-Q600(E)` (and trace-end secondary), the first later request with different L2 hit tokens, its lag in requests/groups/milliseconds, and cumulative paired DeltaQ at every differing request. Within each branch a request counter supplies the stable within-group order; the unchanged trace order permits exact branch pairing. Report the first later group with different L2 victim/rejection events, the number of differing hit requests, and incremental absolute and signed Q difference **before versus after both focal first-residence episodes have ended** (censor this split when an episode survives 600 seconds). A request can differ because of indirect occupancy or subsequent sampling decisions; these event timings are descriptive and do not establish mediation. If rejoining is measured, distinguish equality of the **ordered** L2 resident list and bytes from full continuation-state equality, which also requires RNG state (and other mutable scorer/store state). Equal hits or equal unordered resident sets alone are not rejoining. If reliable state equality is too expensive or unavailable, report rejoining as unmeasured.
+
+Present paired DeltaQ, residence exposure, and first-divergence lags by the eight pre-existing trace × cell × source-policy strata and overall, keeping all 40 states and 16 streams. Show scatter/distribution plots and representative cumulative traces chosen by a deterministic identity rule before looking at new outcomes (e.g. lowest selection hash in each capacity regime). Correlations/regressions between post-action residence and DeltaQ, if shown, are descriptive with state clustering; they are not a causal effect of residence. Do not turn stream-specific maxima, candidate counts, or event rows into independent workload replicates.
+
+## Competing explanations and stopping rule
+
+* If most paired differences are small or change sign across streams, conclude the measured realized mechanism does not identify a stable action preference; retain the randomness limitation.
+* If differential rewards arise while a focal survivor occupies capacity, with little later incremental divergence, simple occupancy/residence is a plausible explanation. It still does not prove that residence alone causally mediates Q.
+* If differences first appear or continue accumulating after both focal episodes end and later victim sequences differ, a downstream trajectory contribution is directly observed. This does not quantify its share of expected Q or prove that sophisticated state-conditioned control is needed.
+
+Report mixed patterns without forcing one category. The causal intervention here is **only E versus Z**; comparisons involving measured residence or later decisions are observational. Do not infer semantic necessity, history impossibility, true optimality, general workloads, or recoverable trace-wide gains. Stop after integrity checks, fixed-grid measurement, and a limitations-aware finding. No policy implementation, fit, new feature, or Phase-3 sampling/label control in this run.
+
+## Execution and protection
+
+Implement in new diagnostic module/runner/tests in the isolated worktree; preserve published source, old plans/findings, all old raw and paper results, and the original main checkout's pre-existing dirty files. Freeze hashes of plan, code, trace, model, 40 snapshot identities, old run config and every referenced old branch; refuse uncommitted execution source and mismatched resume. Smoke one fixed state and stream with both actions, check exact prior Q/digest and instrumentation accounting, then execute the fixed full grid with bounded workers. Any mismatch aborts rather than dropping a state. Publish scripts, integrity summary, compact CSVs/figures, and findings with what each plot supports and cannot establish. GPT-6 Sol xHigh implements/tests; the primary agent reviews design, source, validation and interpretation.
