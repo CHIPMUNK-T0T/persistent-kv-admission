@@ -9,11 +9,10 @@ traces. It does not measure GPU latency or modify a serving system.
 
 A persistent tier receives states evicted by an upper cache. Its decision is
 whether an arriving victim is worth more than the states it would displace.
-The current question is whether the exact reuse labels used to train a
-retention score rank those *actions* by downstream avoided-prefill value, and
-whether apparent action-value differences persist across future L2 sampling
-streams. The [research status](docs/research-status.md) separates supported
-findings, unresolved mechanisms, and the current measurement boundary.
+The current question is how state-local reuse labels relate to the value of
+retention *actions* under later L2 sampling and cache-state changes. The
+[research status](docs/research-status.md) separates supported findings,
+unresolved mechanisms, and the current measurement boundary.
 
 The observations so far are:
 
@@ -37,6 +36,11 @@ The observations so far are:
   restriction gave +90.3 held-out after +13,567.2 on selection folds.
   Stratum effects and state signs vary; this does not establish equal
   expected action values.
+- A follow-up replayed two fixed zero-own-reuse actions on those same 40 states
+  and 16 streams. Same-size focal blocks showed mixed reward differences;
+  later L2 victim sequences usually diverged before the first hit difference,
+  and differences often continued after both focal blocks left L2. This is a
+  trajectory diagnostic, not a new expected-`Q` estimate.
 
 No result here establishes that a semantic signal, a new policy, or a
 particular tree-aware allocation is necessary.
@@ -50,6 +54,7 @@ particular tree-aware allocation is necessary.
 | [On-policy updates](docs/onpolicy-learning-findings.md) | Primary `next_use` `pi3 − pi0` complete-last-40% utility at 2%×4 is +0.538 / +0.483 input-token points, with 5/5 positive paired seeds on conversation / tool-agent. The common `D_test(pi3)` ranking gains are +0.005 / +0.014, below the registered +0.05 threshold. | Fixed three updates, reused trace windows, capped decision reservoirs. In the shorter label-observable window the corresponding utility gains are +0.143 (3/5) / +0.198 (5/5), an exploratory time-window diagnostic. |
 | [One-step counterfactual Q](docs/counterfactual-action-value-findings.md) | 320 fixed decisions and 8,143 action/stream continuations. The exact 600-second next-use selector has lower mean realized regret than the learned selector in five of eight source-policy strata, higher in three. Its minimum-label tie averages 9.8875 actions; the hindsight best tied action has lower realized regret on these states. | Each branch forces one action, then resumes the source policy. The maximum over actions is chosen after observing a continuation. It is not expected-Q superiority or recoverable trace-wide gain. |
 | [Fresh-stream cross-fit](docs/counterfactual-randomness-findings.md) | On 40 fixed states and 16 new streams, unrestricted training/held-out gain is +15,003.0 / −267.8 tokens; exact-tie gain is +13,567.2 / +90.3. Fixed exact next use gains +2,350.1 tokens on the same paired streams. | Eight streams select and the other eight evaluate, then folds swap. Pooled state means are descriptive, the future-informed exact comparator is not deployable, and no trace-wide gain follows. |
+| [Zero-reuse residence diagnostic](docs/counterfactual-residence-findings.md) | Across 640 fixed E/Z paired streams, 629 subsequent victim-sequence differences precede the first hit difference; in 491/497 pairs where both focal blocks leave before 600 seconds, per-request reward differences continue afterward. | The blocks are equally sized and have no own reuse within 600 seconds. Residence correlation and downstream event order do not establish causal mediation or an expected-action advantage. |
 
 Here `2%×4` means L1 capacity is 2% of the packed unique-state working set
 and L2 capacity is four times L1. “Input-token points” means percentage points
@@ -83,6 +88,7 @@ reports; this page states the current interpretation.
 | Local arrival intervention | [Phase 1 findings](docs/phase1-intervention-findings.md): capacity-local gain for the weak B arm; general arrival protection gave similar gain, so ancestry-specific benefit was not established. |
 | Policy-created populations and action values | [on-policy findings](docs/onpolicy-learning-findings.md), [post hoc diagnostics](docs/retention-decision-diagnostics.md), [counterfactual findings](docs/counterfactual-action-value-findings.md) |
 | Fresh-stream measurement | [pre-registration](docs/counterfactual-randomness-plan.md), [implementation guide](docs/counterfactual-randomness-implementation.md), [findings](docs/counterfactual-randomness-findings.md), and [paper output](results/paper/counterfactual_randomness_001/README.md). The [old three-stream CSV audit](docs/counterfactual-randomness-reanalysis.md) is a separate post hoc calculation. |
+| Residence mechanism diagnostic | [pre-registration](docs/counterfactual-residence-plan.md), [findings](docs/counterfactual-residence-findings.md), and [paper output](results/paper/counterfactual_residence_001/README.md). It instruments the same states/streams; full event logs are ignored. |
 
 The fresh-stream run completed all 40 lineages and 10,888 branches without
 recorded failures. Its primary statistic evaluates an action selected on one

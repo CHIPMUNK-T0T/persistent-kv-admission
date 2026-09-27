@@ -15,6 +15,11 @@ The completed [fresh continuation randomness output](counterfactual_randomness_0
 contains the 40-state, 16-stream cross-fit tables, figures, and hashed run
 config. Its interpretation is in the [findings](../../docs/counterfactual-randomness-findings.md);
 the earlier three-stream CSV reanalysis remains separate.
+The [zero-own-reuse residence output](counterfactual_residence_001/README.md)
+adds 640 fixed E/Z paired trajectories on those same states and streams, with
+hash-checked rewards, compact CSVs and figures. Its
+[findings](../../docs/counterfactual-residence-findings.md) describe the
+downstream divergence and the limits of a residence-only explanation.
 
 ## Files
 

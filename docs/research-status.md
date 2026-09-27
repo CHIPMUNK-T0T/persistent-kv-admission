@@ -3,6 +3,7 @@
 この文書はREADMEから参照する現状の地図である。観測値と解釈を分ける。
 fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿って完了し、
 [結果](counterfactual-randomness-findings.md)と[出力](../results/paper/counterfactual_randomness_001/README.md)を収録した。
+その後、同じ固定状態・乱数列での[保持時間診断](counterfactual-residence-findings.md)も完了した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -13,7 +14,8 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 正確な次回利用ラベル、そして「その1回の捨て方を変え、その後は元のpolicyを続ける」
 場合の将来回避token価値 `Q` は、どの条件で同じ選択をするのか。直近の実験では、
 単一の将来サンプリング実現で見た`Q`差が、別の将来サンプリング列でも保たれるかを
-調べた。将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
+調べ、さらに自己再利用ゼロの2候補について保持時間と後続decisionの時系列を測った。
+将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
 現在は目標を変える段階ではなく、既存の選択と説明の検証を深めている。
 
 ## 仮説と証拠の台帳
@@ -32,6 +34,7 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 自分の決定を学習する反復で改善する | `next_use` の固定3更新で、完全な後半40%のrequest windowの2%×1・2%×4は両実トレースでpi3がpi0を平均上回った。一方、事前登録した共通終端母集団の順位改善+0.05は全cellで未達。 | [on-policy findings](onpolicy-learning-findings.md)。40,000決定のreservoir cap、既使用test window、3更新での打切り、短いlabel-observable windowとの差を考慮する。 |
 | 正確な次回利用ラベルなら1回の捨て方の価値を順序づけられる | 固定320状態の単一将来実現では、exactラベルの固定tie-breakにも大きな事後regretがある。しかしexpected `Q`の順位失敗とはまだ言えない。 | [反実仮想findings](counterfactual-action-value-findings.md)。最小ラベルtie内の事後最良は、将来の実現値を見て選んだ下界であり実装可能なselectorではない。 |
 | 事後最大との差は継続サンプリングに対して安定 | 固定40状態・16本の新しいstreamの交差評価では、全候補選択の学習側平均+15,003.0 tokenに対しheld-outは−267.8、exact tie内の選択は+13,567.2に対し+90.3。層と状態で符号が混在し、旧実現値での事後最大を安定した選択利得と読む根拠は弱まった。ただしexpected `Q`の等価性は示さない。 | [事前登録](counterfactual-randomness-plan.md)、[fresh-stream結果](counterfactual-randomness-findings.md)。旧[3 stream監査](counterfactual-randomness-reanalysis.md)は別の事後計算。 |
+| 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母
 
@@ -103,8 +106,28 @@ expected `Q`が等しい証明ではない。各方向の8 stream区間や共有
 5 seedから、独立workloadへの有意差やtrace-wide回収量は推論しない。
 600秒で選んだ同じactionのtrace-end報酬は副次評価である。
 旧[3 stream公開監査](counterfactual-randomness-reanalysis.md)は別の事後計算であり、
-「regretの93%はrandomness」といった割合を確定しない。後段のresidence機構、
-sampling、意味信号、新policyの実験は今回行っていない。
+「regretの93%はrandomness」といった割合を確定しない。
+
+## 自己再利用ゼロ候補の保持時間と後続trajectory
+
+[別途事前登録した診断](counterfactual-residence-plan.md)では、上の40状態・16 streamを
+そのまま用い、600秒内の自己再利用数がともにゼロの2候補を結果非依存で固定した。
+Eは旧exact-next-useの同点内固定選択、Zはlive `last_group`が最大の逆側候補である。
+計1,280 instrumented branchの報酬とdigestは旧branchと全件一致した。
+
+両候補は全640ペアで同じ1 MiBを占め、初回overflow round数も同じだった。
+`ΔQ600=Q(Z)−Q(E)`の40状態等重み平均は+305.3 tokenだが、状態平均の符号は
+正20・負20、640 streamでも正328・ゼロ2・負310と混在する。候補の保持
+byte-seconds差と`ΔQ`のSpearmanは640行で−0.029、40状態平均で−0.090。
+これは単一の保持時間による**実現値の記述**が弱いことを示すが、保持時間は
+行動後変数なので因果的な媒介を否定しない。
+
+629/640ペアで後続victim/rejectionの差が最初のL2 hit差より先に現れた。
+両候補が600秒前に除去された497ペアのうち491ペアでは、その後もrequest単位の
+報酬差が出る。従って違いは候補自身への直接hitではなく、後続cache状態に伝わる。
+ただし差がどう形成されたかの寄与率、安定した期待行動価値、cache状態とRNGを
+含めた再合流は未測定である。詳細な表・図と限界は[findings](counterfactual-residence-findings.md)。
+sampling機構の対照、label表現の再検討、意味信号、新policyはこの診断に含まない。
 
 ## 実験モデルの境界
 

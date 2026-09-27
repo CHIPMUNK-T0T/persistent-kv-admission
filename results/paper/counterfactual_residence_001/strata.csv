@@ -1,0 +1,9 @@
+trace,l1_fraction,l2_multiplier,policy,states,streams_per_state,mean_state_delta_q600,mean_state_delta_qend,positive_states,zero_states,negative_states
+conversation_trace,0.0025,1,pi0,5,16,-1977.6,-3686.4,2,0,3
+conversation_trace,0.0025,1,pi3,5,16,-1236.9875,-1928.725,3,0,2
+conversation_trace,0.02,4,pi0,5,16,537.2625,267.2375,2,0,3
+conversation_trace,0.02,4,pi3,5,16,-3447.55,-35.5625,2,0,3
+toolagent_trace,0.0025,1,pi0,5,16,1227.2625,1909.85,4,0,1
+toolagent_trace,0.0025,1,pi3,5,16,-32.55,-90.225,1,0,4
+toolagent_trace,0.02,4,pi0,5,16,3950.3125,7233.4625,3,0,2
+toolagent_trace,0.02,4,pi3,5,16,3421.925,3469.5875,3,0,2
