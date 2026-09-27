@@ -1,6 +1,9 @@
 # 研究の現在地
 
 この文書はREADMEから参照する現状の地図である。観測値と解釈を分ける。
+先行研究との重複、新規性候補、次の戦略相談は
+[2026-09-27の引継ぎ](strategy-handoff-20260927.md)に分けて記録した。
+そこに挙げた候補は未決であり、新しい実験の事前登録ではない。
 fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿って完了し、
 [結果](counterfactual-randomness-findings.md)と[出力](../results/paper/counterfactual_randomness_001/README.md)を収録した。
 その後、同じ固定状態・乱数列での[保持時間診断](counterfactual-residence-findings.md)も完了した。

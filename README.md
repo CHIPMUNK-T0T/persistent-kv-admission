@@ -14,6 +14,11 @@ retention *actions* under later L2 sampling and cache-state changes. The
 [research status](docs/research-status.md) separates supported findings,
 unresolved mechanisms, and the current measurement boundary.
 
+For the next strategy discussion, see the Japanese
+[2026-09-27 research handoff](docs/strategy-handoff-20260927.md). It separates
+the completed evidence from related-work overlap, possible contributions,
+and unresolved hypotheses. These options are not a new preregistered experiment.
+
 The observations so far are:
 
 - Exact-prefix reuse has substantial skew and a greedy future-aware comparator
