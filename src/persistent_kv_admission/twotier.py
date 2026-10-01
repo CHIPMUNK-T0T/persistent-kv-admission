@@ -61,6 +61,11 @@ L2_POLICIES = ("lru", "lfu", "lru_2hit", "offline_next_use")
 L2_SCORED_POLICIES = ("learned",)
 L2_EVICTIONS = ("heap", "sampled")
 ARRIVAL_PROTECTIONS = ("none", "direct_child", "all")
+# Which residents a sampled decision may remove (mechanism control). "all" is
+# the published mechanism: the arrival plus a uniform sample of every other
+# resident. "leaf" admits only residents none of whose direct children is in
+# L2, which is how a tree-native engine evicts; it is a control, not a policy.
+L2_ELIGIBILITIES = ("all", "leaf")
 HIT_MODELS = ("tree", "independent")
 CLOSURES = ("union", "standalone")
 
@@ -68,7 +73,8 @@ CLOSURES = ("union", "standalone")
 # score tuples in the same order, the index of the chosen victim, the current
 # timestamp, the current timestamp-group index, and the position of the
 # arriving victim in the candidate list (-1 after the first round of an
-# admission, where the arrival is an ordinary resident).
+# admission, where the arrival is an ordinary resident, and in a first round
+# that leaf eligibility does not offer the arrival to).
 L2DecisionHook = Callable[[list[str], list[tuple[float, ...]], int, float, int, int], None]
 # Optional experimental override of one sampled decision. ``None`` keeps the
 # original first tuple minimum. The hook runs after the ordinary observer and
@@ -268,6 +274,28 @@ class _VictimStore:
     dicts. Under union closure that is exactly the history a resident had when
     it left L1: a request for it promotes it out of this store before L1's
     counters move, so the values cannot drift while it is held here.
+
+    Two mechanism controls ride on the sampled path, both off by default:
+
+    * ``eligibility="leaf"`` restricts every decision set to *leaf* residents,
+      those none of whose direct children is in this store. The first round
+      offers the arrival if and only if it is a leaf, plus a uniform sample of
+      up to `sample_width` other leaves; later rounds sample up to
+      `sample_width` leaves, the arrival included if it is one. Leaf status is
+      read afresh every round from `resident_children`, which is kept exact at
+      the two places a state enters (`admit`) and leaves (`_remove`) the store,
+      so promotion, eviction and rejection are all covered. Because L1 is
+      prefix-closed, a child reaches L2 before its parent; a parent can then
+      be neither rejected nor evicted while a child is resident, and promotion
+      only moves it into L1. So L1 ∪ L2 stays ancestor-closed and no block is
+      ever present but unusable. The count is maintained only under
+      ``"leaf"``; the published ``"all"`` path does no extra work.
+    * ``sampled_offline=True`` lets the heap offline comparator's key,
+      ``_key(state, 0, 0, group_index)``, rank a sampled decision. A resident
+      cannot be requested while it is held here, so its next occurrence after
+      the decision group is its next occurrence after the admission group, and
+      the key is the one the heap path would have pushed. Without the flag the
+      comparator is refused on the sampled path, as it always was.
     """
 
     def __init__(
@@ -289,9 +317,26 @@ class _VictimStore:
         arrival_protection: str = "none",
         protection_hook: L2ProtectionHook | None = None,
         override_hook: L2OverrideHook | None = None,
+        eligibility: str = "all",
+        sampled_offline: bool = False,
     ) -> None:
         if eviction not in L2_EVICTIONS:
             raise ValueError(f"unknown L2 eviction mechanism {eviction!r}")
+        if eligibility not in L2_ELIGIBILITIES:
+            raise ValueError(f"unknown L2 eligibility {eligibility!r}")
+        if eligibility == "leaf":
+            if eviction != "sampled":
+                raise ValueError("leaf eligibility needs sampled L2 eviction")
+            if arrival_protection != "none":
+                raise ValueError("leaf eligibility is defined without arrival protection")
+            if policy == "lru_2hit":
+                # The 2-hit rule declines an arrival before any ranking, which
+                # can drop a parent whose child is resident and break the closure.
+                raise ValueError("leaf eligibility is not defined for lru_2hit")
+            if sample_width <= 0:
+                raise ValueError("leaf eligibility needs a positive sample width")
+        if sampled_offline and (policy != "offline_next_use" or eviction != "sampled"):
+            raise ValueError("sampled_offline applies to offline_next_use on the sampled path only")
         if scorer is None:
             if policy not in L2_POLICIES:
                 raise ValueError(f"unknown L2 policy {policy!r}")
@@ -306,7 +351,7 @@ class _VictimStore:
         if arrival_protection != "none" and sample_width <= 0:
             raise ValueError("arrival protection needs a positive sample width")
         if eviction == "sampled":
-            if policy == "offline_next_use":
+            if policy == "offline_next_use" and not sampled_offline:
                 raise ValueError("the offline L2 comparator runs on the heap path only")
             if frequency is None or last_group is None:
                 raise ValueError("sampled L2 eviction needs L1's frequency and last_group")
@@ -339,6 +384,11 @@ class _VictimStore:
         self.protection_hook = protection_hook
         self.frequency = frequency
         self.last_group = last_group
+        self.eligibility = eligibility
+        self.sampled_offline = sampled_offline
+        # Under "leaf" only: resident -> number of its direct children that are
+        # resident too. A plain dict keyed in insertion order, read by lookup.
+        self.resident_children: dict[str, int] = {}
         self.decisions = 0
         # Live residency by depth. Admitted bytes by depth are accumulated by
         # the caller, which knows whether the eviction that caused the
@@ -361,8 +411,12 @@ class _VictimStore:
             return (-float(next_group), -prefix_tokens)
         return (-float(next_group), prefix_tokens)
 
-    def _sampled_key(self, state_id: str, timestamp_ms: float) -> tuple[float, ...]:
-        """The candidate's priority as of `timestamp_ms`, recomputed every time."""
+    def _sampled_key(self, state_id: str, timestamp_ms: float, group_index: int) -> tuple[float, ...]:
+        """The candidate's priority as of `timestamp_ms`, recomputed every time.
+
+        `group_index` is the decision's timestamp group; only the offline
+        comparator reads it, to find the next occurrence after the decision.
+        """
         last = float(self.last_group[state_id])
         if self.scorer is not None:
             return (self.scorer.score(state_id, timestamp_ms), last)
@@ -370,6 +424,10 @@ class _VictimStore:
             return (last,)
         if self.policy == "lfu":
             return (float(self.frequency[state_id]), last)
+        if self.policy == "offline_next_use" and self.sampled_offline:
+            # Exactly the heap comparator's key; frequency and recency are not
+            # part of it, so they are passed as zeros.
+            return self._key(state_id, 0, 0, group_index)
         raise ValueError(f"policy {self.policy!r} has no sampled key")
 
     def admit(
@@ -399,6 +457,8 @@ class _VictimStore:
         # The arrival is charged first and ranked against the residents after,
         # so an admission and a rejection differ only in who loses the round.
         self.cached[state_id] = None
+        if self.eligibility == "leaf":
+            self._count_insert(state_id)
         self.current_bytes += size
         self.bytes_by_depth[label] += size
         self.admissions += 1
@@ -447,7 +507,15 @@ class _VictimStore:
             # dropping the last key leaves exactly the other residents in the
             # original insertion order.
             residents = list(self.cached)
-            if first_round:
+            if self.eligibility == "leaf":
+                candidates, arriving_index = self._leaf_candidates(
+                    arriving, residents, first_round
+                )
+                scores = [
+                    self._sampled_key(state_id, timestamp_ms, group_index)
+                    for state_id in candidates
+                ]
+            elif first_round:
                 others = residents[:-1]
                 if len(others) > self.sample_width:
                     # The protected arm deliberately preserves the original
@@ -460,7 +528,7 @@ class _VictimStore:
                         )
                     full_candidates = [arriving] + others
                     full_scores = [
-                        self._sampled_key(state_id, timestamp_ms)
+                        self._sampled_key(state_id, timestamp_ms, group_index)
                         for state_id in full_candidates
                     ]
                     original_victim = min(
@@ -476,7 +544,8 @@ class _VictimStore:
                 else:
                     candidates = [arriving] + others
                     scores = [
-                        self._sampled_key(state_id, timestamp_ms) for state_id in candidates
+                        self._sampled_key(state_id, timestamp_ms, group_index)
+                        for state_id in candidates
                     ]
                     arriving_index = 0
             else:
@@ -497,7 +566,10 @@ class _VictimStore:
                         if len(residents) <= self.sample_width
                         else self.rng.sample(residents, self.sample_width)
                     )
-                scores = [self._sampled_key(state_id, timestamp_ms) for state_id in candidates]
+                scores = [
+                    self._sampled_key(state_id, timestamp_ms, group_index)
+                    for state_id in candidates
+                ]
                 arriving_index = -1
             if protected and not protected_overflow_recorded:
                 protected_overflow_recorded = True
@@ -537,8 +609,60 @@ class _VictimStore:
             first_round = False
         return True
 
+    def _leaf_candidates(
+        self, arriving: str, residents: list[str], first_round: bool
+    ) -> tuple[list[str], int]:
+        """The decision set of one round under leaf eligibility.
+
+        `residents` is the store in insertion order, so the leaves are too and
+        the uniform draw reads a list whose order does not depend on hashing.
+        Returns the candidates and the arrival's index in them: 0 when the
+        arrival is offered in its own first round (it is then placed first, as
+        on the published path, so a tie still rejects it), -1 otherwise.
+        """
+        counts = self.resident_children
+        leaves = [state_id for state_id in residents if counts[state_id] == 0]
+        if first_round:
+            others = [state_id for state_id in leaves if state_id != arriving]
+            if len(others) > self.sample_width:
+                others = self.rng.sample(others, self.sample_width)
+            if counts[arriving] == 0:
+                candidates, arriving_index = [arriving] + others, 0
+            else:
+                candidates, arriving_index = others, -1
+        else:
+            candidates = (
+                leaves
+                if len(leaves) <= self.sample_width
+                else self.rng.sample(leaves, self.sample_width)
+            )
+            arriving_index = -1
+        if not candidates:
+            # A non-empty forest always has a leaf, so this is a broken count,
+            # never a reason to fall back to a non-leaf victim.
+            raise AssertionError("L2 overflowed with no leaf resident: resident_children is wrong")
+        return candidates, arriving_index
+
+    def _count_insert(self, state_id: str) -> None:
+        """`state_id` has just entered the store: count its resident children.
+
+        `trace.children` holds sets; iterating one here only feeds a count, so
+        its hash-dependent order cannot reach sampling or tie-breaking.
+        """
+        self.resident_children[state_id] = sum(
+            1 for child in self.trace.children.get(state_id, ()) if child in self.cached
+        )
+        parent = self.trace.states[state_id].parent_id
+        if parent is not None and parent in self.cached:
+            self.resident_children[parent] += 1
+
     def _remove(self, state_id: str) -> None:
         del self.cached[state_id]
+        if self.eligibility == "leaf":
+            parent = self.trace.states[state_id].parent_id
+            if parent is not None and parent in self.cached:
+                self.resident_children[parent] -= 1
+            del self.resident_children[state_id]
         size = self.state_bytes(state_id)
         self.current_bytes -= size
         self.bytes_by_depth[depth_bin(self.trace.states[state_id].depth)] -= size
@@ -594,6 +718,8 @@ def run_two_tier(
     l2_protection_hook: L2ProtectionHook | None = None,
     stop_before_ms: float | None = None,
     l2_override_hook: L2OverrideHook | None = None,
+    l2_eligibility: str = "all",
+    l2_sampled_offline: bool = False,
 ) -> TwoTierResult:
     """Replay L1 (fixed) and L2 (the arm) in one pass; optionally log every L1 eviction.
 
@@ -638,6 +764,15 @@ def run_two_tier(
     A decision observer records the original index, not an overridden action.
     An object with `attach(l1, l2, counters)` receives the live stores before
     replay so a fork can inspect their complete state.
+
+    `l2_eligibility` and `l2_sampled_offline` are the mechanism-control
+    options (`_VictimStore` documents both). Their defaults, "all" and False,
+    are the published path exactly: same candidates, same RNG consumption, same
+    result. "leaf" needs sampled union eviction, no arrival protection and a
+    policy other than lru_2hit; `l2_sampled_offline=True` is the only way to run
+    `l2_policy="offline_next_use"` with `l2_eviction="sampled"`. Neither is
+    recorded in `TwoTierResult`, whose row layout the published tables share;
+    a caller that sets them records them itself.
     """
     if l1_policy not in L1_POLICIES:
         raise ValueError(f"unknown L1 policy {l1_policy!r}")
@@ -653,7 +788,20 @@ def run_two_tier(
         raise ValueError(f"unknown L2 eviction mechanism {l2_eviction!r}")
     if l2_arrival_protection not in ARRIVAL_PROTECTIONS:
         raise ValueError(f"unknown arrival protection {l2_arrival_protection!r}")
+    if l2_eligibility not in L2_ELIGIBILITIES:
+        raise ValueError(f"unknown L2 eligibility {l2_eligibility!r}")
     use_l2 = l2_capacity_bytes > 0 and l2_policy != "none"
+    if use_l2 and l2_eligibility == "leaf":
+        if l2_eviction != "sampled" or closure != "union":
+            raise ValueError("leaf eligibility needs sampled L2 eviction under the union closure")
+        if l2_arrival_protection != "none":
+            raise ValueError("leaf eligibility is defined without arrival protection")
+        if l2_policy == "lru_2hit":
+            raise ValueError("leaf eligibility is not defined for lru_2hit")
+        if l2_sample_width <= 0:
+            raise ValueError("leaf eligibility needs a positive sample width")
+    if l2_sampled_offline and (l2_policy != "offline_next_use" or l2_eviction != "sampled"):
+        raise ValueError("l2_sampled_offline applies to offline_next_use on the sampled path only")
     if use_l2 and l2_arrival_protection != "none" and l2_eviction != "sampled":
         raise ValueError("arrival protection needs sampled L2 eviction")
     if use_l2 and l2_arrival_protection != "none" and l2_sample_width <= 0:
@@ -665,7 +813,7 @@ def run_two_tier(
     if l2_eviction == "sampled":
         if closure != "union":
             raise ValueError("sampled L2 eviction is defined for the union closure only")
-        if l2_policy == "offline_next_use":
+        if l2_policy == "offline_next_use" and not l2_sampled_offline:
             raise ValueError("the offline L2 comparator runs on the heap path only")
     if l2_override_hook is not None and (
         not use_l2 or closure != "union" or l2_eviction != "sampled"
@@ -777,7 +925,9 @@ def run_two_tier(
                                     frequency=l1.frequency, last_group=l1.last_group,
                                     removal_hook=l2_removal_hook,
                                     arrival_protection=l2_arrival_protection,
-                                    protection_hook=l2_protection_hook)
+                                    protection_hook=l2_protection_hook,
+                                    eligibility=l2_eligibility,
+                                    sampled_offline=l2_sampled_offline)
             l2_bytes_by_depth = l2_union.bytes_by_depth
         else:
             l2_standalone = _PrefixClosedCache(
