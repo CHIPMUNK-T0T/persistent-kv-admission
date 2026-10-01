@@ -447,3 +447,9 @@ exact-tie selection averaged +13,567.2 training and +90.3 held-out. These
 descriptive results weaken the stable-gain reading of single-stream hindsight
 maxima. They do not prove equal expected action values or establish a
 trace-wide policy gain; further stages require separate designs.
+
+The sampling-mechanism control left open by the handoff is pre-registered in
+[mechanism-control-plan.md](mechanism-control-plan.md): a fixed four-rung score
+ladder (LRU, frozen learned ranker, exact label, exact next use) replayed under
+all-resident and leaf-only eligibility at widths 16 and 64. It has not been
+run.
