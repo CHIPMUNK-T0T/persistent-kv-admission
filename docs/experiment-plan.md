@@ -451,5 +451,17 @@ trace-wide policy gain; further stages require separate designs.
 The sampling-mechanism control left open by the handoff is pre-registered in
 [mechanism-control-plan.md](mechanism-control-plan.md): a fixed four-rung score
 ladder (LRU, frozen learned ranker, exact label, exact next use) replayed under
-all-resident and leaf-only eligibility at widths 16 and 64. It has not been
-run.
+all-resident and leaf-only eligibility at widths 16 and 64.
+
+Outcome ([findings](mechanism-control-findings.md), 960 replays, all required
+checks passed): under the published mechanism the signal gap
+`U(label) − U(learned)` holds 53.8–84.0% of the headroom `T` and is the
+dominant term in 12/12 real trace × cell and in every seed; it stays dominant
+under leaf-only eligibility at width 64 (69.9–91.1%). The candidate-search gap
+is 0–28.1% of `T` under the published mechanism and at most 5.5% under
+`leaf64`, where it is negative at the three smallest cells because the leaf
+mechanism exceeds the greedy heap reference. The ladder inequality fails only
+at its top pair (`label > offline`, at most 1.6 points). The control fits
+nothing and promotes no policy; it does not bound what other causal
+information could do, and it did not run the `pi3` update, binary targets or
+arrival protection.

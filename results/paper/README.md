@@ -20,6 +20,11 @@ adds 640 fixed E/Z paired trajectories on those same states and streams, with
 hash-checked rewards, compact CSVs and figures. Its
 [findings](../../docs/counterfactual-residence-findings.md) describe the
 downstream divergence and the limits of a residence-only explanation.
+The [mechanism control output](mechanism_control_001/README.md) holds the L2
+score fixed at four rungs and replays it under four eviction mechanisms (960
+replays); its [findings](../../docs/mechanism-control-findings.md) state the
+headroom decomposition and its limits, and
+`scripts/tabulate_mechanism_control.py` prints every cited table from the CSVs.
 
 ## Files
 
