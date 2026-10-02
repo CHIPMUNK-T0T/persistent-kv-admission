@@ -13,3 +13,6 @@ NOTE/
 AGENTS.md
 CLAUDE.md
 RULES.md
+
+# Claude Code worktrees (another agent's in-progress checkouts)
+.claude/
