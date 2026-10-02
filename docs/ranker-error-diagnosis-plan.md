@@ -134,3 +134,43 @@ feature, a target, a fit or a policy.
    published table read.
 4. Report the five readings in a findings document, including every cell
    that goes against the error-location reading.
+
+## Addendum, recorded before the computation (2026-10-02)
+
+Written after the implementation was reviewed and before any saved log was
+read; nothing has been computed. The text above is unchanged. This addendum
+corrects one statement that cannot hold as written and fixes the readings the
+implementation had to choose.
+
+- **The four classes of reading 3 are not disjoint in one case.** A victim
+  whose next use is at exactly 600 seconds is reusable (delta ≤ 600 s) and
+  carries the clipped label of a candidate with no reuse. With such a
+  candidate present the decision has no label excess and is also an avoidable
+  reusable eviction, so "exactly one class" fails there. The classes are
+  taken in the order listed: such a decision counts in a no-excess class, and
+  the number of decisions this applies to is published per class
+  (`overlap_decisions`). `m4` keeps its own definition and still counts them.
+  Excess shares are unaffected, since these decisions have no excess.
+- **Which victim each reading uses.** Readings 1 and 2 use the recomputed
+  victim of a scorer for all four entries of the matrix, the own scorer
+  included; the same quantities from the logged victim are published beside
+  them. Readings 3 to 5 use the logged victim of the `pi0` population.
+- **Reading 2** compares the five-seed mean of `−Δown` with the reading of
+  `ΔU_label`; a cell is listed when `ΔU_label` is consistent and that mean has
+  the other, non-zero sign.
+- **Reading 4.** Only the comparison with recency is the registered reading;
+  the same rule against the uniform expectation is published as a
+  description.
+- **Reading 5** counts every avoidable reusable eviction of class 3, including
+  decisions whose victim is the arrival, and repeats the three numbers
+  separately for resident victims and for arrival victims. "The 10% of those
+  states with the most" is the ceiling of 10% of the distinct states.
+- **Sign conventions.** "Has the sign of" matches zero with zero only. A
+  sign reading of `Δsel` or `Δown` is of the raw difference, so a consistent
+  gain means `m3` rose in every seed.
+- **Additional checks that stop the run.** The SHA-256 of every published
+  table equals the one the published run config records; model paths and
+  hashes agree across the published manifests; each population's row,
+  decision and eligible counts, window, horizon and reservoir seed equal the
+  published table's; `pi0` and `pi3` share requested and L1-avoided tokens on
+  both windows.
