@@ -33,13 +33,13 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 同じ23履歴特徴でモデルを大きくすれば候補の二値ラベル順位が改善する | 当該候補ログ上ではgradient boostingによる一貫した大幅な改善は確認されなかった。小さな差や同等のcellはあり、これだけで全履歴特徴や別目標の限界とは言えない。 | [モデル容量診断](predictability-retention-gap.md)。固定23特徴・候補母集団・ラベルでの比較。 |
 | 「600秒内に再利用されるか」という固定二値目標が十分 | 小容量では不十分と示唆された。reuse-count/next-useなどへの変更は一部改善したが、ギャップは閉じない。大容量で「目標が正しい」とは断定できない。 | [oracle分解](predictability-retention-gap.md)、[目標変更](target-change-findings.md)。oracleは既知ラベルに対する比較で、行動価値の最適性証明ではない。 |
 | prefix tree固有の容量配分が主要な損失源 | Phase 0.95の**heap LRU/LFU/2-hit**ではmissing-ancestor hit損失がゼロだったため、事前gateは通らず中心課題には採用しなかった。ただし任意のtree-aware配置の余地は否定できない。 | [L1 victim調査](two-tier-victim-findings.md)。独立block controlは同じ内容物でのhit計算差である。後のsampled L2ではpresent-but-unusable KVが発生する。 |
-| 決定母集団で訓練すれば予測をretentionへ変換できる | 当該固定設計では否定。汎用ログ上のoff-policy順位と、学習policy自身が作るon-policy候補集合の順位が食い違う。history表現の一般的な限界は未判定。 | [Phase 0.97/0.98/0.98b](decision-population-findings.md)。最良学習armのclosure 0.13–0.27は、このphase固有の分母による。 |
+| 決定母集団で訓練すれば予測をretentionへ変換できる | 当該固定設計では否定。汎用ログ上のoff-policy順位と、学習policy自身が作るon-policy候補集合の順位が食い違う。history表現の一般的な限界は未判定。 | [Phase 0.97/0.98/0.98b](decision-population-findings.md)。最良学習armのclosure 0.13–0.27は、このphase固有の分母（床はsampled L2-LRU）による。同じ尺度でheap LRUはcellにより0.00–0.19、2%×4では0.15–0.19にある。 |
 | L2内に直接の子を持つ到着stateの拒否を防げば改善する | 弱いB armの2%×4では局所的に改善。ただし全到着stateの保護も近い改善を出し、祖先選択固有の追加利得は未立証。小容量では害。 | [Phase 1介入](phase1-intervention-findings.md)。既存policyへの限定介入であり、汎用の新best policyではない。 |
 | per-block attributionで損失原因を特定できる | 失われたblockを最後の除去へ帰属させる会計はL2-hit差をtoken単位で閉じた。ただし一つの判断を変えたときの因果的回収量ではない。 | [Phase 0.98b](decision-population-findings.md)。rejection/eviction/compulsoryの内訳と介入効果は区別する。 |
 | 自分の決定を学習する反復で改善する | `next_use` の固定3更新で、完全な後半40%のrequest windowの2%×1・2%×4は両実トレースでpi3がpi0を平均上回った。一方、事前登録した共通終端母集団の順位改善+0.05は全cellで未達。 | [on-policy findings](onpolicy-learning-findings.md)。40,000決定のreservoir cap、既使用test window、3更新での打切り、短いlabel-observable windowとの差を考慮する。 |
 | 正確な次回利用ラベルなら1回の捨て方の価値を順序づけられる | 固定320状態の単一将来実現では、exactラベルの固定tie-breakにも大きな事後regretがある。しかしexpected `Q`の順位失敗とはまだ言えない。 | [反実仮想findings](counterfactual-action-value-findings.md)。最小ラベルtie内の事後最良は、将来の実現値を見て選んだ下界であり実装可能なselectorではない。 |
 | 事後最大との差は継続サンプリングに対して安定 | 固定40状態・16本の新しいstreamの交差評価では、全候補選択の学習側平均+15,003.0 tokenに対しheld-outは−267.8、exact tie内の選択は+13,567.2に対し+90.3。層と状態で符号が混在し、旧実現値での事後最大を安定した選択利得と読む根拠は弱まった。ただしexpected `Q`の等価性は示さない。 | [事前登録](counterfactual-randomness-plan.md)、[fresh-stream結果](counterfactual-randomness-findings.md)。旧[3 stream監査](counterfactual-randomness-reanalysis.md)は別の事後計算。 |
-| 学習armの残りheadroomはsampling機構が失わせている | 当該梯子では否定。scoreを固定して機構だけを変えると、公表機構（到着+16 sampled、誰でも退去可）でも凍結rankerの訓練ラベルそのものはheap offline参照の76.5–98.2%に届き、凍結rankerはそのラベル段のLRU比利得の11.1–27.9%に留まる。rankerとラベルの差（signal gap）が12/12 real cell・全seed・4機構すべてで`T`の半分以上。機構由来の損失は公表機構で`T`の0–28.1%、leaf限定・幅64ではほぼ消える。 | [事前登録](mechanism-control-plan.md)、[結果](mechanism-control-findings.md)。960 replay。ラベル段は将来を読む比較対象で実装可能ではない。線形ranker 1つ・target 1つ・2 traceであり、他の因果的情報の限界は示さない。pi3更新・binary target・arrival protectionは未実行。leaf限定は対照であり提案policyではない。 |
+| 学習armの残りheadroomはsampling機構が失わせている | 当該梯子では否定。scoreを固定して機構だけを変えると、公表機構（到着+16 sampled、誰でも退去可）でも凍結rankerの訓練ラベルそのものはheap offline参照の76.5–98.2%に届き、凍結rankerはそのラベル段のsampled LRU比利得の11.1–27.9%に留まる。rankerとラベルの差（signal gap）が12/12 real cell・全seed・4機構すべてで`T`（heap offline参照 − sampled LRU）の半分以上。機構由来の損失は公表機構で`T`の0–28.1%、leaf限定・幅64ではほぼ消える。 | [事前登録](mechanism-control-plan.md)、[結果](mechanism-control-findings.md)。960 replay。ラベル段は将来を読む比較対象で実装可能ではない。線形ranker 1つ・target 1つ・2 traceであり、他の因果的情報の限界は示さない。pi3更新・binary target・arrival protectionは未実行。leaf限定は対照であり提案policyではない。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母
@@ -50,7 +50,7 @@ pointsで、選択を含めた有意な優位の検定ではない。これを�
 on-policy実験の事前登録された結果と混同しない。前者の
 `HeadroomClosure = (arm − sampled L2-LRU)/(heap offline L2 − sampled L2-LRU)`
 は、その比較系の尺度であって到達可能な最適効用の割合ではない。初期single-tierの
-closureはLRUとgreedy offline next-useを基準とする別の尺度である。いずれの
+closureは同じseedのsampled LRUとgreedy offline next-useを基準とする別の尺度である（床はheap LRUではない）。いずれの
 future-aware comparatorもgreedyで、一般に最適とは証明されていない。
 
 on-policy `next_use` 2%×4のpi3−pi0は、完全な後半40%ではconversation +0.538、

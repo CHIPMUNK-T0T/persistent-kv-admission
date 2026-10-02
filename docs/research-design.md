@@ -24,8 +24,9 @@ Status after Phase 0 and Phase 0.5:
   with frequency. Not the main direction. (`docs/characterization-findings.md`)
 - **Temporal-history signals** predict future reuse well (AUC 0.86–0.94 at
   300–600 s on the real traces), but a history-based learned scorer does not
-  beat parameterless LRU/LFU under a byte budget: the best causal arm recovers
-  at most 0.25 of the LRU-to-offline headroom, and the online learner is never
+  beat parameterless LRU/LFU under a byte budget (all arms through the same
+  sampled eviction): the best causal arm recovers at most 0.25 of the
+  sampled-LRU-to-offline headroom, and the online learner is never
   the best arm. (`docs/temporal-prediction-findings.md`)
 
 Hypothesis 0 is therefore not supported as stated. Reuse prediction is

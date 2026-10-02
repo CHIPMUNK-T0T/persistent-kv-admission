@@ -237,7 +237,7 @@ and below R_high in most cells. Case C not
 established. Verdict: the primary question is refuted, the B / C diagnosis is
 unresolved between the two decision populations; no non-history signal, new
 heuristic or new policy follows from this phase. Best learned L2 closes
-0.13–0.27 of the headroom and differs from the best generic heap policy by
+0.13–0.27 of the headroom (sampled L2-LRU floor) and differs from the best generic heap policy by
 −0.8 to +0.7 input-token points. Its mean is above that policy in five of 12
 real cells; the five-seed CIs measure sampling-seed variability, and the
 post-hoc best-arm / target comparison is not a formal significance test. The
@@ -455,7 +455,8 @@ all-resident and leaf-only eligibility at widths 16 and 64.
 
 Outcome ([findings](mechanism-control-findings.md), 960 replays, all required
 checks passed): under the published mechanism the signal gap
-`U(label) − U(learned)` holds 53.8–84.0% of the headroom `T` and is the
+`U(label) − U(learned)` holds 53.8–84.0% of the headroom `T` (heap offline
+reference minus sampled LRU) and is the
 dominant term in 12/12 real trace × cell and in every seed; it stays dominant
 under leaf-only eligibility at width 64 (69.9–91.1%). The candidate-search gap
 is 0–28.1% of `T` under the published mechanism and at most 5.5% under
