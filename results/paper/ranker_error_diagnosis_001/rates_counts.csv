@@ -1,0 +1,5 @@
+target,rate,cells,better_than_recency,worse_than_recency,mixed_vs_recency,better_than_uniform,worse_than_uniform,mixed_vs_uniform
+next_use,avoidable,12,9,3,0,12,0,0
+next_use,order,12,2,0,10,0,1,11
+binary,avoidable,12,12,0,0,12,0,0
+binary,order,12,2,0,10,2,0,10

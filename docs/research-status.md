@@ -13,6 +13,8 @@ fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿っ�
 [結果](working-set-ratio-findings.md)を収録した。
 凍結rankerとそのexact labelの差がどの判断にあるかを調べる誤り位置の対照も、[事前登録](error-location-plan.md)に沿って完了し、
 [結果](error-location-findings.md)を収録した。
+保存済みの判断ログだけを使う実rankerの誤り診断も、[事前登録](ranker-error-diagnosis-plan.md)に沿って完了し、
+[結果](ranker-error-diagnosis-findings.md)を収録した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -47,6 +49,8 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 容量によるsign反転はこのrepo固有の発見である | 否定。L1 victim流から計算した再利用working set（EfficientAgentの比、計算前に定義と閾値1を固定）をL2容量で割った比は、2-hit admission対LRUのsign反転をheap・sampledとも実trace×cellの12/12で位置づけた。到着保護は公表済み6 cell中4で一致し、外れた2 cellは比1.005と1.179でseedが混在。反転は既存のworking set論で説明でき、独立の貢献としない。比≤1のcellは各traceで2%×4の1つだけで、交差点は比0.553〜1.005の間としか言えない。 |
 | 凍結rankerとexact labelの差は、到着を拒否するかどうかの判断にある | 否定。公表機構のまま、residentのどれを退去させるかだけをexact labelに置き換えると差の65–100%が回復し、実trace×cellの12/12で「eviction側」と読めた。到着の拒否判断だけを置き換えても回復しない（平均は常に0以下）。ただしL1 0.25%では差の33–42%が両方を置き換えたときにしか得られず、二つは足し算にならない。hybridは将来を読む比較器で、因果的な予測器が同じものを供給できるとは示していない。 |
 | victimが参照と一致する割合で予測器の良し悪しを評価できる | 否定。一致率を同じ（0.75、0.50）に固定しても、誤ったvictimを2位の候補にするか一様に選ぶかで効用が4–27点変わる。4つの判断統計はどれも18 armの効用順をρ≥0.9で再現しなかった（最大2/12 cell）。実rankerのpi0→pi3については、victimのlabel超過の平均が効用変化の符号と24/24で一致し、pairwise一致率は4 cellで逆に動いた。2組のranker対だけの符号一致で、評価指標として検証済みではない。 |
+| victimのlabel超過の変化は、rankerの選び方が良くなったことを表す | 限定的。各policy自身の判断ログでは、label超過の変化はlabel windowの効用変化と22/24で符号が一致し、一貫した効用変化と逆に動いた例はない。しかし候補集合を固定してpi0とpi3で選び直すと、符号が母集団によって変わるcellが`next_use`で5/12、`binary`で7/12ある。対応は選び方だけのものではなく、policyが作る候補集合の変化を含む。 |
+| 凍結rankerの誤りは、再利用されるstateどうしの順序の誤りである | 否定（自身の判断ログ上では）。label超過の99.3%以上は、候補に再利用されないstateがあるのに600秒以内に再利用されるstateを退去させた判断から来る。全候補が再利用され順序が問題になる判断は0.3%以下。判断の69–87%は参照とtie-breakだけが違う。同じ候補集合で比べると、この種の退去をrecencyより減らせているのは9/12 cellで、小容量の会話traceの3 cellではrecencyより多い。exact labelが保つstore上で順序が要るかどうかは未検証。 |
 | 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 容量による。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 

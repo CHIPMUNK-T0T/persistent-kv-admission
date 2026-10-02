@@ -1,0 +1,5 @@
+target,statistic,cells,carried_by_selection,population_dependent,not_carried_by_selection,agrees_pi0pop,agrees_pi3pop,delta_own_agrees
+next_use,m3,12,7,5,0,10,9,11
+next_use,m4,12,7,5,0,9,10,12
+binary,m3,12,4,7,1,11,4,11
+binary,m4,12,4,6,2,9,5,11

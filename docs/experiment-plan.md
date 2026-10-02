@@ -505,3 +505,23 @@ excess has the sign of the utility change in 24/24 and pairwise concordance
 moves against it in 4. The exact `binary` label equals the `next_use` label at
 1%×4 and 2%×4 only. Every constructed arm reads the future and none is a
 policy; the control does not say why the ranker evicts the residents it does.
+
+Two questions the error-location control left open are pre-registered
+together: [ranker-error-diagnosis-plan.md](ranker-error-diagnosis-plan.md)
+re-reads the saved held-out decision logs to separate selection from
+population in the victim's label excess and to classify the frozen ranker's
+errors, and [horizon-control-plan.md](horizon-control-plan.md) asks whether an
+exact reuse label at a shorter horizon reaches the `next_use` label, whose
+order inside a reuse class is needed, and whether the location holds under
+leaf-only eligibility.
+
+Outcome of the diagnosis ([findings](ranker-error-diagnosis-findings.md), 240
+saved populations, no replay, all checks passed): on a policy's own decisions
+the victim's mean label excess has the sign of label-window utility in 22/24
+trace × cell × target, but with the candidate population fixed the sign
+depends on the population in 5/12 (`next_use`) and 7/12 (`binary`). At least
+99.3% of the frozen ranker's label excess is the eviction of a reusable state
+while a non-reusable candidate was sampled; decisions among reusable
+candidates of differing label are at most 0.3%. On its own candidate sets the
+`next_use` ranker makes such evictions less often than recency in 9/12 cells
+and more often in 3. The horizon and class-order control has not been run.

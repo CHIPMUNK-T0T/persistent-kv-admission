@@ -35,6 +35,12 @@ the frozen ranker and its exact label under the published mechanism (1,080
 replays) with four decision statistics per replay; its
 [findings](../../docs/error-location-findings.md) state the six readings and
 their limits, and `scripts/tabulate_error_location.py` prints every cited table.
+The [ranker-error diagnosis output](ranker_error_diagnosis_001/README.md) re-scores
+the saved held-out decision populations of `pi0` and `pi3` (no replay): a
+population-by-scorer matrix of the victim's label excess, the kinds of error of
+the frozen ranker, and conditional rates against recency and a uniform victim;
+its [findings](../../docs/ranker-error-diagnosis-findings.md) state the readings
+and their limits.
 
 ## Files
 
