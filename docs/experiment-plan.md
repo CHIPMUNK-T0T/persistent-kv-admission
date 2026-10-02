@@ -524,4 +524,22 @@ depends on the population in 5/12 (`next_use`) and 7/12 (`binary`). At least
 while a non-reusable candidate was sampled; decisions among reusable
 candidates of differing label are at most 0.3%. On its own candidate sets the
 `next_use` ranker makes such evictions less often than recency in 9/12 cells
-and more often in 3. The horizon and class-order control has not been run.
+and more often in 3.
+
+Outcome of the horizon and class-order control ([findings](horizon-control-findings.md),
+540 replays, all checks passed): an exact one-bit reuse label with recency
+reaches the `next_use` label, within 10% of its gain over sampled LRU, at some
+horizon of {6, 15, 60, 300, 600} s in 8/12 trace × cell; the four that fail
+share an L2 capacity of 1% and sit in the grid's gap between 60 and 300 s. A
+[fill-in](horizon-fill-plan.md) pre-registered after that result, with five
+horizons between 90 and 240 s and the prediction that one suffices in all
+four, held 4/4 (minimum at 150 s in each); its count is reported beside the
+8/12 and not merged with it. The horizon that works grows with L2 capacity
+(60, 150, 300, 600 s) and neighbouring grid horizons lose 6–85% of the gain.
+With the exact 600 s reuse class given on residents, the frozen ranker
+recovers 94–104% of what the exact label recovers on eviction in the six
+cells where that class is sufficient and 33–61% in the other six; within a
+class its order beats recency in 9/12. Under leaf-only eligibility the gap is
+eviction-located in 12/12, with the arrival a candidate in a minority of
+decisions. Nothing predicts the horizon before the fact, and no learned
+predictor of the bit has been measured.

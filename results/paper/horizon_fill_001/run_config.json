@@ -1,0 +1,311 @@
+{
+  "phase": "horizon_fill",
+  "plan": "docs/horizon-fill-plan.md",
+  "plan_commit": "dfcf5b3326e0f7a414b32a8c5c1a324bad63151b",
+  "code_commit": "78d64af33383a893f6396519b2b58939702096d3",
+  "git_dirty_at_start": false,
+  "execution_sources_differing_from_head": [],
+  "source_manifest": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_horizon_fill.py": "ce917c0863cbe19603c2cdb81d62ccd9a1321f8f05edce04c2cd02907403d340",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "bb3ae0c5312b57210342c9450f1edafc1c307b82336804f6c63642218b3816e0"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "models": {},
+  "references": {
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c"
+  },
+  "reference_rows": {
+    "label/all16": "error_location_001",
+    "lru/all16": "error_location_001",
+    "label_binary/all16": "error_location_001"
+  },
+  "reference_identifiers": [
+    "l1_capacity_bytes",
+    "l2_capacity_bytes",
+    "requested_tokens",
+    "l1_avoided_tokens",
+    "absent_compulsory_tokens"
+  ],
+  "first_run": {
+    "checked": true,
+    "directory": "/home/ubuntu/Desktop/persistent-kv-admission/results/paper/horizon_control_001",
+    "table": "replay_seeds.csv",
+    "sha256": "0f96f1e9061c88098dda7e6693530f0223343cd3280ad3307179f532d9e555d6",
+    "columns": [
+      "avoided_prefill_tokens",
+      "counters_sha256"
+    ],
+    "columns_where_both_carry_them": [
+      "decision_sha256"
+    ]
+  },
+  "traces": [
+    "conversation_trace",
+    "toolagent_trace"
+  ],
+  "cells": [
+    [
+      0.0025,
+      4.0
+    ],
+    [
+      0.01,
+      1.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "mechanism": {
+    "name": "all16",
+    "eligibility": "all",
+    "width": 16
+  },
+  "arms": {
+    "label_binary_60": {
+      "h": 60.0,
+      "role": "check"
+    },
+    "label_binary_90": {
+      "h": 90.0,
+      "role": "fill"
+    },
+    "label_binary_120": {
+      "h": 120.0,
+      "role": "fill"
+    },
+    "label_binary_150": {
+      "h": 150.0,
+      "role": "fill"
+    },
+    "label_binary_180": {
+      "h": 180.0,
+      "role": "fill"
+    },
+    "label_binary_240": {
+      "h": 240.0,
+      "role": "fill"
+    },
+    "label_binary_300": {
+      "h": 300.0,
+      "role": "check"
+    },
+    "label_binary_600": {
+      "h": 600.0,
+      "role": "check"
+    }
+  },
+  "fill_horizons_seconds": [
+    90.0,
+    120.0,
+    150.0,
+    180.0,
+    240.0
+  ],
+  "check_horizons_seconds": [
+    60.0,
+    300.0,
+    600.0
+  ],
+  "curve_horizons_seconds": [
+    60.0,
+    90.0,
+    120.0,
+    150.0,
+    180.0,
+    240.0,
+    300.0
+  ],
+  "readings": {
+    "suffices_shortfall": 0.1,
+    "fill_labels": [
+      "reuse_label_suffices_at_filled_horizon",
+      "order_needed_stands"
+    ],
+    "predicted_reuse_label_suffices_at_filled_horizon": 4
+  },
+  "label_horizon_seconds": 600.0,
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "arrival_protection": "none",
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "checks": {
+    "reproduction": {
+      "label_binary_600": {
+        "reference": "label_binary/all16",
+        "matched": 20,
+        "missing": 0,
+        "mismatched": 0,
+        "expected": 20
+      }
+    },
+    "first_run": {
+      "expected": 60,
+      "replays": 60,
+      "matched": 60,
+      "missing": 0,
+      "mismatched": 0,
+      "decision_digests_compared": 60,
+      "duplicates": 0
+    },
+    "identifier_pairs_compared": 480,
+    "identifier_problems": 0,
+    "statistics_problems": 0,
+    "invariant_groups": 20,
+    "invariant_violations": 0,
+    "invariant_columns": [
+      "l1_avoided_tokens",
+      "requested_tokens",
+      "absent_compulsory_tokens"
+    ],
+    "unexplained_absent_tokens": 0
+  },
+  "replays": 160,
+  "workers": 10,
+  "replay_seconds": 335.7426691055298,
+  "wall_seconds": 338.34676027297974,
+  "seconds_by_arm": [
+    {
+      "arm": "label_binary_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 23.189651715755463,
+      "max_seconds": 43.57237410545349,
+      "total_seconds": 463.79303431510925
+    },
+    {
+      "arm": "label_binary_90",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 21.69845892190933,
+      "max_seconds": 40.1042058467865,
+      "total_seconds": 433.96917843818665
+    },
+    {
+      "arm": "label_binary_120",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 18.89337569475174,
+      "max_seconds": 30.493860960006714,
+      "total_seconds": 377.8675138950348
+    },
+    {
+      "arm": "label_binary_150",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 18.084510588645934,
+      "max_seconds": 26.39595603942871,
+      "total_seconds": 361.6902117729187
+    },
+    {
+      "arm": "label_binary_180",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 22.424370062351226,
+      "max_seconds": 39.09891700744629,
+      "total_seconds": 448.48740124702454
+    },
+    {
+      "arm": "label_binary_240",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 19.751562798023222,
+      "max_seconds": 38.73346281051636,
+      "total_seconds": 395.0312559604645
+    },
+    {
+      "arm": "label_binary_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 18.516785907745362,
+      "max_seconds": 26.420897722244263,
+      "total_seconds": 370.3357181549072
+    },
+    {
+      "arm": "label_binary_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 19.401487624645235,
+      "max_seconds": 30.04232168197632,
+      "total_seconds": 388.02975249290466
+    }
+  ],
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 859.98828125,
+    "children_peak_rss_mib": 859.98828125,
+    "max_worker_pss_mib_at_replay_end": 734.673828125,
+    "parent_peak_rss_mib": 525.875,
+    "mem_available_mib_at_start": 20912.48046875
+  },
+  "note": "Descriptive follow-up of the horizon control on the four trace x cell that read order needed there, chosen because they failed it and judged on ten horizons where the other eight were judged on five; its count is reported beside the horizon control's 8/12 and never merged with it. A horizon found by filling the grid after the run describes that grid: it does not show that the horizon can be chosen before the fact, predicted from capacity or learned from features. Nothing is fitted; every arm reads the trace's future on purpose and none is a policy. References are published rows, not reruns; label_binary_600 reproduces the published label_binary rows. Seed intervals describe sampling-seed variability only."
+}

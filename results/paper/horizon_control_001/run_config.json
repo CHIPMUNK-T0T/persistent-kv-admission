@@ -1,0 +1,340 @@
+{
+  "phase": "horizon_control",
+  "smoke": false,
+  "plan": "docs/horizon-control-plan.md",
+  "plan_commit": "c84ef539df44198a5293d6ee75e5fa95e77deb58",
+  "code_commit": "9333d5c43dc9c71c4af01dc8de19e9d878b75e86",
+  "git_dirty_at_start": false,
+  "execution_sources_differing_from_head": [],
+  "allow_dirty": false,
+  "source_manifest": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "0063249578d7f7d07b9ee5e219d12c1a6aca1b43427cadf04987e9126b7c8704"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "models": {
+    "pi0_next_use": {
+      "conversation_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/conversation_trace__next_use.json",
+        "sha256": "87c24bb2abdcdc62028405a19eaff0b24c3bffacfd8d50334fc76d76e0b2d60c"
+      },
+      "toolagent_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/toolagent_trace__next_use.json",
+        "sha256": "2696e5e55f005760cd2a8aafe376b346718f72dcd46864fe8a35217951121c4c"
+      }
+    }
+  },
+  "model_manifests": {
+    "results/onpolicy_full_feb30eb_001/canonical_model_manifest.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23",
+    "results/paper/onpolicy_learning/onpolicy_canonical_models.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23"
+  },
+  "references": {
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c",
+    "results/paper/error_location_001/location.csv": "484c271671438db22bc121f74a9c96c386af93eb68bb78d2aeb3269791bb6023",
+    "results/paper/mechanism_control_001/replay_seeds.csv": "cdbf9a93eeddfee3f1eda81fb80cc0a97915ed71d1456c6c9d113a107ab417d6"
+  },
+  "reference_rows": {
+    "lru/all16": "error_location_001",
+    "learned/all16": "error_location_001",
+    "label/all16": "error_location_001",
+    "evict_label/all16": "error_location_001",
+    "label_binary/all16": "error_location_001",
+    "learned/leaf16": "mechanism_control_001",
+    "label/leaf16": "mechanism_control_001"
+  },
+  "reference_identifiers": [
+    "l1_capacity_bytes",
+    "l2_capacity_bytes",
+    "requested_tokens",
+    "l1_avoided_tokens",
+    "absent_compulsory_tokens"
+  ],
+  "traces": [
+    "conversation_trace",
+    "toolagent_trace"
+  ],
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.0025,
+      4.0
+    ],
+    [
+      0.01,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      1.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "arms": {
+    "label_binary_6": "all16",
+    "label_binary_15": "all16",
+    "label_binary_60": "all16",
+    "label_binary_300": "all16",
+    "label_binary_600": "all16",
+    "evict_binary_learned": "all16",
+    "evict_binary_recency": "all16",
+    "adm_label": "leaf16",
+    "evict_label": "leaf16"
+  },
+  "mechanisms": {
+    "all16": {
+      "eligibility": "all",
+      "width": 16
+    },
+    "leaf16": {
+      "eligibility": "leaf",
+      "width": 16
+    }
+  },
+  "horizons_seconds_of_label_binary_h": [
+    6.0,
+    15.0,
+    60.0,
+    300.0,
+    600.0
+  ],
+  "reuse_horizon_seconds": 600.0,
+  "class_order": {
+    "evict_binary_learned": "learned",
+    "evict_binary_recency": "recency"
+  },
+  "identity_arms": {},
+  "identity_reference_arms": {},
+  "readings": {
+    "suffices_shortfall": 0.1,
+    "published_subset_shortfall": 0.05,
+    "class_order_share": 0.9,
+    "horizon_labels": [
+      "reuse_label_suffices",
+      "order_needed"
+    ],
+    "class_order_labels": [
+      "reuse_identification_suffices",
+      "ranker_order_costs"
+    ],
+    "location_labels": [
+      "admission_located",
+      "eviction_located",
+      "both",
+      "neither"
+    ]
+  },
+  "label_horizon_seconds": 600.0,
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "arrival_protection": "none",
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "checks": {
+    "reproduction": {
+      "label_binary_600": {
+        "reference": "label_binary/all16",
+        "matched": 60,
+        "missing": 0,
+        "mismatched": 0,
+        "expected": 60
+      }
+    },
+    "identifier_pairs_compared": 3780,
+    "identifier_problems": 0,
+    "leaf16_replays": 120,
+    "leaf16_closure_problems": 0,
+    "statistics_problems": 0,
+    "label_identity_replays": 0,
+    "invariant_groups": 60,
+    "invariant_violations": 0,
+    "invariant_columns": [
+      "l1_avoided_tokens",
+      "requested_tokens",
+      "absent_compulsory_tokens"
+    ],
+    "unexplained_absent_tokens": 0,
+    "smoke_identity_checks": 0,
+    "smoke_identity_failures": 0
+  },
+  "replays": 540,
+  "workers": 10,
+  "replay_seconds": 2532.828144788742,
+  "wall_seconds": 2535.398239850998,
+  "seconds_by_arm": [
+    {
+      "arm": "label_binary_6",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 27.28602114121119,
+      "max_seconds": 60.58872985839844,
+      "total_seconds": 1637.1612684726715
+    },
+    {
+      "arm": "label_binary_15",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 26.104898556073508,
+      "max_seconds": 53.06349849700928,
+      "total_seconds": 1566.2939133644104
+    },
+    {
+      "arm": "label_binary_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 24.811899769306184,
+      "max_seconds": 58.76383972167969,
+      "total_seconds": 1488.713986158371
+    },
+    {
+      "arm": "label_binary_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 23.92692006031672,
+      "max_seconds": 43.56502437591553,
+      "total_seconds": 1435.6152036190033
+    },
+    {
+      "arm": "label_binary_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 22.966014794508617,
+      "max_seconds": 45.088722705841064,
+      "total_seconds": 1377.960887670517
+    },
+    {
+      "arm": "evict_binary_learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 103.84838049411773,
+      "max_seconds": 200.08482146263123,
+      "total_seconds": 6230.902829647064
+    },
+    {
+      "arm": "evict_binary_recency",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 65.71149415969849,
+      "max_seconds": 110.29720759391785,
+      "total_seconds": 3942.689649581909
+    },
+    {
+      "arm": "adm_label",
+      "mechanism": "leaf16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 84.057106479009,
+      "max_seconds": 137.94737696647644,
+      "total_seconds": 5043.42638874054
+    },
+    {
+      "arm": "evict_label",
+      "mechanism": "leaf16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 40.33732083638509,
+      "max_seconds": 82.45995354652405,
+      "total_seconds": 2420.2392501831055
+    }
+  ],
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 1279.57421875,
+    "children_peak_rss_mib": 1279.57421875,
+    "max_worker_pss_mib_at_replay_end": 1102.6923828125,
+    "parent_peak_rss_mib": 529.31640625,
+    "mem_available_mib_at_start": 20842.05859375
+  },
+  "note": "Descriptive control. Nothing is fitted; every constructed arm reads the trace's future on purpose and none is a policy. References are published rows, not reruns; label_binary_600 reproduces the published label_binary rows. A reuse label that suffices at a horizon chosen from five after the run describes that grid only. Seed intervals describe sampling-seed variability only."
+}

@@ -15,6 +15,8 @@ fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿っ�
 [結果](error-location-findings.md)を収録した。
 保存済みの判断ログだけを使う実rankerの誤り診断も、[事前登録](ranker-error-diagnosis-plan.md)に沿って完了し、
 [結果](ranker-error-diagnosis-findings.md)を収録した。
+exactな再利用labelの時間範囲（horizon）とclass内順序の対照も、[事前登録](horizon-control-plan.md)と、
+その結果を見てから登録した[grid補間](horizon-fill-plan.md)に沿って完了し、[結果](horizon-control-findings.md)を収録した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -28,6 +30,8 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 調べ、さらに自己再利用ゼロの2候補について保持時間と後続decisionの時系列を測った。
 将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
 現在は目標を変える段階ではなく、既存の選択と説明の検証を深めている。
+
+2026-10-03時点の整理。問いは「有限容量の階層KV cacheで再利用を増やすために、どの保持判断について、どの時間範囲の将来利用を、どの粒度で予測する必要があるか」に絞り、exactな将来情報で上限を測る対照を重ねている。判断はresident evictionの側にある（all16で12/12、leaf16でも12/12）。粒度は、容量に合うhorizonの1 bit（h秒以内に再利用されるか）+ recencyで`next_use` labelに届く（登録gridで8/12、結果を見てから登録した補間gridで残り4/4、合算しない）。時間範囲はL2容量とともに伸びる（60、150、300、600秒）。凍結rankerの不足は、順序ではなくその1 bitの見分けにある（label超過の99%超、classを与えると境界が合うcellで94–104%回復）。未測定は、学習器がその1 bitをどれだけ当てられるか、horizonを事前に決められるか、別traceでの再現である。
 
 ## 仮説と証拠の台帳
 
@@ -50,8 +54,11 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 凍結rankerとexact labelの差は、到着を拒否するかどうかの判断にある | 否定。公表機構のまま、residentのどれを退去させるかだけをexact labelに置き換えると差の65–100%が回復し、実trace×cellの12/12で「eviction側」と読めた。到着の拒否判断だけを置き換えても回復しない（平均は常に0以下）。ただしL1 0.25%では差の33–42%が両方を置き換えたときにしか得られず、二つは足し算にならない。hybridは将来を読む比較器で、因果的な予測器が同じものを供給できるとは示していない。 |
 | victimが参照と一致する割合で予測器の良し悪しを評価できる | 否定。一致率を同じ（0.75、0.50）に固定しても、誤ったvictimを2位の候補にするか一様に選ぶかで効用が4–27点変わる。4つの判断統計はどれも18 armの効用順をρ≥0.9で再現しなかった（最大2/12 cell）。実rankerのpi0→pi3については、victimのlabel超過の平均が効用変化の符号と24/24で一致し、pairwise一致率は4 cellで逆に動いた。2組のranker対だけの符号一致で、評価指標として検証済みではない。 |
 | victimのlabel超過の変化は、rankerの選び方が良くなったことを表す | 限定的。各policy自身の判断ログでは、label超過の変化はlabel windowの効用変化と22/24で符号が一致し、一貫した効用変化と逆に動いた例はない。しかし候補集合を固定してpi0とpi3で選び直すと、符号が母集団によって変わるcellが`next_use`で5/12、`binary`で7/12ある。対応は選び方だけのものではなく、policyが作る候補集合の変化を含む。 |
-| 凍結rankerの誤りは、再利用されるstateどうしの順序の誤りである | 否定（自身の判断ログ上では）。label超過の99.3%以上は、候補に再利用されないstateがあるのに600秒以内に再利用されるstateを退去させた判断から来る。全候補が再利用され順序が問題になる判断は0.3%以下。判断の69–87%は参照とtie-breakだけが違う。同じ候補集合で比べると、この種の退去をrecencyより減らせているのは9/12 cellで、小容量の会話traceの3 cellではrecencyより多い。exact labelが保つstore上で順序が要るかどうかは未検証。 |
-| 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 容量による。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
+| 凍結rankerの誤りは、再利用されるstateどうしの順序の誤りである | 否定（自身の判断ログ上では）。label超過の99.3%以上は、候補に再利用されないstateがあるのに600秒以内に再利用されるstateを退去させた判断から来る。全候補が再利用され順序が問題になる判断は0.3%以下。判断の69–87%は参照とtie-breakだけが違う。同じ候補集合で比べると、この種の退去をrecencyより減らせているのは9/12 cellで、小容量の会話traceの3 cellではrecencyより多い。exact labelが保つstore上では、horizon対照により、容量に合うhorizonの1 bit + recencyで`next_use` labelに届く（順序は要らない）ことが12 cellすべてで示された（うち4 cellは補間gridで）。 |
+| 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 600秒という境界に依る。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
+| 「h秒以内に再利用されるか」の1 bitは、hが容量に合えば`next_use` labelに届く | 支持（exact情報の範囲で）。登録した5点のgrid {6, 15, 60, 300, 600}秒では、labelのLRUに対する利得の90%以上に届くhがあるcellが8/12。届かなかった4 cell（L2容量1%）は、結果を見てから登録した補間（90–240秒、予測「4/4で届く」）で4/4、最小は4 cellとも150秒。合う horizon はL2容量とともに伸びる（60、150、300、600秒）。隣のgrid点では利得の6–85%を失う。6 cellでは1 bitが`next_use` labelを全seedで上回る（0.29–0.59点）。 | [事前登録](horizon-control-plan.md)、[補間の事前登録](horizon-fill-plan.md)、[結果](horizon-control-findings.md)。どのhも実行後にgridから選んだもので、容量から事前に決められることや学習器が当てられることは示していない。8/12と4/4は合算しない。 |
+| 凍結rankerの不足は、再利用classの見分けにあり、class内の順序ではない | 支持（600秒classの範囲で）。residentにexactな600秒の再利用classを与えると、その境界が合う6 cellではexact labelをevictionに使った回復分の94–104%、合わない6 cellでは33–61%を回復する。class内ではrankerのscoreがrecencyより良いcellが9/12。合わない6 cellでの不足はclass境界の誤りで、順序に帰すことはできない。 | 同上。cellごとに合う horizon のclassを与えるarmは未実行。 |
+| 差がeviction側にあるのはall16の到着条件の産物である | 否定。leaf16でもeviction-locatedが12/12で、label evictionだけで差の97–100%を回復する。ただしleaf16では到着が候補になる判断が少数（0.25%×1で約半分、他は3–18%）で、「admissionは重要でない」とは区別できない。 | 同上。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母

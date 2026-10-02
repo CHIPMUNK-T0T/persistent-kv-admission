@@ -41,6 +41,14 @@ population-by-scorer matrix of the victim's label excess, the kinds of error of
 the frozen ranker, and conditional rates against recency and a uniform victim;
 its [findings](../../docs/ranker-error-diagnosis-findings.md) state the readings
 and their limits.
+The [horizon-control output](horizon_control_001/README.md) holds exact reuse
+labels at five horizons, two class-order arms and the leaf16 hybrids under the
+published mechanism (540 replays), and the [fill-in output](horizon_fill_001/README.md)
+the same label at five further horizons between 90 and 240 s on the four cells
+that read "order needed" (160 replays, pre-registered after the first result and
+counted separately); their [findings](../../docs/horizon-control-findings.md)
+state the readings and their limits, and `scripts/tabulate_horizon_control.py`
+and `scripts/tabulate_horizon_fill.py` print every cited table.
 
 ## Files
 

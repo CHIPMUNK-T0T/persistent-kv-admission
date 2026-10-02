@@ -1,0 +1,4 @@
+scope,cells,reuse_label_suffices_at_filled_horizon,order_needed_stands,predicted_reuse_label_suffices_at_filled_horizon,prediction_holds,unimodal_60_300,cell_labels,curve_minimiser_horizons,same_curve_minimiser
+all,4,4,0,4,True,4,,,
+conversation_trace,2,2,0,2,True,2,"l1=0.0025,l2x4|l1=0.01,l2x1",150|150,True
+toolagent_trace,2,2,0,2,True,2,"l1=0.0025,l2x4|l1=0.01,l2x1",150|150,True
