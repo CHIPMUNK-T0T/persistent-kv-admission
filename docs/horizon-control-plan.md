@@ -134,3 +134,38 @@ a fit or a deployed policy.
    and a figure under `results/paper/horizon_control_001/`, with a read-only
    tabulation script and a findings document that states what each table can
    and cannot establish, including null and adverse results.
+
+## Addendum, recorded before the smoke (2026-10-02)
+
+Written after the implementation was reviewed and before any real replay of
+the new arms; no outcome has been inspected. The text above is unchanged. This
+addendum records what the implementation had to fix.
+
+- **Leaf eligibility and the arrival.** Under `leaf16` the arrival is a
+  candidate of its first round only when it is a leaf. An arrival with a
+  cached child is not among the candidates, cannot be rejected, and the round
+  evicts by the eviction score; "admission by X" therefore judges leaf
+  arrivals only. This is the mechanism as the mechanism control ran it, and
+  Part 3 is read with that restriction stated. No counter is added for it.
+- **Leaf identities.** The X/X hybrids under `leaf16` are compared with the
+  `leaf16` rungs decision by decision in the smoke, where the two rungs are
+  replayed and must also equal their published rows; the grid stays at 540
+  replays and uses the published rows as references.
+- **Composite key.** `evict_binary_learned` gives the store the score pair
+  `(reusable, ranker score)`; with the store's `last_group` appended it orders
+  as `(reusable, ranker score, last_group)`. The ranker is one object in both
+  roles and observes each timestamp group once. `m1` of the two class-order
+  arms is computed on the store's composite key, as for the hybrids of the
+  error-location control.
+- **Thresholds and ties.** `S_h ≤ 0.10` suffices, `R ≥ 0.9` suffices, and the
+  separately counted subset is published `S_600 > 0.05`, computed by the
+  runner from the published rows. Horizons that attain the minimum exactly
+  are all listed. A zero denominator gives no value and falls on the "order
+  needed" or "the ranker's order costs" side.
+- **Further checks.** An arm without an override, and every identity arm,
+  must show zero overridden decisions; the smoke's `leaf16` label replays must
+  satisfy the label identities of the error-location addendum; the published
+  `all16` location labels are checked against the rule applied to their own
+  published `G`, `A`, `E`.
+- **Smoke.** The nine arms with and without the statistics hook, the three
+  identity arms, and the `leaf16` `learned` and `label` rungs: 23 replays.
