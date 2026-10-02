@@ -106,3 +106,44 @@ descriptive. Nothing here triggers a new policy or experiment.
    recording plan and code commits and trace hashes.
 4. Report the ratios, the three agreement counts and verdicts, and the
    descriptive tables in a findings document, including misses.
+
+## Addendum, recorded before the computation (2026-10-02)
+
+Written after the implementation was reviewed and before any real trace was
+processed; the ratio is still unknown for every cell. The text above is
+unchanged. This addendum corrects one factual error in it and fixes the
+readings the implementation had to choose.
+
+- **Outcome 3 is published at 6 of the 12 trace × cells.** The Phase 1 pairs
+  table carries `all − none` at three cells per trace (0.25%×1, 1%×4, 2%×4),
+  not at all six; "Per real trace × cell (12)" above was wrong for this
+  outcome. No Phase 1 replay is added. For outcome 3 the 12-cell verdict is
+  reported as not computable, and the same rule applied to the 6 published
+  cells is reported beside it with its denominator stated (agreement out of
+  6; *located* means 6/6). Outcomes 1 and 2 are published at all 12 cells and
+  are read as written.
+- **Target of outcome 3.** The table carries two targets. `next_use` is the
+  primary row, as the [Phase 1 plan](phase1-intervention-plan.md) fixed
+  ("The next-use target carries the primary verdict"); `binary` is reported as
+  a secondary row and does not enter the verdict.
+- **Weight and quantile.** Each offer is weighted by its own block tokens.
+  The median and the quartiles are lower weighted quantiles: the smallest
+  observed value whose cumulative weight reaches the quantile.
+- **Order inside one timestamp group.** Every return of a group precedes
+  every offer of that group, as in the simulator (requests are served against
+  the tiers as they stood before the group; L1 evicts while the group is
+  inserted afterwards). A return is the first group strictly after the offer's
+  group with a request whose prefix contains the state.
+- **Windows and censoring.** A return is in the window when its timestamp is
+  at or after the split; for the declinable share an offer is in the window
+  when its eviction timestamp is. An offer with no later request before the
+  trace ends counts as never returning, so offers late in the trace are
+  right-censored and inflate the never-returning part of the declinable
+  share; the two parts are reported separately.
+- **Boundaries.** `γ = 1` falls on the `γ ≤ 1` side; the transition band
+  includes 0.5 and 2. An observed zero or a mixed seed reading is a miss.
+- **Declinable share and rejection share.** The published rejection shares
+  count offers over the whole trace; the plan's declinable share is in bytes
+  over offers made in the window. The plan's share stays the reported column;
+  count-based whole-trace and window shares are given beside it so that the
+  comparison with the rejection shares is like for like.
