@@ -11,6 +11,8 @@ fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿っ�
 [結果](mechanism-control-findings.md)を収録した。
 容量によるsign反転がworking set比で位置づくかの検査も、[事前登録](working-set-ratio-plan.md)に沿って完了し、
 [結果](working-set-ratio-findings.md)を収録した。
+凍結rankerとそのexact labelの差がどの判断にあるかを調べる誤り位置の対照も、[事前登録](error-location-plan.md)に沿って完了し、
+[結果](error-location-findings.md)を収録した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -43,6 +45,9 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 事後最大との差は継続サンプリングに対して安定 | 固定40状態・16本の新しいstreamの交差評価では、全候補選択の学習側平均+15,003.0 tokenに対しheld-outは−267.8、exact tie内の選択は+13,567.2に対し+90.3。層と状態で符号が混在し、旧実現値での事後最大を安定した選択利得と読む根拠は弱まった。ただしexpected `Q`の等価性は示さない。 | [事前登録](counterfactual-randomness-plan.md)、[fresh-stream結果](counterfactual-randomness-findings.md)。旧[3 stream監査](counterfactual-randomness-reanalysis.md)は別の事後計算。 |
 | 学習armの残りheadroomはsampling機構が失わせている | 当該梯子では否定。scoreを固定して機構だけを変えると、公表機構（到着+16 sampled、誰でも退去可）でも凍結rankerの訓練ラベルそのものはheap offline参照の76.5–98.2%に届き、凍結rankerはそのラベル段のsampled LRU比利得の11.1–27.9%に留まる。rankerとラベルの差（signal gap）が12/12 real cell・全seed・4機構すべてで`T`（heap offline参照 − sampled LRU）の半分以上。機構由来の損失は公表機構で`T`の0–28.1%、leaf限定・幅64ではほぼ消える。 | [事前登録](mechanism-control-plan.md)、[結果](mechanism-control-findings.md)。960 replay。ラベル段は将来を読む比較対象で実装可能ではない。線形ranker 1つ・target 1つ・2 traceであり、他の因果的情報の限界は示さない。pi3更新・binary target・arrival protectionは未実行。leaf限定は対照であり提案policyではない。 |
 | 容量によるsign反転はこのrepo固有の発見である | 否定。L1 victim流から計算した再利用working set（EfficientAgentの比、計算前に定義と閾値1を固定）をL2容量で割った比は、2-hit admission対LRUのsign反転をheap・sampledとも実trace×cellの12/12で位置づけた。到着保護は公表済み6 cell中4で一致し、外れた2 cellは比1.005と1.179でseedが混在。反転は既存のworking set論で説明でき、独立の貢献としない。比≤1のcellは各traceで2%×4の1つだけで、交差点は比0.553〜1.005の間としか言えない。 |
+| 凍結rankerとexact labelの差は、到着を拒否するかどうかの判断にある | 否定。公表機構のまま、residentのどれを退去させるかだけをexact labelに置き換えると差の65–100%が回復し、実trace×cellの12/12で「eviction側」と読めた。到着の拒否判断だけを置き換えても回復しない（平均は常に0以下）。ただしL1 0.25%では差の33–42%が両方を置き換えたときにしか得られず、二つは足し算にならない。hybridは将来を読む比較器で、因果的な予測器が同じものを供給できるとは示していない。 |
+| victimが参照と一致する割合で予測器の良し悪しを評価できる | 否定。一致率を同じ（0.75、0.50）に固定しても、誤ったvictimを2位の候補にするか一様に選ぶかで効用が4–27点変わる。4つの判断統計はどれも18 armの効用順をρ≥0.9で再現しなかった（最大2/12 cell）。実rankerのpi0→pi3については、victimのlabel超過の平均が効用変化の符号と24/24で一致し、pairwise一致率は4 cellで逆に動いた。2組のranker対だけの符号一致で、評価指標として検証済みではない。 |
+| 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 容量による。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母

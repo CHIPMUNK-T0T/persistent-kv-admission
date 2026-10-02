@@ -483,3 +483,25 @@ known working-set argument and not as a separate contribution. Only 2%×4 has a
 ratio at or below 1 on either trace, so the crossing is bracketed between
 0.553 and 1.005 and not located more finely; the check says nothing about
 learned scores.
+
+The gap the mechanism control left between the frozen ranker and its label is
+located by decision type and error type in
+[error-location-plan.md](error-location-plan.md): 18 arms under the published
+mechanism — hybrids that take admission from one score and eviction from the
+other, the label with controlled Gaussian error, victim swaps at a fixed rate,
+and the `pi3` and `binary` rankers the ladder left out — with four decision
+statistics per replay.
+
+Outcome ([findings](error-location-findings.md), 1,080 replays, all required
+checks passed): the gap is eviction-located in 12/12 real trace × cell — the
+label's choice of victim among residents recovers 65–100% of it and the
+label's rejection decision none — with a third or more of it needing both at
+L1 0.25%. Utility is monotone in the noise level in every cell and seed, and
+the frozen ranker lies between levels 1 and 2 in 10/12. At an equal
+victim-agreement rate the runner-up swap is above the uniform swap by 4–27
+points in 12/12. No statistic orders the arms by utility at ρ ≥ 0.9 in more
+than 2/12 cells; for the two published ranker updates the victim's mean label
+excess has the sign of the utility change in 24/24 and pairwise concordance
+moves against it in 4. The exact `binary` label equals the `next_use` label at
+1%×4 and 2%×4 only. Every constructed arm reads the future and none is a
+policy; the control does not say why the ranker evicts the residents it does.

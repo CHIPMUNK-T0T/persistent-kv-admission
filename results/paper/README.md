@@ -30,6 +30,11 @@ stack-distance working set of the L1 offer stream, the ratio per cell and its
 comparison with the published sign outcomes of 2-hit admission and arrival
 protection; its [findings](../../docs/working-set-ratio-findings.md) state the
 agreement counts, the misses and the limits.
+The [error-location output](error_location_001/README.md) holds 18 arms between
+the frozen ranker and its exact label under the published mechanism (1,080
+replays) with four decision statistics per replay; its
+[findings](../../docs/error-location-findings.md) state the six readings and
+their limits, and `scripts/tabulate_error_location.py` prints every cited table.
 
 ## Files
 
