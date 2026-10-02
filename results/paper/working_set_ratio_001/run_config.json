@@ -1,0 +1,386 @@
+{
+  "phase": "working_set_ratio",
+  "plan": "docs/working-set-ratio-plan.md",
+  "plan_commit": "1e48bab81e7a1e2d884afc826865aaa5b15d1d2d",
+  "code_commit": "f8a1fcfcf69b76172580044e1bb78cc001253288",
+  "source_manifest": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_working_set_ratio.py": "2213936e851e47cc2f3936e46b2b8c732b854156b156c9f38ebf6239239c5fcf",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "883badfcf57af98e1ba3721e88b7b942002df59f67e28a5f2c84aeee50f9fa83"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "references": {
+    "results/paper/decision_population_replay_seeds.csv": "6a6eea890a5d4ec663a93f8bbdff109f02db297d3290edb4415a80f0f966fcf0",
+    "results/paper/phase1_intervention_pairs_seeds.csv": "2ec963b3951df46f8e98d39ae484bfba1f0f0e9ebd5c753cc4953a06b33db2af",
+    "results/paper/mechanism_control_001/replay.csv": "38e11913229c30e8331f89e8dd331d86d942216096f45867543e9ddfa3de980a"
+  },
+  "traces": [
+    "conversation_trace",
+    "toolagent_trace"
+  ],
+  "l1_fractions": [
+    0.0025,
+    0.01,
+    0.02
+  ],
+  "l2_multipliers": [
+    1.0,
+    4.0
+  ],
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.0025,
+      4.0
+    ],
+    [
+      0.01,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      1.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "cells_expected": 12,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "l1_policy": "lru",
+  "offer_stream": "run_two_tier, L2 of zero bytes, victim_hook",
+  "size_model": "packed block tokens x bytes_per_token (HYPERPARAMETERS)",
+  "quantiles": [
+    0.25,
+    0.5,
+    0.75
+  ],
+  "weight": "offer block tokens",
+  "threshold": 1.0,
+  "transition": [
+    0.5,
+    2.0
+  ],
+  "outcomes": [
+    {
+      "outcome": "heap_lru_2hit_minus_lru",
+      "number": 1,
+      "declining_sign": 1,
+      "label": "heap lru_2hit - lru",
+      "source": "results/paper/decision_population_replay_seeds.csv",
+      "paired": false
+    },
+    {
+      "outcome": "sampled_lru_2hit_s_minus_lru_s",
+      "number": 2,
+      "declining_sign": 1,
+      "label": "sampled lru_2hit_s - lru_s",
+      "source": "results/paper/decision_population_replay_seeds.csv",
+      "paired": true
+    },
+    {
+      "outcome": "protection_all_minus_none",
+      "number": 3,
+      "declining_sign": -1,
+      "label": "arrival protection all - none",
+      "source": "results/paper/phase1_intervention_pairs_seeds.csv",
+      "paired": true
+    }
+  ],
+  "phase1_comparison": "all-none",
+  "phase1_primary_target": "next_use",
+  "phase1_secondary_targets": [
+    "binary"
+  ],
+  "phase1_inventory": [
+    {
+      "comparison": "all-none",
+      "left_variant": "all",
+      "right_variant": "none",
+      "target": "binary",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    },
+    {
+      "comparison": "all-none",
+      "left_variant": "all",
+      "right_variant": "none",
+      "target": "next_use",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    },
+    {
+      "comparison": "direct_child-all",
+      "left_variant": "direct_child",
+      "right_variant": "all",
+      "target": "binary",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    },
+    {
+      "comparison": "direct_child-all",
+      "left_variant": "direct_child",
+      "right_variant": "all",
+      "target": "next_use",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    },
+    {
+      "comparison": "direct_child-none",
+      "left_variant": "direct_child",
+      "right_variant": "none",
+      "target": "binary",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    },
+    {
+      "comparison": "direct_child-none",
+      "left_variant": "direct_child",
+      "right_variant": "none",
+      "target": "next_use",
+      "trace_cells": 6,
+      "cells": [
+        "l1=0.0025,l2x1",
+        "l1=0.01,l2x4",
+        "l1=0.02,l2x4"
+      ]
+    }
+  ],
+  "declinable_rungs": [
+    "label",
+    "learned"
+  ],
+  "declinable_mechanism": "all16",
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "capacities": {
+    "conversation_trace/0.0025": {
+      "l1_capacity_bytes": 464360509,
+      "l2x1": 464360509,
+      "l2x4": 1857442038
+    },
+    "conversation_trace/0.01": {
+      "l1_capacity_bytes": 1857442038,
+      "l2x1": 1857442038,
+      "l2x4": 7429768151
+    },
+    "conversation_trace/0.02": {
+      "l1_capacity_bytes": 3714884076,
+      "l2x1": 3714884076,
+      "l2x4": 14859536302
+    },
+    "toolagent_trace/0.0025": {
+      "l1_capacity_bytes": 446163482,
+      "l2x1": 446163482,
+      "l2x4": 1784653926
+    },
+    "toolagent_trace/0.01": {
+      "l1_capacity_bytes": 1784653926,
+      "l2x1": 1784653926,
+      "l2x4": 7138615706
+    },
+    "toolagent_trace/0.02": {
+      "l1_capacity_bytes": 3569307853,
+      "l2x1": 3569307853,
+      "l2x4": 14277231411
+    }
+  },
+  "checks": {
+    "problems": 0,
+    "tier_equivalence_violations": 0,
+    "returning_offers_checked_per_capacity": {
+      "conversation_trace/0.0025": 93496,
+      "conversation_trace/0.01": 90300,
+      "conversation_trace/0.02": 82422,
+      "toolagent_trace/0.0025": 88232,
+      "toolagent_trace/0.01": 84184,
+      "toolagent_trace/0.02": 76296
+    }
+  },
+  "streams": [
+    {
+      "trace": "conversation_trace",
+      "l1_fraction": 0.0025,
+      "l1_capacity_bytes": 464360509,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 464360509,
+      "l1_evictions": 275832,
+      "requested_tokens": 58742117,
+      "l1_avoided_tokens": 2662942,
+      "offered_bytes": 283268640768,
+      "max_distance_bytes": 160347725824,
+      "record_seconds": 1.8812999725341797,
+      "distance_seconds": 1.674222469329834,
+      "seconds": 4.007007598876953,
+      "worker_peak_rss_mib": 664.23046875
+    },
+    {
+      "trace": "conversation_trace",
+      "l1_fraction": 0.01,
+      "l1_capacity_bytes": 1857442038,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 1857442038,
+      "l1_evictions": 271289,
+      "requested_tokens": 58742117,
+      "l1_avoided_tokens": 3218284,
+      "offered_bytes": 278530201600,
+      "max_distance_bytes": 158954579968,
+      "record_seconds": 1.995074987411499,
+      "distance_seconds": 1.6369454860687256,
+      "seconds": 4.0769829750061035,
+      "worker_peak_rss_mib": 664.0390625
+    },
+    {
+      "trace": "conversation_trace",
+      "l1_fraction": 0.02,
+      "l1_capacity_bytes": 3714884076,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 3714884076,
+      "l1_evictions": 261582,
+      "requested_tokens": 58742117,
+      "l1_avoided_tokens": 4770907,
+      "offered_bytes": 268421097472,
+      "max_distance_bytes": 157097060352,
+      "record_seconds": 2.0089173316955566,
+      "distance_seconds": 1.5207204818725586,
+      "seconds": 3.9484972953796387,
+      "worker_peak_rss_mib": 670.8203125
+    },
+    {
+      "trace": "toolagent_trace",
+      "l1_fraction": 0.0025,
+      "l1_capacity_bytes": 446163482,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 446163482,
+      "l1_evictions": 271080,
+      "requested_tokens": 83026370,
+      "l1_avoided_tokens": 29393272,
+      "offered_bytes": 270390255616,
+      "max_distance_bytes": 152230213632,
+      "record_seconds": 1.957648754119873,
+      "distance_seconds": 1.6022255420684814,
+      "seconds": 3.991549253463745,
+      "worker_peak_rss_mib": 667.78515625
+    },
+    {
+      "trace": "toolagent_trace",
+      "l1_fraction": 0.01,
+      "l1_capacity_bytes": 1784653926,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 1784653926,
+      "l1_evictions": 265705,
+      "requested_tokens": 83026370,
+      "l1_avoided_tokens": 30578881,
+      "offered_bytes": 264827553792,
+      "max_distance_bytes": 150891552768,
+      "record_seconds": 2.0302915573120117,
+      "distance_seconds": 1.578354835510254,
+      "seconds": 4.03170371055603,
+      "worker_peak_rss_mib": 666.671875
+    },
+    {
+      "trace": "toolagent_trace",
+      "l1_fraction": 0.02,
+      "l1_capacity_bytes": 3569307853,
+      "split_ms": 2122199.4,
+      "replay_l1_capacity_bytes": 3569307853,
+      "l1_evictions": 255969,
+      "requested_tokens": 83026370,
+      "l1_avoided_tokens": 32176527,
+      "offered_bytes": 254793775104,
+      "max_distance_bytes": 149107412992,
+      "record_seconds": 2.0427253246307373,
+      "distance_seconds": 1.4486427307128906,
+      "seconds": 3.890498638153076,
+      "worker_peak_rss_mib": 667.79296875
+    }
+  ],
+  "workers": 6,
+  "stream_seconds": 4.1383092403411865,
+  "wall_seconds": 6.642173528671265,
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 670.8203125,
+    "children_peak_rss_mib": 670.8203125,
+    "parent_peak_rss_mib": 526.75,
+    "mem_available_mib_at_start": 21146.4453125
+  },
+  "note": "Arithmetic on the L1 offer stream and on published tables. No L2 policy is run, nothing is fitted and nothing is proposed."
+}

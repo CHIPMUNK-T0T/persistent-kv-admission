@@ -1,0 +1,5 @@
+outcome,number,target,primary,cells_expected,cells_compared,agreement,misses,misses_in_transition,miss_list,verdict,verdict_on_compared_cells
+heap_lru_2hit_minus_lru,1,,True,12,12,12,0,0,,located,located
+sampled_lru_2hit_s_minus_lru_s,2,,True,12,12,12,0,0,,located,located
+protection_all_minus_none,3,next_use,True,12,6,4,2,2,"conversation_trace/l1=0.01,l2x4 gamma=1.179 (mixed); toolagent_trace/l1=0.01,l2x4 gamma=1.005 (mixed)",not computable: 6 of 12 cells published,located outside the transition
+protection_all_minus_none,3,binary,False,12,6,6,0,0,,not computable: 6 of 12 cells published,located

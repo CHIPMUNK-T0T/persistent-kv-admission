@@ -25,6 +25,11 @@ score fixed at four rungs and replays it under four eviction mechanisms (960
 replays); its [findings](../../docs/mechanism-control-findings.md) state the
 headroom decomposition and its limits, and
 `scripts/tabulate_mechanism_control.py` prints every cited table from the CSVs.
+The [working-set ratio output](working_set_ratio_001/README.md) holds the
+stack-distance working set of the L1 offer stream, the ratio per cell and its
+comparison with the published sign outcomes of 2-hit admission and arrival
+protection; its [findings](../../docs/working-set-ratio-findings.md) state the
+agreement counts, the misses and the limits.
 
 ## Files
 

@@ -466,3 +466,20 @@ at its top pair (`label > offline`, at most 1.6 points). The control fits
 nothing and promotes no policy; it does not bound what other causal
 information could do, and it did not run the `pi3` update, binary targets or
 arrival protection.
+
+The capacity reversal the handoff lists as candidate A is checked against an
+existing explanation in
+[working-set-ratio-plan.md](working-set-ratio-plan.md): the ratio of a
+trace-derived reuse working set to the L2 capacity, with its definition and
+the threshold of 1 fixed before it was computed.
+
+Outcome ([findings](working-set-ratio-findings.md), arithmetic on the L1 offer
+stream and published tables, all checks passed): the ratio places the sign
+change of 2-hit admission against LRU in 12/12 real trace × cell for the heap
+pair and 12/12 for the sampled pair. Arrival protection is published at 6 of
+the 12 cells; the ratio agrees in 4, and both misses are mixed seed readings at
+ratios 1.005 and 1.179. The reversal is therefore read as an instance of a
+known working-set argument and not as a separate contribution. Only 2%×4 has a
+ratio at or below 1 on either trace, so the crossing is bracketed between
+0.553 and 1.005 and not located more finely; the check says nothing about
+learned scores.

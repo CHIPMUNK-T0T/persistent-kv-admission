@@ -1,0 +1,5 @@
+outcome,number,target,primary,cells_compared,max_agreement,agreement_at_1,interval,threshold_low,threshold_high,contains_1
+heap_lru_2hit_minus_lru,1,,True,12,12,12,0,0.552570536867618,1.0045460071443157,True
+sampled_lru_2hit_s_minus_lru_s,2,,True,12,12,12,0,0.552570536867618,1.0045460071443157,True
+protection_all_minus_none,3,next_use,True,6,4,4,0,0.552570536867618,18.163996953923718,True
+protection_all_minus_none,3,binary,False,6,6,6,0,0.552570536867618,1.0045460071443157,True
