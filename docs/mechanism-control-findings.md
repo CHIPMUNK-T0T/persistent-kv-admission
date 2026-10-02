@@ -48,7 +48,9 @@ The four right-hand columns are shares of the five-seed mean `T`. The signal gap
 
 Read directly: through the published mechanism — the arrival plus 16 uniformly sampled residents, any of which may leave — a perfect predictor of the ranker's own training target reaches 76.5–98.2% of the heap offline reference, while the frozen ranker obtains 11.1–27.9% of the label rung's gain over sampled LRU. The published sampled mechanism does not prevent a good score from becoming utility on these traces; most of the headroom it leaves is between the ranker and its label.
 
-The candidate-search gap is 0–28.1% of `T`: largest in the cells whose L2 is at most 1% of the working set, zero at 2%×4. The objective gap is within ±3.7% of `T` except at 2%×4 (20.1% conversation, 5.9% tool-agent), where the label's 600-second clip costs against the unclipped next use.
+The candidate-search gap is 0–28.1% of `T`: largest in the cells whose L2 is at most 1% of the working set, zero at 2%×4. The objective gap is within ±3.7% of `T` except at 2%×4 (20.1% conversation, 5.9% tool-agent), where the offline key is ahead of the clipped-label key. The two rungs differ in the 600-second clip and in the tie-break (recency against prefix length) at once, so this term is the difference between the two keys, not the cost of the clip alone.
+
+Stated on one denominator: the label rung recovers `(U(label) − U(lru)) / T` = 74.3–95.7% of the headroom above sampled LRU (the signal and achieved shares together), and the frozen ranker 9.0–22.2% of it.
 
 ## Reading 2 — mechanism effect on each rung
 
@@ -76,7 +78,7 @@ By the pre-registered rule (an inversion present under `all16` that is absent un
 - 0.25%×1 and 1%×4: present under `all16`, absent under `leaf64` on both traces → **mechanism-borne** by the rule. The rule does not separate eligibility from width, and here width does the removing: under `leaf16` the same inversion is present in 5/5 seeds on both traces and is larger at 1%×4 (−1.25, −0.91 against −0.79 and a 1/5-seed +0.02 under `all16`), and at 1%×4 it is already absent under `all64`.
 - 2%×4: no inversion under any mechanism.
 
-The inversions are small against `T`: the mean `offline − label` difference is between −0.79 and +0.07 points under `all16` and at most −1.59 under `leaf16`. They say that under sampling, the clipped label with its recency tie-break is not a worse key than the unclipped next use with the heap's prefix tie-break in most cells; they do not rank the two targets in general, because the two rungs differ in tie-break as well as in clipping.
+The inversions are small against `T`. Over the ten trace × cell where `all16` lists an inversion, the mean `offline − label` difference is between −0.787 and +0.073 points (a positive mean where only some seeds invert); over all twelve cells it is −0.787…+2.516, the two 2%×4 cells being ordered. Under `leaf16` the most negative mean is −1.585. They say that under sampling, the clipped label with its recency tie-break is not a worse key than the unclipped next use with the heap's prefix tie-break in most cells; they do not rank the two targets in general, because the two rungs differ in tie-break as well as in clipping.
 
 ## Reading 4 — the learned arm once the mechanism is controlled
 
@@ -98,7 +100,7 @@ These were not pre-registered as readings. They are computed from the same publi
 
 **Where the learned rung differs from its label under `all16`.** In the four cells where rejections are frequent, the per-block charge of tokens absent after a rejection is 25.9 / 19.7 / 14.0 / 7.4 points for the learned rung against 15.7 / 4.8 / 3.6 / 0.7 for the label rung (conversation 0.25%×1, 0.25%×4, 1%×1, 2%×1; tool-agent 15.8 / 11.7 / 7.6 / 3.9 against 9.2 / 2.2 / 1.7 / 0.2). At 1%×4 and 2%×4 both rungs reject almost nothing and the difference is in the charge after resident evictions (17.4 and 9.0 against 2.8 and 2.4, conversation). As in Phase 0.98b, the charge attributes a lost block to its last removal; it is not the amount recovered by changing that decision.
 
-**Orphaning rises with score quality under `all` eligibility.** Present-but-unusable tokens under `all16` are 0.05–2.28 points for `lru` over the twelve cells, and 2.89–4.64 for `label` in the four cells named above (conversation; 2.03–3.32 tool-agent). Leaf eligibility sets them to zero by construction, and the `leaf16 − all16` gain of the label rung in those cells (+1.91…+3.73) is of the same order.
+**Orphaning under `all` eligibility depends on score and capacity.** In the four cells named above, present-but-unusable tokens under `all16` are 0.05–1.58 points for `lru` and 2.03–4.64 for `label`; at 1%×4 and 2%×4 the order reverses (1.25–2.28 for `lru`, 0.02–0.37 for `label`). Leaf eligibility sets them to zero by construction, and the `leaf16 − all16` gain of each rung is of the same order as the orphaning it removes.
 
 ## Figures
 
@@ -115,12 +117,13 @@ The four terms of `T` per mechanism, negative terms below zero. It shows the sig
 Established on this surface (two Mooncake traces from one deployment family, about 59 minutes, 512-token blocks, six cells, one frozen linear ranker, one target):
 
 1. With the score held fixed, the published headroom is lost mainly between the frozen ranker and the exact label it was fitted to, under the published mechanism and under all three alternatives, in every cell and seed.
-2. The sampled mechanism is a secondary, score-dependent limit: up to 28% of `T` under the published mechanism, removable by leaf-only eligibility and width, and larger for a better score.
-3. The 600-second clipped target is not the limiting term except at 2%×4.
+2. The sampled mechanism is a secondary limit: up to 28% of `T` under the published mechanism, removable by leaf-only eligibility and width. The size of the eligibility effect depends on the score and the capacity together: it is largest for the label rung where L2 is at most 2% of the working set, and largest for LRU at 1%×4 and 2%×4.
+3. The clipped-label key is within ±3.7% of `T` of the offline key except at 2%×4. That comparison changes the clip and the tie-break together.
 4. Leaf-only eligibility is a consistent gain for LRU, the learned ranker and the label in every cell.
 
 Not established:
 
+- Independent causes. The identity closes additively by construction; each term is the utility difference between two policies (for the signal gap, the frozen ranker replaced by the exact label at every decision). It does not apportion the gap among missing features, the fitting method, or the placement of the ranker's errors.
 - That history is inadequate, or that some other feature set is required. The signal gap is the distance between **one** linear ranker and a label that reads the future; earlier phases varied target, model family and training population on the same 23 features without closing the gap, and none of that bounds what other causal information could do.
 - How much of the signal gap a better predictor would recover. The ladder has two points between LRU and the exact label; it does not give utility as a function of ranking quality, and so does not by itself explain why ranking gains measured in the on-policy study did not appear as utility.
 - A deployable policy. The label and offline rungs read the trace's future. Leaf-only eligibility is tree-native engines' constraint used as a control; its gain here is against this simulator's sampled exclusive L2, not against any serving stack.
