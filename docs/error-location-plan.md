@@ -175,3 +175,56 @@ phase triggers a new feature, target, fit or deployed policy.
    and figures under `results/paper/error_location_001/`, with a read-only
    tabulation script, and a findings document that states what each table can
    and cannot establish, including null and adverse results.
+
+## Addendum, recorded before the smoke (2026-10-02)
+
+Written after the implementation was reviewed and before any real replay of
+the new arms; no outcome has been inspected. The text above is unchanged. This
+addendum corrects one required check that cannot hold as written and fixes the
+readings the implementation had to choose.
+
+- **The label rung's `m4` is not identically zero.** The `next_use` label
+  clips the delta at 600 seconds, so a state whose next use is at exactly 600
+  seconds carries the same label as a state that is never requested again,
+  while the `binary` convention of this repository
+  (`decisionpop.target_column`, delta ≤ 600 s) counts it as requested within
+  the horizon. The label rung can therefore break that tie by recency and
+  evict the reusable state. On the real traces 562 of the 1,180 timestamps
+  have another timestamp exactly 600,000 ms later, so the case is common. The
+  definition of `m4` stays as written above. The required check for `label`
+  becomes: `m1 = 1`, `m2 = 1`, `m3 = 0`, and every `m4` victim has its next
+  use at exactly the horizon (`m4_count = m4_victim_at_horizon`, overall and
+  per decision type). Both counts are published for every arm. A label-rung
+  victim counted by `m4` must carry the minimum label, hence a delta of at
+  least 600 seconds, hence exactly 600 seconds, so the corrected check is an
+  identity.
+- **`m1`** is pooled over the candidate pairs of all window decisions, not
+  averaged per decision. **`m2`–`m4`** take every window decision of the type
+  as the denominator, single-candidate decisions included; a single-candidate
+  decision contributes no `m1` pair.
+- **Window.** A decision is in the evaluation window when its timestamp is at
+  or after the split; no decision is dropped for lying within 600 seconds of
+  the trace end.
+- **Statistics of an overridden decision** are those of the final victim (the
+  hybrid's or the swap's choice), recorded in the override slot; the arm's key
+  in `m1` is the store's key (Y's for a hybrid, the label's for a swap arm).
+- **Shared draws.** The noise draw `z` depends on (seed, state, timestamp)
+  only, so the four noise levels share it. The swap coin depends on (seed,
+  decision index) only, so both swap families fire at the same decisions for a
+  given `p` and the decisions swapped at `p = 0.25` are a subset of those at
+  `p = 0.5`. The decision index is the store's counter over the whole replay,
+  warm-up included. Draws come from a keyed hash and never from the store's
+  sampling generator.
+- **Swaps apply in every round,** first rounds included, so a swap can turn a
+  rejection into an eviction or the reverse.
+- **Reading 1** applies the half-of-`G` rule as written for any sign of `G`.
+  **Reading 2** tests monotonicity over the four noise levels only; a level at
+  or above `U(learned)` counts as above, and every adjacent pair that changes
+  side is listed. **Reading 4** correlates the five-seed mean of each
+  replay's ratio with the five-seed mean `U`. **Reading 5**: a statistic
+  agrees when its mean change and the mean utility change have the same sign,
+  zero matching only zero.
+- **Smoke identities.** The X/X hybrids, `noise_0` and the `p = 0` swaps are
+  compared with their reference rung by a digest of every counter and a digest
+  of every decision (candidates, final victim, arrival index, timestamp); the
+  statistics hook is compared on and off for all 18 arms.
