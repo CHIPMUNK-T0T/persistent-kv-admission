@@ -1,0 +1,219 @@
+{
+  "mode": "anchor",
+  "code_commit": "e6e702ec86244ed8a9f2c349d225da5ea2aad3af",
+  "plan_commit": "b4d6d474623e28e5e8a41fdcaa44d592c0f42863",
+  "plan": "docs/bailian-external-check-plan.md",
+  "git_dirty_at_start": false,
+  "source_manifest": {
+    "files": {
+      "scripts/run_bailian_external_check.py": "be21013fab6aa874fe1a9b412b0005d8cdead08ae9a70ec963b9c5e0951ef6f4",
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_leaf_matched_horizon.py": "30ed129e8a2f2fd605932ea382e0aa1fc81af54746f8ca7a25c4d9c9b95ce81e",
+      "scripts/run_matched_class_order.py": "fbe3e69b5f6c14b3db4338fee58807fe04d843d782587d184fb5db7d0219389d",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/bailiancheck.py": "5b572e372854b9463984ce216e4181b3d1b002bdcc08420eec343a7e8460c16a",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/classmix.py": "0c5eea68dd644ce4b02241c738a24970fe489febc6c88962bb1e4caf968c6689",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/leafmatched.py": "953e390137e4e6a304160b4441b651a3bb87d594868fce033709a8651d3b33b9",
+      "src/persistent_kv_admission/matcheddiag.py": "1ce2d06111a53069fae4f34c0d13a7614552b4644279ab6f010b90d633b7958d",
+      "src/persistent_kv_admission/matchedorder.py": "8f29c28bd1ec0b3897d5a2f48d40657e751c7c5ec2004ad29b6e4acf90c53081",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/tailwindow.py": "8f3afeeb454431abe0826eb36721a2b4cfd37d5870a2f963c0c11871c3e1b2d4",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "539cd01cf2af14e11b78dbdfb997d8833aa33fe5b64a342ad2a3739c06241e66"
+  },
+  "passed": true,
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    }
+  },
+  "inputs": {
+    "conversation_trace": {
+      "name": "conversation_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "block_size": 512,
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df",
+      "horizon_seconds": 600.0,
+      "split_ms": 2122199.4,
+      "start_ms": 0.0,
+      "end_ms": 3536999.0,
+      "requests": 12031,
+      "states": 182790,
+      "working_set_bytes": 185744203776,
+      "load_seconds": 0.847712516784668,
+      "windows": {
+        "split_ms": 2122199.4,
+        "primary_end_ms": 2336999.0,
+        "mid_ms": 2229599.2,
+        "second_start_ms": 2229599.2000000007,
+        "end_ms": 3536999.0,
+        "full_seconds": 1414.7996,
+        "primary_seconds": 214.79960000000008,
+        "first_half_seconds": 107.39980000000028,
+        "second_half_seconds": 107.39979999999981
+      }
+    }
+  },
+  "references": {
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c",
+    "results/paper/horizon_control_001/replay_seeds.csv": "0f96f1e9061c88098dda7e6693530f0223343cd3280ad3307179f532d9e555d6",
+    "results/paper/mechanism_control_001/replay_seeds.csv": "cdbf9a93eeddfee3f1eda81fb80cc0a97915ed71d1456c6c9d113a107ab417d6",
+    "results/paper/leaf_matched_horizon_001/replay_seeds.csv": "a2503e75c1707e88b14905427d918d4ab98c6d1af678cc0ae8406bbdba09d051"
+  },
+  "anchor_sources": {
+    "all16/lru": [
+      "error_location_001"
+    ],
+    "all16/label": [
+      "error_location_001"
+    ],
+    "all16/label_binary_60": [
+      "horizon_control_001"
+    ],
+    "all16/label_binary_600": [
+      "horizon_control_001"
+    ],
+    "leaf16/lru": [
+      "mechanism_control_001"
+    ],
+    "leaf16/label": [
+      "leaf_matched_horizon_001",
+      "mechanism_control_001"
+    ],
+    "leaf16/label_binary_60": [
+      "leaf_matched_horizon_001"
+    ],
+    "leaf16/label_binary_600": [
+      "leaf_matched_horizon_001"
+    ]
+  },
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "replays": 70,
+  "reproduced": 70,
+  "checks": [
+    {
+      "check": "reproduction",
+      "scope": "every anchor replay vs its published row",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "complete",
+      "scope": "one row per task",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "identifiers",
+      "scope": "every arm of a trace x cell x seed, every window; heap with its cell",
+      "checked": 10,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "windows",
+      "scope": "W <= full and W1 + W2 = W, every replay",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "mechanism",
+      "scope": "eligibility, width, arm, h*, builder",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "statistics",
+      "scope": "every decision seen with its final victim; label identities; no override",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "leaf16_closure",
+      "scope": "no present-but-unusable token under leaf16",
+      "checked": 30,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "phase098b",
+      "scope": "attribution identities (per replay) and no unexplained absent token",
+      "checked": 70,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "random_stream",
+      "scope": "draws = candidates; own stream; recency-arm identifiers",
+      "checked": 0,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    }
+  ],
+  "compared": "avoided_prefill_tokens and each digest the published row carries; every published counter column where it carries no counter digest (skipped: arm, arm_parameter, cell, eligibility, family, l1_fraction, l2_multiplier, mechanism, reference_avoided_prefill_tokens, reference_source, reproduces_reference, rung, seconds, seed, trace, variant, width, worker_peak_rss_mib, worker_pss_mib_end)",
+  "windows": "the three window collectors attached exactly as in main",
+  "workers": 10,
+  "wall_seconds": 188.0335669517517
+}
