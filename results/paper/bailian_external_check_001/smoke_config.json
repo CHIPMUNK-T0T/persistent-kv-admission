@@ -1,0 +1,380 @@
+{
+  "mode": "smoke",
+  "code_commit": "3f0986fee122c124143810c5f34d4afe36d6585a",
+  "plan_commit": "b4d6d474623e28e5e8a41fdcaa44d592c0f42863",
+  "plan": "docs/bailian-external-check-plan.md",
+  "git_dirty_at_start": false,
+  "source_manifest": {
+    "files": {
+      "scripts/run_bailian_external_check.py": "be21013fab6aa874fe1a9b412b0005d8cdead08ae9a70ec963b9c5e0951ef6f4",
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_leaf_matched_horizon.py": "30ed129e8a2f2fd605932ea382e0aa1fc81af54746f8ca7a25c4d9c9b95ce81e",
+      "scripts/run_matched_class_order.py": "fbe3e69b5f6c14b3db4338fee58807fe04d843d782587d184fb5db7d0219389d",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/bailiancheck.py": "5b572e372854b9463984ce216e4181b3d1b002bdcc08420eec343a7e8460c16a",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/classmix.py": "0c5eea68dd644ce4b02241c738a24970fe489febc6c88962bb1e4caf968c6689",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/leafmatched.py": "953e390137e4e6a304160b4441b651a3bb87d594868fce033709a8651d3b33b9",
+      "src/persistent_kv_admission/matcheddiag.py": "1ce2d06111a53069fae4f34c0d13a7614552b4644279ab6f010b90d633b7958d",
+      "src/persistent_kv_admission/matchedorder.py": "8f29c28bd1ec0b3897d5a2f48d40657e751c7c5ec2004ad29b6e4acf90c53081",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/tailwindow.py": "8f3afeeb454431abe0826eb36721a2b4cfd37d5870a2f963c0c11871c3e1b2d4",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "539cd01cf2af14e11b78dbdfb997d8833aa33fe5b64a342ad2a3739c06241e66"
+  },
+  "anchor": {
+    "paths": {
+      "results/paper/bailian_external_check_001/anchor.csv": "2f69db611a4e9df9c24ee87c585eb77ae8f6bc057819464d0d32b79343f4535b",
+      "results/paper/bailian_external_check_001/anchor_config.json": "ad44cf492a8e91e6b0257f78552096113100e81d06d76e2f41d28b8e0767328f"
+    },
+    "replays": 70,
+    "reproduced": 70,
+    "code_commit": "e6e702ec86244ed8a9f2c349d225da5ea2aad3af"
+  },
+  "trace_files": {
+    "bailian_toc_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_toc_trace.jsonl",
+      "sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_toc_trace.manifest.json",
+        "sha256": "6b3d41aa14d5e86401ef88b4a86926d613d5e9cb6212223c47c5db0325d07699",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_toc_trace.jsonl",
+          "output_blocks": 120177,
+          "output_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "records": 43058,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceA_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_tob_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_tob_trace.jsonl",
+      "sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_tob_trace.manifest.json",
+        "sha256": "af08eff0c800cc0f749c3f7fcd429d065ab5bec71e4e2f19d95de26962b8d734",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_tob_trace.jsonl",
+          "output_blocks": 290486,
+          "output_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "records": 172800,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceB_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_thinking_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_thinking_trace.jsonl",
+      "sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_thinking_trace.manifest.json",
+        "sha256": "9ae290046dea8a82a44be39a22ad1e6a29020607ff2c4c301046a7ebc8e5229b",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_thinking_trace.jsonl",
+          "output_blocks": 62077,
+          "output_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "records": 10812,
+          "records_moved_by_sort": 0,
+          "source": "qwen_thinking_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_coder_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_coder_trace.jsonl",
+      "sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_coder_trace.manifest.json",
+        "sha256": "5cab3e60060596f05473e7cef410246c7d02c7fb4119a2cee2917cb62d3a1aca",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_coder_trace.jsonl",
+          "output_blocks": 199350,
+          "output_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "records": 43011,
+          "records_moved_by_sort": 0,
+          "source": "qwen_coder_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "timestamp_unit": "ms"
+        }
+      }
+    }
+  },
+  "inputs": {
+    "bailian_toc_trace": {
+      "name": "bailian_toc_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_toc_trace.jsonl",
+      "block_size": 512,
+      "sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319678.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7199464.0,
+      "requests": 43058,
+      "states": 120177,
+      "working_set_bytes": 102480951296,
+      "load_seconds": 0.7349851131439209,
+      "windows": {
+        "split_ms": 4319678.399999999,
+        "primary_end_ms": 5999464.0,
+        "mid_ms": 5159571.199999999,
+        "second_start_ms": 5159571.2,
+        "end_ms": 7199464.0,
+        "full_seconds": 2879.7856000000006,
+        "primary_seconds": 1679.7856000000006,
+        "first_half_seconds": 839.8927999999999,
+        "second_half_seconds": 839.8928000000008
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_toc_trace.manifest.json",
+        "sha256": "6b3d41aa14d5e86401ef88b4a86926d613d5e9cb6212223c47c5db0325d07699",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_toc_trace.jsonl",
+          "output_blocks": 120177,
+          "output_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "records": 43058,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceA_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_tob_trace": {
+      "name": "bailian_tob_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_tob_trace.jsonl",
+      "block_size": 512,
+      "sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319982.0,
+      "start_ms": 0.0,
+      "end_ms": 7199970.0,
+      "requests": 172800,
+      "states": 290486,
+      "working_set_bytes": 211049367552,
+      "load_seconds": 1.8858911991119385,
+      "windows": {
+        "split_ms": 4319982.0,
+        "primary_end_ms": 5999970.0,
+        "mid_ms": 5159976.0,
+        "second_start_ms": 5159976.000000001,
+        "end_ms": 7199970.0,
+        "full_seconds": 2879.988,
+        "primary_seconds": 1679.988,
+        "first_half_seconds": 839.994,
+        "second_half_seconds": 839.994
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_tob_trace.manifest.json",
+        "sha256": "af08eff0c800cc0f749c3f7fcd429d065ab5bec71e4e2f19d95de26962b8d734",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_tob_trace.jsonl",
+          "output_blocks": 290486,
+          "output_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "records": 172800,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceB_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_thinking_trace": {
+      "name": "bailian_thinking_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_thinking_trace.jsonl",
+      "block_size": 512,
+      "sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "horizon_seconds": 600.0,
+      "split_ms": 4315040.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7191734.0,
+      "requests": 10812,
+      "states": 62077,
+      "working_set_bytes": 59610759168,
+      "load_seconds": 0.2386338710784912,
+      "windows": {
+        "split_ms": 4315040.399999999,
+        "primary_end_ms": 5991734.0,
+        "mid_ms": 5153387.199999999,
+        "second_start_ms": 5153387.2,
+        "end_ms": 7191734.0,
+        "full_seconds": 2876.6936000000005,
+        "primary_seconds": 1676.6936000000005,
+        "first_half_seconds": 838.3467999999998,
+        "second_half_seconds": 838.3468000000007
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_thinking_trace.manifest.json",
+        "sha256": "9ae290046dea8a82a44be39a22ad1e6a29020607ff2c4c301046a7ebc8e5229b",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_thinking_trace.jsonl",
+          "output_blocks": 62077,
+          "output_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "records": 10812,
+          "records_moved_by_sort": 0,
+          "source": "qwen_thinking_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_coder_trace": {
+      "name": "bailian_coder_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_coder_trace.jsonl",
+      "block_size": 512,
+      "sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319327.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7198879.0,
+      "requests": 43011,
+      "states": 199350,
+      "working_set_bytes": 185958426624,
+      "load_seconds": 1.3862831592559814,
+      "windows": {
+        "split_ms": 4319327.399999999,
+        "primary_end_ms": 5998879.0,
+        "mid_ms": 5159103.199999999,
+        "second_start_ms": 5159103.2,
+        "end_ms": 7198879.0,
+        "full_seconds": 2879.5516000000007,
+        "primary_seconds": 1679.5516000000005,
+        "first_half_seconds": 839.7757999999998,
+        "second_half_seconds": 839.7758000000008
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_coder_trace.manifest.json",
+        "sha256": "5cab3e60060596f05473e7cef410246c7d02c7fb4119a2cee2917cb62d3a1aca",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_coder_trace.jsonl",
+          "output_blocks": 199350,
+          "output_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "records": 43011,
+          "records_moved_by_sort": 0,
+          "source": "qwen_coder_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "timestamp_unit": "ms"
+        }
+      }
+    }
+  },
+  "fine_input": null,
+  "replays": 16,
+  "workers": 10,
+  "workers16": 1,
+  "isolation": "one fresh forked process per replay; peak RSS includes the parent's resident pages at fork (parent_rss_mib_at_fork)",
+  "stop_conditions": {
+    "max_seconds_512": 900.0,
+    "max_rss_mib_512": 3072.0,
+    "max_seconds_16": 1200.0,
+    "max_rss_mib_16": 6144.0,
+    "max_projected_hours_16": 12.0
+  },
+  "verdict_512": {
+    "replays": 16,
+    "max_seconds": 28.322479248046875,
+    "max_rss_mib": 567.2109375,
+    "max_seconds_allowed": 900.0,
+    "max_rss_mib_allowed": 3072.0,
+    "integrity_ok": true,
+    "within_limits": true,
+    "start": true
+  },
+  "verdict_16": null,
+  "identifier_problems": [],
+  "columns": [
+    "trace",
+    "block_tokens",
+    "l1_fraction",
+    "l2_multiplier",
+    "cell",
+    "mechanism",
+    "arm",
+    "seed",
+    "l1_capacity_bytes",
+    "l2_capacity_bytes",
+    "measured_requests",
+    "l2_decisions",
+    "l2_admissions",
+    "l2_rejections",
+    "l2_evictions",
+    "l1_evictions",
+    "candidates_seen",
+    "random_draws",
+    "seconds",
+    "worker_peak_rss_mib",
+    "worker_pss_mib_end",
+    "trace_load_seconds",
+    "parent_rss_mib_at_fork",
+    "identifiers_sha256",
+    "check_attribution_identities",
+    "check_no_unexplained_absent",
+    "check_statistics",
+    "check_no_override",
+    "check_windows",
+    "check_random_stream",
+    "check_replay",
+    "check_identifiers_across_arms"
+  ],
+  "note": "No utility of a smoke replay is written or read: the rows carry seconds, memory, counts and integrity-check outcomes only.",
+  "wall_seconds": 43.33448934555054
+}
