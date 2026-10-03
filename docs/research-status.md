@@ -67,6 +67,40 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 
 Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)を終え、[事前登録案](bailian-external-check-plan.md)をレビュー用に置いた段階である。案はMooncakeのh*表の移植（主解析）と固定grid内の存在（副解析）を分け、all16とleaf16を各機構の参照で評価し、学習モデルは使わず乱数のclass内順序を対照に加える。未決事項（gridの6秒と1,200秒、主窓、予測1の閾値、モデル移植の時期、評価可能cellの規則）は案の末尾に列挙し、合意後に計画だけを単独でcommitしてから実装へ進む。履歴fitは別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。引継ぎも案も事前登録ではなく、新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
 
+### 論文の中心命題と新規性の位置づけ（2026-10-03、Bailian確認前）
+
+三つの確認までの結果をAstraが論文の観点で整理し、Fableが表中の数値を公開CSVから再計算して照合した（[台帳](#仮説と証拠の台帳)の該当行と同じ値）。対象はMooncake実trace 2本（各3,537秒）、L1 victimを有限L2が受け取る設定である。比較器はいずれも将来を読むgreedyな参照で最適解ではなく、「90%」はそれぞれ指定した比較器との差に対する割合であって、全改善余地の回収率ではない。
+
+| 確認できたこと | 主な結果 | 言えること |
+|---|---|---|
+| 選択改善の余地がある | 凍結rankerは、正確な訓練ラベルがsampled LRUに対して得る利得の11.1–27.9%しか回収していない | 今の機構でも、有用な将来情報を選択へ渡せれば改善余地がある。[機構対照](mechanism-control-findings.md) |
+| 改善箇所を絞れた | residentの退去選択だけを正確なラベルにすると、ranker–label差の65–100%が回復する（12/12） | この凍結rankerでは、保存済みstateの選び直しが主要な改善箇所。[誤り位置](error-location-findings.md) |
+| 再利用情報の時間範囲が重要 | all16では、事後に選んだhorizonの正確なbit＋recencyがgreedy `next_use` 比較器のLRU比利得の90%以上に届く（登録grid 8/12、事後登録の補間4/4、合算しない） | 次回利用時刻だけが有効な表現ではない。ただしhorizonは事後選択。[horizon対照](horizon-control-findings.md) |
+| 正確なclassだけでは選択は終わらない | 両class内を一様乱数で選ぶとrecencyに12/12で全seed負ける | 同じclassに入った候補の選び方にも効用がある。[三つの確認](matched-horizon-checks-findings.md) |
+| 順位情報の価値が機構で逆転する | class内の学習順序は、all16ではrecencyに8/12で全seed負け、h*を持ち越したleaf16では11/12で全seed勝つ | 同じ学習scoreの有用性は、退去候補の制約から独立には評価できない。同上 |
+| 主要な結果は末尾だけの現象ではない | 末尾600秒を除いてもbit＋recencyの`S ≤ 0.10`は12/12、順序差の符号も12/12で維持（classの読みは10/12→9/12） | trace終端の情報だけでは主要な読みを説明できない。同上 |
+
+**中心命題（現時点の案）。** 有限容量の階層KV cacheでは、再利用予測の価値は、その時間範囲と、予測を使う選択規則・退去候補の制約によって変わる。正確な再利用classを与えてもclass内選択には効用差が残り、同じ学習順位情報の追加価値が候補適格性によって逆転する。したがって下位tierでは、何を予測するかと、その情報をどの候補・選択規則に使うかを一体で評価する必要がある。新policyは未完成だが、良いKVを選ぶために必要な条件を、実際の回避prefill tokenへの介入で具体化した。
+
+**新規性として押す三点。**
+
+1. 正確な再利用classを与えても、追加の順位情報の価値が候補適格性で逆転する。介入効果として測れたが、内部原因は未説明で、leaf化はarrivalの適格性と後続cache状態も変える。
+2. 学習順序の損が、予想と反対の非再利用classに現れる。再利用classだけに学習順序を使うと6/12で全seed改善、h以内に再利用されないclassだけでは9/12で全seed悪化し、後者は元の8つの一貫した損をすべて含む。非再利用classは永久に不要なstateではなく、容量占有や後続再利用への即断はしない。
+3. 下位tierで、情報の価値を実際の判断（到着拒否、resident選択、classの正確化、class内順序、適格性）への介入で測り、「どの情報が当たるか」から「どこへ渡すと再計算が減るか」まで接続した。実験数ではなく、改善箇所と適用条件を区別できたことに価値を置く。
+
+**先行研究との対応。** [2026-09-27の引継ぎ](strategy-handoff-20260927.md)の表に加えて、以下を照合した（リンク先は2026-10-03にFableが確認）。
+
+| 既に先行研究にあること | こちらが追加できる部分 |
+|---|---|
+| 再利用境界（Belady boundary）で厳密な最遠next-use予測を緩和する。[LRB, NSDI'20](https://www.usenix.org/system/files/nsdi20-paper-song.pdf) | 境界を与えた後にも残るclass内選択の価値と、それが候補適格性で逆転する条件 |
+| 会話継続の予測と最終アクセス時刻を組み合わせてLLM prefix cacheを退去する。[LPC, NeurIPS 2025](https://papers.nips.cc/paper_files/paper/2025/file/414f642a1ea9350006669774cba9bcd4-Paper-Conference.pdf) | 二層のresident判断で、情報・horizon・class内順序を分けて効用を測る介入。最も近い先行研究で、同条件の比較は未実施 |
+| reuse working setと容量でadmissionの効果が変わる。[EfficientAgent, arXiv 2609.33762](https://arxiv.org/abs/2609.33762) | 容量依存の符号反転自体ではなく（[working set比](working-set-ratio-findings.md)で既存論に帰着済み）、固定rankerの不足がどの判断・classに現れるか |
+| session reuseとstructural reuseを統合した退去、agent workloadのround-robin tail eviction。[UniCache, SIGMETRICS 2026](https://jxing.me/pdf/unicache-sigmetrics26.pdf)、[RR-Evict, arXiv 2609.32278](https://arxiv.org/abs/2609.32278) | policyの提案ではなく、同じ予測情報の追加価値が退去候補の制約で変わることの対照実験 |
+
+「1 bitを使う」「LRUに改善余地がある」「容量で良いpolicyが変わる」だけを中心に据えない。主要文献を照合した範囲では、再利用情報・class内順序・候補適格性の相互作用を下位KV tierの効用への介入として示した部分が最も差別化しやすい。世界初と断定する段階ではない。
+
+**足りないもの。** 外的妥当性（同一providerの短い2 traceを越えて再現するか。[Bailian計画案](bailian-external-check-plan.md)がこれに当たる）、逆転の説明（なぜall16とleaf16で学習順序の価値が変わるか）、実現可能性（必要なclassを過去だけから予測し、実際のpolicy改善につなげられるか）、事前選択（horizonをtest結果を見る前に決められるか）。characterizationとしての論文を強める優先事項は外部traceでの確認であり、実用policyの完成は別の到達点とする。
+
 ## 仮説と証拠の台帳
 
 | 仮説・論点 | 現在の読み | 主要な証拠と境界 |
