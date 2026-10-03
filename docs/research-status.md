@@ -36,6 +36,25 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 
 2026-10-03時点の整理。問いは「有限容量の階層KV cacheで再利用を増やすために、どの保持判断について、どの時間範囲の将来利用を、どの粒度で予測する必要があるか」に絞り、exactな将来情報を与えたときの比較性能を測る対照を重ねている（sampled-16のgreedyであり最適値の上界ではない）。判断はresident evictionの側にある（all16で12/12、leaf16でも12/12）。粒度は、事後にgridから選んだ容量に合うhorizonの1 bit（h秒以内に再利用されるか）とrecency tie-breakの組で、sampled-16のgreedy exact `next_use` labelに届く（登録gridで8/12、結果を見てから登録した補間gridで残り4/4、合算しない。6 cellでは上回る）。recencyという順序は使っており、比較先は最適解ではない。時間範囲はL2容量とともに伸びる（60、150、300、600秒。Phase 0.9の単層oracle sweepと同じ向き）。凍結rankerの不足については、600秒境界での誤りの99%超が再利用classの見分けであること、600秒のclassを与えると境界が合う6 cellで94–104%回復することまでが分かっている。容量に合う境界のclassをresidentに与える対照（[結果](matched-horizon-findings.md)）では、1%の4 cellで不足の90–98%が回復し（600秒classでは45–61%）、0.25%×1では73–81%にとどまって残りはrankerのclass内順序（recencyの順序なら103–106%）、2%以上では全回復だった。合うclassの中ではrankerの順序はrecencyより悪く（8/12で一貫して損。600秒classでは9/12で得）、rankerの拒否規則はlabelの拒否より最大4.1点劣る。保存ログ上では、合う境界での誤りはrecencyより0.25%×1で少なく（0.64倍）、1%の4 cellで多い（2.1–2.3倍）。未測定は、学習器がその1 bitをどれだけ当てられるか、horizonを事前に決められるか、別traceでの再現である。
 
+### 当初の目的との照合（2026-10-03）
+
+RULES.mdの目的「有限容量のPersistent KV Cacheにおいて、将来再利用価値の高いstateをどう選び、限られた容量を最も有効に使うか」は変えていない。変わったのは手段の仮説（構造特徴や履歴予測が効くか）と成果の重心で、現在の成果は「優れた実用policy」ではなく「良いpolicyが解くべき予測・選択問題の具体化」である。両者は分けて扱う。
+
+| 当初知りたかったこと | 現在の回答 | 根拠 |
+|---|---|---|
+| stateごとに残す価値の差があるか | ある。将来を読む比較器は、L1 victimを受ける有限L2でも汎用policyを大きく上回る。ただしその比較器はsampled-16のgreedyで、最適解でも実行可能なpolicyでもない。 | [機構対照](mechanism-control-findings.md)、[誤り位置](error-location-findings.md) |
+| 構造特徴を使えば良いstateを選べるか | 今回の特徴では追加効果が小さく、中心に置く根拠は弱い。 | [構造特性](characterization-findings.md) |
+| reuse予測の精度が高ければ十分か | 全体の予測指標や決定統計だけでは判断できない。実際の候補集合と選択規則で確認が要る。 | [時間予測](temporal-prediction-findings.md)、[誤り位置](error-location-findings.md)、[合うhorizonの追試](matched-horizon-findings.md) |
+| 何を正しく見分ける必要があるか | 改善余地の大部分はresidentの退去選択にある（差の65–100%）。容量に合うhorizonの再利用classが有力で、class内の選び方も条件次第で重要（合うclassの中では学習scoreの順序がrecencyより悪い8/12）。 | [誤り位置](error-location-findings.md)、[horizon対照](horizon-control-findings.md)、[合うhorizonの追試](matched-horizon-findings.md) |
+| その情報を過去の履歴だけから得られるか | **未解決。** 600秒fitの凍結scoreの再採点では、合う境界の判断内分離は0.55–0.64で偶然より上、exactには遠い。合う境界を目標に学習した場合の成否は測っていない（Phase 0.9の単層では小さな改善）。 | [合うhorizonの追試](matched-horizon-findings.md)、[目標変更](target-change-findings.md) |
+| 実用的に良いretention policyができたか | **まだできていない。** | — |
+
+残る中心的な穴は三つ。(a) 必要な情報の予測可能性（合う境界で実際のresident候補を履歴から見分けられるか）。(b) 条件の事前決定と再現性（合うhorizonは結果を見て選んでおり、容量から事前に決める方法と、別traceでの再現が未確認）。(c) persistent tierへの適用範囲（約59分のtraceでは時間・日単位の長期保持は示せず、実機の速度も未測定。これを補うためにI/O最適化へ広げることはしない）。
+
+以後の追加実験の採否基準は「その結果で、何を予測し、どの選択規則に渡すべきかの判断が変わるか」とし、診断そのものを目的にしない。この基準で、進行中の三つの確認は次のように位置づく。評価窓の確認（[計画](tail-window-check-plan.md)）は中心結論の交絡の確認、class内順序の混合（[計画](class-order-mix-plan.md)）は「予測を渡す選択規則」の確定、leaf適格の確認（[計画](leaf-matched-horizon-plan.md)）は条件が機構の産物でないことの確認。その後の外部trace（Bailian）は再現性、合う境界を目標にした履歴からの学習は穴(a)への接続点であり、どちらも別の事前登録で行う。
+
+現在の成果を当初の目的に沿って一文で言えば、「有限容量の下位KV cacheには大きな選択改善余地があり、今回の条件ではresidentの退去選択が主要な改善箇所で、役立つ再利用の時間範囲とclass内の選択方法は容量によって変わる。ただし、その情報を履歴から取得して実用policyにする方法は未解決」である。
+
 ## 仮説と証拠の台帳
 
 | 仮説・論点 | 現在の読み | 主要な証拠と境界 |
