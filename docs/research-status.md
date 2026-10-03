@@ -25,6 +25,8 @@ classをresidentに与える[class-order対照](matched-class-order-plan.md)（�
 その読みの三つの確認（評価窓の末尾600秒を除いた再集計、class内順序の混合と乱数順序、leaf適格での再実行）も、
 三つの[事前登録](tail-window-check-plan.md)（[混合](class-order-mix-plan.md)、[leaf](leaf-matched-horizon-plan.md)、
 leafは実行前のaddendumで再現検査の内容を訂正）に沿って完了し、[結果](matched-horizon-checks-findings.md)を収録した。
+独立workloadでの確認に向けて、Qwen-Bailian 4 traceの[入力監査](bailian-input-audit.md)（138/138検査合格、replayなし）を終え、
+[外部workload確認の事前登録案](bailian-external-check-plan.md)をレビュー用の下書きとして置いた。案は未合意で、実装・replay・fitは行っていない。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -63,7 +65,7 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 
 残る中心的な問いは、(1) 別workloadで関係が再現するか、(2) horizonと機構を結果を見る前に固定できるか、(3) その条件で必要な再利用classを履歴から学習し、実際の回避token増加へつなげられるか、の三つとする。約59分のMooncake 2 traceから時間・日単位のpersistent reuseや実機TTFTは主張しない。I/O最適化へ範囲を広げない。
 
-次はBailianによる独立workload確認の計画を先に具体化し、履歴fitは別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。この引継ぎ自体は事前登録ではなく、新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
+Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)を終え、[事前登録案](bailian-external-check-plan.md)をレビュー用に置いた段階である。案はMooncakeのh*表の移植（主解析）と固定grid内の存在（副解析）を分け、all16とleaf16を各機構の参照で評価し、学習モデルは使わず乱数のclass内順序を対照に加える。未決事項（gridの6秒と1,200秒、主窓、予測1の閾値、モデル移植の時期、評価可能cellの規則）は案の末尾に列挙し、合意後に計画だけを単独でcommitしてから実装へ進む。履歴fitは別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。引継ぎも案も事前登録ではなく、新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
 
 ## 仮説と証拠の台帳
 

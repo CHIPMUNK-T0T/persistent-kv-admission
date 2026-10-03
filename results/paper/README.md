@@ -98,6 +98,12 @@ under `leaf16` is not an absolute utility decline. Every constructed arm reads
 future occurrences, `h*` is carried over from inspected `all16` grids, and
 "not reused within `h*`" does not mean never reused.
 
+The [Bailian input audit output](bailian_input_audit_001/README.md) records the
+identity, byte-level conversion and 16-versus-512-token structure of the four
+Qwen-Bailian traces (138/138 checks; no cache policy is run and nothing is
+fitted); its [findings](../../docs/bailian-input-audit.md) state what the
+coarsening changes, and `scripts/audit_bailian_inputs.py` regenerates it.
+
 ## Files
 
 - `online_policy_comparison.csv` and `online_policy_comparison.png`: causal online policies only, including 2-hit + LRU. The offline comparator is excluded.
