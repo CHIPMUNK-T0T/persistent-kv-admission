@@ -101,3 +101,40 @@ same arm.
    recording plan and code commits and the hashes of the traces and of every
    table read.
 5. Report, including failed predictions.
+
+## Addendum, before any replay
+
+Written when the review of the implementation found that one required
+check cannot be done as worded, and committed before any replay.
+
+- **Reproduction without a counter digest.** The published `leaf16` `label`
+  rows of `results/paper/mechanism_control_001/replay_seeds.csv` carry no
+  `counters_sha256` or `decision_sha256` column (that run predates the
+  digests). The reproduction check therefore compares, for each of the 60
+  `label` replays, `avoided_prefill_tokens` and **every counter column the
+  published row carries**, exactly (everything but identity, timing, memory
+  and annotation columns; 87 columns per row), and requires that the replay
+  counters `l1_capacity_bytes`, `l2_capacity_bytes`, `requested_tokens`,
+  `measured_requests`, `l1_avoided_tokens`, `l2_avoided_tokens`,
+  `avoided_prefill_tokens`, `extra_avoided_tokens`,
+  `l2_present_unusable_tokens`, `l2_present_unusable_blocks`,
+  `l2_admissions`, `l2_rejections`, `l2_evictions`, `l2_decisions` and
+  `l1_evictions` are among them. Any digest a published row does carry is
+  compared as well. This run's own digests are recorded in
+  `reproduction.csv`. Counters the published rows never carried (block
+  counts, byte-seconds, depth bins) cannot be checked.
+- **Class statistic on `label_binary_h*` as well.** The statistic is attached
+  to the three `h*` arms and required zero in each; it is not attached to the
+  `label` anchor, whose key is the `next_use` label (at `h* = 600 s` a victim
+  exactly 600 s from reuse may tie with a never-reused state, so zero is not
+  guaranteed there; those victims are covered by the label identities of the
+  error-location statistics).
+- **Identifiers against every reference of the cell.** Each replay is
+  compared with every published row of its trace × cell × seed read by the
+  run, `leaf16` and `all16` alike (11 rows), not only the `leaf16` rows.
+- **Prediction 2 counts 0.25% × 1.** The reading at 0.25% × 1 is not
+  predicted, but it is counted in the "at least 10 of 12".
+- **Published `all16` values recomputed and checked.** The `all16` columns
+  beside every reading are recomputed from the published per-seed rows and
+  must equal the published `horizon.csv`, `fill.csv`, `class_order.csv`,
+  `order.csv` and `admission.csv` values before any replay.
