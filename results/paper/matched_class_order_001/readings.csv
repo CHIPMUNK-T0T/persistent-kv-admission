@@ -1,0 +1,8 @@
+reading,scope,cells,reuse_identification_at_matched_horizon_suffices,ranker_order_costs_at_matched_horizon,consistent_gain,consistent_loss,mixed,predicted_reuse_identification_at_matched_horizon_suffices,prediction_holds
+1_class_order_at_matched_horizon,new,8,6,2,,,,8,False
+1_class_order_at_matched_horizon,reproduced,4,4,0,,,,,
+2_order_within_matched_class,all,12,,,2,8,2,,
+2_context_order_within_600_class_published,all,12,,,9,1,2,,
+3_admission_at_matched_horizon,all,12,,,8,0,4,,
+4_matched_minus_600_learned,new,8,,,8,0,0,,
+4_matched_minus_600_recency,new,8,,,8,0,0,,
