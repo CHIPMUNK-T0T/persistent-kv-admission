@@ -34,10 +34,37 @@ possible; better retention did not follow from it.
 
 ## Current question
 
-**Why does accurate future-reuse prediction fail to translate into effective KV
-retention under a finite cache budget?**
+**Which future-reuse information helps select states for a finite persistent
+lower-tier KV cache, and how do its horizon, within-class selection rule and
+candidate eligibility determine avoided prefill tokens?**
 
-The decomposition experiment (`docs/predictability-retention-gap.md`) separates
+The objective remains selection under limited capacity. The current result is
+a characterization of useful information and its use in retention decisions;
+a deployable policy has not been established. The [research status](research-status.md)
+and completed [matched-horizon checks](matched-horizon-checks-findings.md)
+are the current entry points. The [2026-10-03 handoff](next-phase-handoff-20261003.md)
+sets out the next planning step, without registering a new experiment.
+
+The latest 840 replays check the evaluation window, the reuse class in which
+the frozen order's losses occur, and leaf-only eligibility. Under `all16`,
+bit plus recency reaches the local greedy label comparison in 12/12 when the
+last 600 s are excluded; learned class recovery changes from 10/12 on the
+full window to 9/12 on the head. Under `leaf16`, the learned class recovery
+holds in the same 10/12, but the learned within-class order consistently beats
+recency in 11/12, reversing the earlier comparison. Useful information and
+the selection rule that uses it must therefore be evaluated together.
+
+These future-aware comparisons do not give an optimal upper bound. `h*` is
+selected after inspecting `all16` grids on the same traces, not before test
+results. Class recovery divides by the gain from exact resident selection
+with learned admission kept, not all headroom. Causal prediction of the
+required information and independent-workload validation remain open.
+
+## Earlier decomposition question (single-tier, Phase 0.5–0.75)
+
+At that stage the question was why the measured global reuse predictability
+did not translate into effective retention for the evaluated ranker. The
+decomposition experiment (`docs/predictability-retention-gap.md`) separated
 three candidate causes with the same eviction machinery for every arm:
 
 - **Signal gap**: the causal predictor does not know the label well enough
@@ -49,25 +76,40 @@ three candidate causes with the same eviction machinery for every arm:
   exact comparator reaches (`offline_next_use − oracle_next_use_sampled`).
 
 Prefix dependency is a constraint shared by every arm, including the offline
-comparator, and is not treated as a separate policy factor here.
+comparator, and was not treated as a separate policy factor in that
+decomposition. This section records that experiment's design, not an
+exhaustive explanation of all later two-tier results.
 
 ## Research questions (as they now stand)
 
 ### RQ1 — Which KV states are valuable to retain?
 
-Answered descriptively by Phase 0: reuse is heavy-tailed, most states are
-never reused, and recency/frequency/window features carry most of the
-predictable signal.
+Phase 0 answers descriptively: reuse is heavy-tailed, most observed states
+are never reused within the trace, and recency/frequency/window features carry
+most of the measured predictive signal. Later two-tier controls show
+substantial avoided-token gains from exact future information on the L1
+victim population. The value sought is reduced recomputation under capacity,
+not reuse count considered separately from the retention decision.
 
 ### RQ2 — Can we select future-useful KV states better than generic policies?
 
-Phase 0.5 answer: not with single-state reuse history as the score. The gap
-experiment says why (see the findings document for the decision).
+Phase 0.5 did not obtain a general advantage with its tested single-tier
+history scorers. This is a result for those features, targets, models and
+mechanisms, not evidence that single-state history is inherently inadequate.
+The latest controls show that exact future labels produce large utility gains
+and that much of the frozen-ranker-to-label gap can be recovered by changing
+resident selection. Appropriate horizons and within-class rules matter:
+"one bit suffices" and "recency is universally best" are not established.
+Whether past observations can provide the useful information well enough for
+a causal policy remains unresolved.
 
 ### RQ3 — Does better selection reduce recomputation under the same budget?
 
-Measured as avoided prefill tokens in trace replay. End-to-end GPU time,
-TTFT, and energy are still out of scope.
+Measured as avoided prefill tokens in trace replay, with a finite L2 receiving
+evictions from a fixed upper cache. The latest evidence concerns two
+approximately 59-minute Mooncake traces; it does not establish hours- or
+days-scale persistent reuse. End-to-end GPU time, TTFT, energy and storage
+throughput remain out of scope.
 
 ## Important design constraint
 
@@ -86,8 +128,9 @@ headroom below 1% and is the best causal arm at 1%, but stays below LFU below
 1% and reaches at most 42% of its own count oracle and 29% of its own
 next-use oracle at 0.25–1%
 (`docs/target-change-findings.md`). What remains is a signal gap on the new
-target, on the eviction-candidate population. The next measurement inside
-Research 1 is listed in `docs/experiment-plan.md`.
+target, on the eviction-candidate population. This is the conclusion at
+Phase 0.9; the later measurements are recorded in
+[the experiment history](experiment-plan.md) and [research status](research-status.md).
 
 ## Setting change after Phase 0.9: the persistent tier's population (Phase 0.95, done)
 
@@ -97,10 +140,13 @@ evicts, not about every state ever seen. Phase 0.95 fixes the upper tier
 (prefix-closed, LRU or LFU) and evaluates lower-tier retention on its victim
 stream under a union-closure hit rule, with an independent-block control
 that removes prefix dependency and a standalone-closure sensitivity. Result:
-the room over generic policies on that population is 25–80% of the offline
-gain, and prefix dependency costs generic policies nothing, because recency
-and frequency are monotone along an ancestor chain and the upper tier
-evicts leaves (`docs/two-tier-victim-findings.md`). Tree-aware allocation is
-therefore not the direction; the open question on the victim population is
-the same as before, ranking victims by future reuse. Phases 0–0.9 remain
-valid as single-tier results.
+the room over generic policies on that population is 25–80% of the greedy
+offline gain, and the tested generic heap policies have no token loss from
+prefix dependency in that control, consistent with recency and frequency
+being monotone along an ancestor chain and the upper tier evicting leaves
+(`docs/two-tier-victim-findings.md`). At that stage the result did not motivate
+additional tree-aware allocation experiments. It does not show that candidate
+eligibility or prefix effects are irrelevant in other mechanisms: the latest
+`all16`/`leaf16` check directly changes the within-class ordering comparison,
+with the reason still untested. Phases 0–0.9 remain valid as single-tier
+results under their recorded conditions.

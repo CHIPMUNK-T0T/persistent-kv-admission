@@ -4,6 +4,8 @@
 先行研究との重複、新規性候補、次の戦略相談は
 [2026-09-27の引継ぎ](strategy-handoff-20260927.md)に分けて記録した。
 そこに挙げた候補は未決であり、新しい実験の事前登録ではない。
+最新結果を踏まえた次の依頼範囲は[2026-10-03の引継ぎ](next-phase-handoff-20261003.md)を参照する。
+こちらも計画依頼の文書であり、新規実験の事前登録ではない。
 fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿って完了し、
 [結果](counterfactual-randomness-findings.md)と[出力](../results/paper/counterfactual_randomness_001/README.md)を収録した。
 その後、同じ固定状態・乱数列での[保持時間診断](counterfactual-residence-findings.md)も完了した。
@@ -26,37 +28,42 @@ leafは実行前のaddendumで再現検査の内容を訂正）に沿って完�
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
-## 現在の問い
+## 現在の問いと当初の目的（2026-10-03）
 
-有限容量のpersistent KV tierがL1から追い出されたstateを受け取るとき、到着stateと
-既存L2 residentのどれを捨てるべきか。過去の再利用履歴から作ったスコア、600秒内の
-正確な次回利用ラベル、そして「その1回の捨て方を変え、その後は元のpolicyを続ける」
-場合の将来回避token価値 `Q` は、どの条件で同じ選択をするのか。直近の実験では、
-単一の将来サンプリング実現で見た`Q`差が、別の将来サンプリング列でも保たれるかを
-調べ、さらに自己再利用ゼロの2候補について保持時間と後続decisionの時系列を測った。
-将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
-現在は目標を変える段階ではなく、既存の選択と説明の検証を深めている。
+[RULES.md](../RULES.md)の目的は「有限容量のPersistent KV Cacheにおいて、将来再利用価値の高いstateをどう選び、限られた容量を最も有効に使うか」である。対象はL1から追い出されたstateを受け取る有限L2、主指標はL1単独に対する追加の回避prefill tokenで、目的は変えていない。
 
-2026-10-03時点の整理。問いは「有限容量の階層KV cacheで再利用を増やすために、どの保持判断について、どの時間範囲の将来利用を、どの粒度で予測する必要があるか」に絞り、exactな将来情報を与えたときの比較性能を測る対照を重ねている（sampled-16のgreedyであり最適値の上界ではない）。判断はresident evictionの側にある（all16で12/12、leaf16でも12/12）。粒度は、事後にgridから選んだ容量に合うhorizonの1 bit（h秒以内に再利用されるか）とrecency tie-breakの組で、sampled-16のgreedy exact `next_use` labelに届く（登録gridで8/12、結果を見てから登録した補間gridで残り4/4、合算しない。6 cellでは上回る）。recencyという順序は使っており、比較先は最適解ではない。時間範囲はL2容量とともに伸びる（60、150、300、600秒。Phase 0.9の単層oracle sweepと同じ向き）。凍結rankerの不足については、600秒境界での誤りの99%超が再利用classの見分けであること、600秒のclassを与えると境界が合う6 cellで94–104%回復することまでが分かっている。容量に合う境界のclassをresidentに与える対照（[結果](matched-horizon-findings.md)）では、1%の4 cellで不足の90–98%が回復し（600秒classでは45–61%）、0.25%×1では73–81%にとどまって残りはrankerのclass内順序（recencyの順序なら103–106%）、2%以上では全回復だった。合うclassの中ではrankerの順序はrecencyより悪く（8/12で一貫して損。600秒classでは9/12で得）、rankerの拒否規則はlabelの拒否より最大4.1点劣る。その損は再利用されないclassの側にあり（rankerに再利用classだけを順序付けさせると12/12でrecency以上、非再利用classだけを順序付けさせると9/12で一貫して損。予測は逆で0/8）、class内の乱数順序はrecencyに12/12で負ける。末尾600秒を除いても読みは変わらない（1 bitは12/12で届き、classの読みは閾値上の1 cellだけ動き、順序の損の符号は12/12で同じ）。ただしleaf適格（候補はleafだけ）では、classの読みは同じ10/12で保つが、1 bitは9/12にとどまり（0.25%×1で0.20–0.21不足）、class内順序は逆転してrankerの順序がrecencyに11/12で一貫して勝つ（recencyのclass内順序は7/12でlabelの回復の0.9を下回る）。class内順序の読みは候補集合（機構）に依り、その理由は未検討である。保存ログ上では、合う境界での誤りはrecencyより0.25%×1で少なく（0.64倍）、1%の4 cellで多い（2.1–2.3倍）。未測定は、学習器がその1 bitをどれだけ当てられるか、horizonを事前に決められるか、別traceでの再現である。
+現在の問いは、**その効用を増やすために、どの保持判断について、どの時間範囲の再利用を見分け、その情報をどの退去候補・選択規則に渡す必要があるか**である。構造特徴や履歴予測はそのための手段であり、現段階の成果は予測・選択問題の具体化である。過去だけを使う優れた実用policyの完成とは区別する。
 
-### 当初の目的との照合（2026-10-03）
+### 現在の証拠を四つの問いで読む
 
-RULES.mdの目的「有限容量のPersistent KV Cacheにおいて、将来再利用価値の高いstateをどう選び、限られた容量を最も有効に使うか」は変えていない。変わったのは手段の仮説（構造特徴や履歴予測が効くか）と成果の重心で、現在の成果は「優れた実用policy」ではなく「良いpolicyが解くべき予測・選択問題の具体化」である。両者は分けて扱う。
-
-| 当初知りたかったこと | 現在の回答 | 根拠 |
+| 問い | 確認したこと | 適用範囲・残る問い |
 |---|---|---|
-| stateごとに残す価値の差があるか | ある。将来を読む比較器は、L1 victimを受ける有限L2でも汎用policyを大きく上回る。ただしその比較器はsampled-16のgreedyで、最適解でも実行可能なpolicyでもない。 | [機構対照](mechanism-control-findings.md)、[誤り位置](error-location-findings.md) |
-| 構造特徴を使えば良いstateを選べるか | 今回の特徴では追加効果が小さく、中心に置く根拠は弱い。 | [構造特性](characterization-findings.md) |
-| reuse予測の精度が高ければ十分か | 全体の予測指標や決定統計だけでは判断できない。実際の候補集合と選択規則で確認が要る。 | [時間予測](temporal-prediction-findings.md)、[誤り位置](error-location-findings.md)、[合うhorizonの追試](matched-horizon-findings.md) |
-| 何を正しく見分ける必要があるか | 改善余地の大部分はresidentの退去選択にある（差の65–100%）。容量に合うhorizonの再利用classが有力で、class内の選び方も条件次第で重要（all16では合うclassの中で学習scoreの順序がrecencyより悪い8/12で、損は非再利用classの側。leaf16では逆に学習scoreの順序が11/12で勝つ）。 | [誤り位置](error-location-findings.md)、[horizon対照](horizon-control-findings.md)、[合うhorizonの追試](matched-horizon-findings.md)、[三つの確認](matched-horizon-checks-findings.md) |
-| その情報を過去の履歴だけから得られるか | **未解決。** 600秒fitの凍結scoreの再採点では、合う境界の判断内分離は0.55–0.64で偶然より上、exactには遠い。合う境界を目標に学習した場合の成否は測っていない（Phase 0.9の単層では小さな改善）。 | [合うhorizonの追試](matched-horizon-findings.md)、[目標変更](target-change-findings.md) |
-| 実用的に良いretention policyができたか | **まだできていない。** | — |
+| 選ぶ価値の差はあるか | 将来を読む比較器は有限L2でも汎用policyを上回る。公表機構の凍結rankerは、正確な訓練ラベルがsampled LRUに対して得る利得の11.1–27.9%を得る。 | 同じ機構で使える将来情報の効用を測った。比較器はgreedyで、最適値の上界でも過去だけで実行できるpolicyでもない。[機構対照](mechanism-control-findings.md)。 |
+| どの判断を改善すると効用が増えるか | all16ではresidentの退去選択だけをexact labelへ置換すると、凍結rankerとlabelの差の65–100%が回復する。leaf16でも当該gapはeviction側という判定が12/12で保たれた。 | 一つの凍結ranker・相対的なarrival拒否規則への介入。admissionとの交互作用があり、admission一般が不要という結果ではない。[誤り位置](error-location-findings.md)、[horizon対照](horizon-control-findings.md)。 |
+| どの再利用情報が役立つか | all16では、事後に選んだhorizonの正確な再利用bitとrecencyの組がgreedy exact next-use比較器のLRU比利得の90%以上に届く。登録gridで8/12、結果を見てから登録した補間で残り4/4（合算しない）。 | bit単独の十分性ではない。horizonを事前に決める方法や、他の機構・traceへの移植は未確定。[horizon対照](horizon-control-findings.md)。 |
+| 同じclass内では何を優先するか | all16では学習順序がrecencyに8/12で全seed負けるが、leaf16では11/12で全seed勝つ。all16の損は、h以内に再利用されないclassだけに学習順序を使う介入でも現れる。 | 選択規則の効用は退去候補の適格性に依存する。なぜ逆転するか、過去の情報から必要なclassを得られるかは未解決。[三つの確認](matched-horizon-checks-findings.md)。 |
 
-残る中心的な穴は三つ。(a) 必要な情報の予測可能性（合う境界で実際のresident候補を履歴から見分けられるか）。(b) 条件の事前決定と再現性（合うhorizonは結果を見て選んでおり、容量から事前に決める方法と、別traceでの再現が未確認）。(c) persistent tierへの適用範囲（約59分のtraceでは時間・日単位の長期保持は示せず、実機の速度も未測定。これを補うためにI/O最適化へ広げることはしない）。
+構造特徴の追加効果が小さかったこと、globalな予測指標だけではretention効用を評価できなかったことは、使う情報と評価対象を絞る根拠として残る。これらは履歴一般の限界やsemantic signalの必要性を証明しない。counterfactualの実現regretとfresh-stream検証は、単一実現の事後最大を安定した選択利得と読めないことを示した診断として位置づけ、現在の主題をexpected-Qの解明へ変更しない。
 
-以後の追加実験の採否基準は「その結果で、何を予測し、どの選択規則に渡すべきかの判断が変わるか」とし、診断そのものを目的にしない。この基準で行った三つの確認（[結果](matched-horizon-checks-findings.md)）の位置づけは次の通り。評価窓の確認（[計画](tail-window-check-plan.md)）は中心結論の交絡の確認で、末尾600秒を除いても読みは変わらなかった。class内順序の混合（[計画](class-order-mix-plan.md)）は「予測を渡す選択規則」の確定で、学習順序の損は非再利用classの側にあり（予測と逆）、class内のrecencyは乱数より情報を持つ。leaf適格の確認（[計画](leaf-matched-horizon-plan.md)）は条件が機構の産物でないことの確認で、classの読みは保ち、1 bitの読みは弱まり（9/12）、class内順序の読みは逆転した。したがって「合うhorizonのclassをresidentに与える」は候補集合によらず有効だが、「class内はrecency」という選択規則はall16の候補集合に特有で、渡す規則は機構ごとに確かめる必要がある。その後の外部trace（Bailian）は再現性、合う境界を目標にした履歴からの学習は穴(a)への接続点であり、どちらも別の事前登録で行う。
+### 最新の三つの確認で更新した読み
 
-現在の成果を当初の目的に沿って一文で言えば、「有限容量の下位KV cacheには大きな選択改善余地があり、今回の条件ではresidentの退去選択が主要な改善箇所で、役立つ再利用の時間範囲は容量によって変わり、class内の選択方法は容量と候補集合によって変わる。ただし、その情報を履歴から取得して実用policyにする方法は未解決」である。
+- **評価窓。** all16のfull窓から末尾600秒を除いたhead窓でも、bit＋recencyは比較器のLRU比利得の90%以上に12/12で届く。学習順序を残したclass介入の`R ≥ 0.9`は10/12から9/12へ変わる（会話0.25%×4、0.903→0.859）。class内の学習順序とrecencyの効用差の符号は12/12で維持された。主要な読みは末尾600秒だけには依存しないが、全判定が不変とは言わない。
+- **class内順序。** all16で学習順序をh以内に再利用されるclassだけに使うと、6/12で全seed改善、2/12でrecency armとdecision digestまで完全一致、残り4/12は符号混在。一つの平均は微小な負（tool-agent 1%×4、−0.00216 input-token points）なので「12/12でrecency以上」ではない。h以内に再利用されないclassだけに使うと9/12で全seed悪化し、元の8つの一貫した損をすべて含む。ただし2%×4では両traceとも改善する。両class内の一様乱数順序はrecencyに12/12で全seed負けるため、bitに加える選択規則にも効用がある。
+- **leaf適格性。** all16で選んだh*を持ち越したleaf16では、学習順序を残したclass介入の`R ≥ 0.9`は同じ10/12だが、bit＋recencyの`S ≤ 0.10`は9/12。class内の学習順序は11/12で全seedにおいてrecencyに勝ち、recency順序の`R ≥ 0.9`は5/12である。これは比較器に対する相対的な不足で、絶対効用の低下ではない。例えば会話0.25%×1のbit＋recencyはall16の6.27点からleaf16の7.30点へ増え、label比較器は6.44点から9.22点へさらに増えた。leaf16で最良のhorizonを探した結果ではない。
+
+ここで、`U`はL1単独に対する追加回避prefillのinput-token pointsである。`R = (U(class arm) − U(learned)) / (U(evict_label) − U(learned))`は、**learnedのadmissionを維持してresident選択だけをexact next-useにした改善**を分母とし、全headroomの回収率ではない。`S = (U(label) − U(bit＋recency)) / (U(label) − U(lru))`も、各機構内のgreedy比較器とsampled LRUを基準にする。機構が違えば分母も違うため、絶対Uと併記する。
+
+「h以内に再利用されない」は、hより後の再利用とtrace内で再利用されないstateを含み、永久に不要という意味ではない。class混合の介入は後続storeや候補集合も変えるので、二つのclassの差を足して損失の因果的な寄与率とはしない。leaf化はresidentだけでなくarrivalの適格性も変える。内部node退去やpresent-but-unusable tokenのcounterだけでは、順序の逆転を説明も反証もできていない。
+
+以前の「sampling機構は凍結rankerとlabelのgap全体の主因ではない」と、今回の「class内の選択規則の優劣が適格性で変わる」は両立する。前者は全体の不足の大きさ、後者は同じ情報を使う規則と機構の相互作用を測っている。
+
+### 未達と次の判断
+
+当初の目的に対して、選択改善余地と、そのために役立つ将来情報・resident選択・適格性の条件は具体化できた。一方、**過去だけからその情報を得て、限られた容量を有効に使うpolicyにする部分は未達**である。
+
+残る中心的な問いは、(1) 別workloadで関係が再現するか、(2) horizonと機構を結果を見る前に固定できるか、(3) その条件で必要な再利用classを履歴から学習し、実際の回避token増加へつなげられるか、の三つとする。約59分のMooncake 2 traceから時間・日単位のpersistent reuseや実機TTFTは主張しない。I/O最適化へ範囲を広げない。
+
+次はBailianによる独立workload確認の計画を先に具体化し、履歴fitは別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。この引継ぎ自体は事前登録ではなく、新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
 
 ## 仮説と証拠の台帳
 
@@ -81,13 +88,13 @@ RULES.mdの目的「有限容量のPersistent KV Cacheにおいて、将来再�
 | victimのlabel超過の変化は、rankerの選び方が良くなったことを表す | 限定的。各policy自身の判断ログでは、label超過の変化はlabel windowの効用変化と22/24で符号が一致し、一貫した効用変化と逆に動いた例はない。しかし候補集合を固定してpi0とpi3で選び直すと、符号が母集団によって変わるcellが`next_use`で5/12、`binary`で7/12ある。対応は選び方だけのものではなく、policyが作る候補集合の変化を含む。 |
 | 凍結rankerの誤りは、再利用されるstateどうしの順序の誤りである | 否定（自身の判断ログ上では）。label超過の99.3%以上は、候補に再利用されないstateがあるのに600秒以内に再利用されるstateを退去させた判断から来る。全候補が再利用され順序が問題になる判断は0.3%以下。判断の69–87%は参照とtie-breakだけが違う。同じ候補集合で比べると、この種の退去をrecencyより減らせているのは9/12 cellで、小容量の会話traceの3 cellではrecencyより多い。exact labelが保つstore上では、horizon対照により、事後に選んだ容量に合うhorizonの1 bitとrecency tie-breakの組がgreedy exact `next_use` labelに届くことが12 cellすべてで示された（うち4 cellは補間gridで）。recencyという順序は使っており、比較先は最適解ではない。 |
 | 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 600秒という境界に依る。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
-| 「h秒以内に再利用されるか」の1 bitは、hが容量に合えば`next_use` labelに届く | 支持（exact情報の範囲で）。登録した5点のgrid {6, 15, 60, 300, 600}秒では、labelのLRUに対する利得の90%以上に届くhがあるcellが8/12。届かなかった4 cell（L2容量1%）は、結果を見てから登録した補間（90–240秒、予測「4/4で届く」）で4/4、最小は4 cellとも150秒。合う horizon はL2容量とともに伸びる（60、150、300、600秒）。隣のgrid点では利得の6–85%を失う。6 cellでは1 bitが`next_use` labelを全seedで上回る（0.29–0.59点）。 | [事前登録](horizon-control-plan.md)、[補間の事前登録](horizon-fill-plan.md)、[結果](horizon-control-findings.md)。どのhも実行後にgridから選んだもので、容量から事前に決められることや学習器が当てられることは示していない。8/12と4/4は合算しない。 |
-| 凍結rankerの不足は、再利用classの見分けにあり、class内の順序ではない | 容量による。residentにexactな600秒の再利用classを与えると、その境界が合う6 cellではexact labelをevictionに使った回復分の94–104%、合わない6 cellでは33–61%を回復する。合うhorizonのclassを与えると、新規8 cellのうち6で90%以上（1%の4 cellで90–98%、2%×1で103%）、0.25%×1では73–81%で予測「8/8」は外れた。0.25%×1の残りはclass内順序で、recencyの順序なら103–106%。合うclassの中ではrankerの順序はrecencyより一貫して悪いcellが8/12（600秒classでは良いcellが9/12）。この損は非再利用classの側にある（再利用classだけをrankerが順序付けると12/12でrecency以上、6/12で一貫して得。非再利用classだけでは9/12で一貫して損。予測「再利用classの側」は0/8で外れ）。leaf16では逆転し、rankerの順序が11/12で一貫して勝つ。 | 同上、[合うhorizonの対照](matched-horizon-findings.md)、[三つの確認](matched-horizon-checks-findings.md)。h*は同じtraceのgridから事後に選んだもの。新規8と再現4は合算しない。非再利用classでrankerの順序が劣る理由、leaf16で逆転する理由は未検討。 |
-| 合うhorizonの読みは、末尾600秒でexact labelがtraceの終端を知っていることに依る | 否定。末尾600秒を除いた窓（入力tokenの56–57%）でも、1 bitはlabelに12/12で届き（S ≤ 0.10）、classの読みは閾値上の1 cell（会話0.25%×4、0.903→0.859）だけ動き、class内順序の損の符号は12/12で同じでむしろ大きく、admissionの差の符号もゼロでないcellでは同じ。末尾600秒は差`label−learned`の42–47%を持ち、入力tokenの割合と同程度。 | [事前登録](tail-window-check-plan.md)、[結果](matched-horizon-checks-findings.md)。420 replayはすべて公開行をdigestまで再現。予測4つのうち2つ（classの読み10/12、admissionの符号12/12）は閾値上の1 cellとゼロ値の2 cellで外れた。 |
+| all16で、事後に選んだhの正確な再利用bit＋recencyは`next_use` labelに届く | 支持（all16・exact情報・recencyとの組の範囲で）。登録した5点のgrid {6, 15, 60, 300, 600}秒では、labelのLRUに対する利得の90%以上に届くhがあるcellが8/12。届かなかった4 cell（L2容量1%）は、結果を見てから登録した補間（90–240秒、予測「4/4で届く」）で4/4、最小は4 cellとも150秒。合う horizon はL2容量とともに伸びる（60、150、300、600秒）。隣のgrid点では利得の6–85%を失う。6 cellではbit＋recencyがgreedy `next_use` labelを全seedで上回る（0.29–0.59点）。 | [事前登録](horizon-control-plan.md)、[補間の事前登録](horizon-fill-plan.md)、[結果](horizon-control-findings.md)。どのhも実行後にgridから選んだもので、容量から事前に決められることや学習器が当てられることは示していない。8/12と4/4は合算しない。 |
+| 凍結rankerの不足は、再利用classの見分けにあり、class内の順序ではない | 容量による。residentにexactな600秒の再利用classを与えると、その境界が合う6 cellではexact labelをevictionに使った回復分の94–104%、合わない6 cellでは33–61%を回復する。合うhorizonのclassを与えると、新規8 cellのうち6で90%以上（1%の4 cellで90–98%、2%×1で103%）、0.25%×1では73–81%で予測「8/8」は外れた。0.25%×1の残りはclass内順序で、recencyの順序なら103–106%。合うclassの中ではrankerの順序はrecencyより一貫して悪いcellが8/12（600秒classでは良いcellが9/12）。all16の損はh以内に再利用されないclassへの介入でも現れる（h以内に再利用されるclassだけをrankerが順序付けると6/12で全seed改善、2/12で完全一致、4/12で符号混在（tool-agent 1%×4の平均は−0.00216点）。h以内に再利用されないclassだけでは9/12で全seed悪化、2%×4の2 cellでは改善。予測「再利用classの側」は0/8で外れ）。leaf16では逆転し、rankerの順序が11/12で一貫して勝つ。 | 同上、[合うhorizonの対照](matched-horizon-findings.md)、[三つの確認](matched-horizon-checks-findings.md)。h*は同じtraceのgridから事後に選んだもの。新規8と再現4は合算しない。非再利用classでrankerの順序が劣る理由、leaf16で逆転する理由は未検討。 |
+| 合うhorizonの読みは、末尾600秒でexact labelがtraceの終端を知っていることに依る | 否定。末尾600秒を除いた窓（入力tokenの56–57%）でも、bit＋recencyはlabelのLRU比利得の90%以上に12/12で届き（S ≤ 0.10）、classの読みは閾値上の1 cell（会話0.25%×4、0.903→0.859）だけ動き、class内順序の損の符号は12/12で同じでむしろ大きく、admissionの差の符号もゼロでないcellでは同じ。末尾600秒は差`label−learned`の42–47%を持ち、入力tokenの割合と同程度。 | [事前登録](tail-window-check-plan.md)、[結果](matched-horizon-checks-findings.md)。420 replayはすべて公開行をdigestまで再現。予測4つのうち2つ（classの読み10/12、admissionの符号12/12）は閾値上の1 cellとゼロ値の2 cellで外れた。 |
 | class内のrecency順序は1 bitに情報を足していない（bitだけで足りる） | 否定。両class内を一様乱数で順序付けると、recency順序に12/12で一貫して負ける（−0.1〜−2.9点、1%×1で最大）。乱数は学習順序にも8/12で負け、会話0.25%×1でだけ勝つ。 | [事前登録](class-order-mix-plan.md)、[結果](matched-horizon-checks-findings.md)。乱数orderは1 seedに1 streamで、seed区間は標本抽出と乱数の両方の変動を含む。 |
-| 合うhorizonの読み（1 bit、class、class内順序）はall16の到着条件の産物である | 部分的に肯定。h*をall16から持ち越したleaf16では、classの読み（R ≥ 0.9）は同じ10/12で保つが、1 bit＋recencyがlabelに届くcellは9/12（0.25%×1で0.20–0.21、会話2%×1で0.11不足。h* < 600秒の全cellで0.11–0.20悪化）、class内順序は逆転してrankerの順序がrecencyに11/12で一貫して勝ち、class内recencyは7/12でlabelの回復の0.9未満。admissionの差は0.05点以下（到着が候補になる判断は2.5–10%）。 | [事前登録](leaf-matched-horizon-plan.md)（実行前のaddendumで、公開行にdigestがないため再現検査を全公開counter列87列の一致に変更）、[結果](matched-horizon-checks-findings.md)。h*はall16の最良で、leaf16の最良horizonは探していない。leaf16は機構の対照であり提案ではない。 |
+| all16のh*とclass内順序の読みはleaf16へそのまま移る | 一部は維持されるが、順序の読みは逆転する。h*をall16から持ち越したleaf16では、classの読み（R ≥ 0.9）は同じ10/12で保つが、1 bit＋recencyがlabelに届くcellは9/12（0.25%×1で0.20–0.21、会話2%×1で0.11不足。h* < 600秒の全cellでSが0.11–0.20増加。機構ごとに比較器・分母が異なり、絶対効用の低下を意味しない）、class内順序は逆転してrankerの順序がrecencyに11/12で一貫して勝ち、class内recencyは7/12でlabelの回復の0.9未満。admissionの差は0.05点以下（到着が候補になる判断は2.5–10%）。 | [事前登録](leaf-matched-horizon-plan.md)（実行前のaddendumで、公開行にdigestがないため再現検査を全公開counter列87列の一致に変更）、[結果](matched-horizon-checks-findings.md)。h*はall16の最良で、leaf16の最良horizonは探していない。leaf16は機構の対照であり提案ではない。 |
 | 凍結rankerは、容量に合う境界での再利用classをrecencyより見分けられない | 容量による（保存ログ上）。合う境界での「再利用されるstateを退去させ非再利用候補を残す」判断は、0.25%×1（60秒）ではrecencyの0.64倍、1%の4 cell（150秒）では2.1–2.3倍、2%×1（300秒）では1.04倍と0.90倍。600秒fitのscoreの判断内分離は、h*のbitで600秒のbitより低いcellが8中6（登録予測）、0.25%×1では600秒のbitの分離が偶然並み（0.50）で60秒のbitが上回る。 | [事前登録](matched-horizon-diagnosis-plan.md)、[結果](matched-horizon-findings.md)。凍結rankerの自身のstoreのログで、exact classが保つstoreの候補集合ではない。自身のstore上の統計は、class-kept store上の順序の価値を予測しない（0.25%×1で逆向き）。 |
-| 差がeviction側にあるのはall16の到着条件の産物である | 否定。leaf16でもeviction-locatedが12/12で、label evictionだけで差の97–100%を回復する。ただしleaf16では到着が候補になる判断が少数（0.25%×1で約半分、他は3–18%）で、「admissionは重要でない」とは区別できない。合うhorizonでのclassの読みもleaf16で保つ（上の行）。 | 同上、[三つの確認](matched-horizon-checks-findings.md)。 |
+| 差がeviction側にあるのはall16の到着条件の産物である | 否定。leaf16でもeviction-locatedが12/12で、label evictionだけで差の97–100%を回復する。ただしleaf16では到着が候補になる判断が少数（0.25%×1で約半分、他は3–18%）で、「admissionは重要でない」とは区別できない。合うhorizonでのclass介入は、all16からh*を持ち越したleaf16の同じ10/12でR ≥ 0.9（上の行）。 | 同上、[三つの確認](matched-horizon-checks-findings.md)。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母

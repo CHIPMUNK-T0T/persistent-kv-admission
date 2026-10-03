@@ -1,6 +1,16 @@
 # Reviewable Characterization Artifacts
 
-These lightweight artifacts were generated from the pinned Mooncake FAST'25 traces with:
+The latest completed measurement is the [matched-horizon checks](../../docs/matched-horizon-checks-findings.md)
+(840 replays): evaluation-window, class-order mix and leaf-eligibility controls.
+Their contribution to the fixed objective is to specify how future-reuse
+information and resident selection interact with the eligible candidate set
+when maximizing avoided prefill tokens in a finite lower tier. They establish
+conditional utility comparisons, not an implemented serving policy or a
+future-information upper bound. The [research status](../../docs/research-status.md)
+and [next-phase handoff](../../docs/next-phase-handoff-20261003.md) give the current
+interpretation and planning boundary.
+
+The earlier lightweight characterization artifacts were generated from the pinned Mooncake FAST'25 traces with:
 
 ```bash
 python3 scripts/run_characterization.py \
@@ -72,6 +82,21 @@ published `leaf16` `label` rows in every published counter column). Their
 their limits, and `scripts/tabulate_tail_window_check.py`,
 `scripts/tabulate_class_order_mix.py` and `scripts/tabulate_leaf_matched_horizon.py`
 print every cited table.
+
+The window check preserves the bit-plus-recency comparison in 12/12 head-window
+cells; learned class-order recovery changes from 10/12 full-window cells to
+9/12. In the class mix, ordering only states reused within `h*` gives six
+all-seed gains, two digest-identical matches and four mixed-sign cells, one
+with a slightly negative mean (−0.002157 input-token points). Ordering only
+states not reused within `h*` reproduces all eight original consistent losses.
+Under `leaf16`, the learned within-class order beats recency consistently in
+11/12, while bit plus recency reaches the local label reference in 9/12.
+Recovery `R` is relative to an exact resident-selection intervention that
+keeps learned admission, not total headroom; `S` compares each mechanism's
+bit-plus-recency gain with that mechanism's greedy label gain. A larger `S`
+under `leaf16` is not an absolute utility decline. Every constructed arm reads
+future occurrences, `h*` is carried over from inspected `all16` grids, and
+"not reused within `h*`" does not mean never reused.
 
 ## Files
 

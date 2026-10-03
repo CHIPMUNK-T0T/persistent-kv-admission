@@ -4,7 +4,16 @@ Status markers: **done** means the code, results, and findings document are in
 the repository; **current** marks an experiment in progress when one exists;
 the rest is planned.
 
-Current navigation: [on-policy findings](onpolicy-learning-findings.md),
+Current navigation: [research status](research-status.md), the completed
+[matched-horizon checks](matched-horizon-checks-findings.md) and the
+[2026-10-03 next-phase handoff](next-phase-handoff-20261003.md). The fixed
+objective is to increase avoided prefill tokens by selecting states for a
+finite persistent lower-tier KV cache. The latest controls specify how useful
+future information depends on horizon, resident selection and eligibility;
+they do not establish a deployable policy. The handoff is a planning document,
+not a new pre-registration or an experiment in progress.
+
+Earlier evidence: [on-policy findings](onpolicy-learning-findings.md),
 [post hoc retention diagnostics](retention-decision-diagnostics.md),
 [one-step counterfactual findings](counterfactual-action-value-findings.md),
 and the completed fresh-stream [pre-registration](counterfactual-randomness-plan.md),
@@ -433,6 +442,19 @@ as a control variable, not the research contribution.
 
 ## Current research status
 
+The latest [matched-horizon checks](matched-horizon-checks-findings.md) are
+complete (840 replays). On `all16`, removing the last 600 s preserves the
+bit-plus-recency comparison in 12/12 and the sign of the within-class order
+difference in 12/12; class recovery changes from 10/12 to 9/12. On `leaf16`,
+the learned class-order recovery remains at least 0.9 in the same 10/12, but
+the learned-versus-recency order comparison reverses. Useful reuse information
+and the rule that uses it therefore need joint evaluation through avoided
+prefill tokens. `h*` is selected after inspecting the same traces; causal
+prediction, a horizon fixed before test results and independent-workload
+validation remain open. Detailed registered outcomes follow below. The
+[next-phase handoff](next-phase-handoff-20261003.md) proposes the next planning
+step; no new run is registered by this summary.
+
 The later [fixed three-update on-policy study](onpolicy-learning-findings.md)
 reported complete held-out replay gains in some cells without passing its
 registered common-terminal-population ranking threshold. The
@@ -567,12 +589,15 @@ Outcome of the matched-horizon checks ([findings](matched-horizon-checks-finding
 [leaf-eligibility plan](leaf-matched-horizon-plan.md) with a pre-run addendum
 replacing a reproduction check that the published rows could not support):
 with the last 600 s of the trace excluded from the count, the bit at `h*`
-reaches the label in 12/12, the class reading moves in one threshold cell
+with recency reaches the label in 12/12, class recovery changes from 10/12
+on the full window to 9/12 on the head window in one threshold cell
 (conversation 0.25%×4, 0.903 → 0.859) and the sign of the learned order's
 loss within the class is the full window's in 12/12 and larger. Within the
 matched class under `all16`, the learned order's loss sits in the
-non-reusable class: the ranker ordering only the states reusable within `h*`
-is at or above recency in 12/12 (a consistent gain in 6), the ranker ordering
+class not reused within `h*`: the ranker ordering only the positive class
+gives six all-seed gains, two digest-identical matches and four mixed-sign
+cells (three positive means and tool-agent 1%×4 at −0.002157 points),
+with no consistent loss. The ranker ordering
 only the states not reusable within `h*` is a consistent loss in 9/12 and in
 every cell where the full order lost; the prediction placed the loss in the
 reusable class and fails 0/8. A random order within both classes loses to
@@ -585,3 +610,11 @@ consistent gain over recency in 11/12 (the prediction of a loss in 8/12 fails
 in the opposite direction), with recency inside the class below 0.9 of the
 label's eviction gain in 7/12. The within-class order reading of the
 follow-ups is specific to the `all16` candidate set; why is not examined.
+The 0.11–0.20 increase at every `h*` < 600 s is in normalized shortfall `S`,
+not a decrease in absolute avoided tokens. `R` divides by the gain from
+changing resident selection to `evict_label` while keeping learned admission;
+it does not measure all headroom. States outside the positive class can be
+reused after `h*`. Aggregate orphaning counters neither confirm nor rule out
+an orphaning-mediated explanation. This conditional order reversal addresses
+a different question from the earlier finding that sampling was not the
+largest term of the frozen-ranker-to-label utility gap.
