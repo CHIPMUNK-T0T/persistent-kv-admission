@@ -1,0 +1,10 @@
+check,scope,checked,problems,passes,detail
+counts,"2,400 sampled + 48 heap",2448,0,True,
+complete,one row per task,2448,0,True,
+identifiers,"every arm of a trace x cell x seed, every window; heap with its cell",120,0,True,
+windows,"W <= full and W1 + W2 = W, every replay",2448,0,True,
+mechanism,"eligibility, width, arm, h*, builder",2448,0,True,
+statistics,every decision seen with its final victim; label identities; no override,2400,0,True,
+leaf16_closure,no present-but-unusable token under leaf16,1200,0,True,
+phase098b,attribution identities (per replay) and no unexplained absent token,2400,0,True,
+random_stream,draws = candidates; own stream; recency-arm identifiers,240,0,True,

@@ -1,0 +1,35 @@
+reading,workload,mechanism,kind,window,counted,count,evaluable,cells,threshold,holds,count_resting_on_1200,detail
+1_transplant_all16,bailian,all16,prediction,W,S_hstar_at_most_0.10,11,23,24,12,False,0,
+3_grid_all16,bailian,all16,prediction,W,min_h_S_h_at_most_0.10,23,23,24,20,True,13,
+2_direction_of_failure_all16,bailian,all16,prediction,W,longer/shorter,12/0,12,24,longer > shorter,True,0,over the 12 evaluable cells with S_h* > 0.10; h_best equal to h* in 0
+reading2_classification,bailian,all16,descriptive,W,cells per class,24,23,24,,,0,transplant_suffices 11; retuned_grid_point_suffices 12; none_in_grid 0; no_headroom 1
+4_monotonicity_all16,bailian,all16,prediction,W,traces with h_best nondecreasing in L2,4,4,4,3,True,4,not assessable: 
+5_random_order_all16,bailian,all16,prediction,W,D_rand_consistent_loss,23,23,24,16,True,0,
+reading4_calibration_half,bailian,all16,descriptive,W1->W2,S_hcal_on_W2_at_most_0.10,22,23,24,,,13,min_S_W2 at most 0.10: 23
+1_transplant_all16,bailian,all16,context,full,S_hstar_at_most_0.10,11,23,24,12,,0,
+3_grid_all16,bailian,all16,context,full,min_h_S_h_at_most_0.10,22,23,24,20,,13,
+2_direction_of_failure_all16,bailian,all16,context,full,longer/shorter,11/0,12,24,longer > shorter,,0,over the 12 evaluable cells with S_h* > 0.10; h_best equal to h* in 1
+reading2_classification,bailian,all16,descriptive,full,cells per class,24,23,24,,,0,transplant_suffices 11; retuned_grid_point_suffices 11; none_in_grid 1; no_headroom 1
+4_monotonicity_all16,bailian,all16,context,full,traces with h_best nondecreasing in L2,4,4,4,3,,4,not assessable: 
+5_random_order_all16,bailian,all16,context,full,D_rand_consistent_loss,23,23,24,16,,0,
+reading1_transplant_leaf16,bailian,leaf16,descriptive,W,S_hstar_at_most_0.10,6,22,24,,,0,
+6_grid_leaf16,bailian,leaf16,prediction,W,min_h_S_h_at_most_0.10,17,22,24,16,True,13,
+reading2_direction_of_failure_leaf16,bailian,leaf16,descriptive,W,longer/shorter,13/0,16,24,longer > shorter,,0,over the 16 evaluable cells with S_h* > 0.10; h_best equal to h* in 3
+reading2_classification,bailian,leaf16,descriptive,W,cells per class,24,22,24,,,0,transplant_suffices 6; retuned_grid_point_suffices 11; none_in_grid 5; no_headroom 2
+reading2_monotonicity_leaf16,bailian,leaf16,descriptive,W,traces with h_best nondecreasing in L2,4,4,4,,,4,not assessable: 
+reading3_random_order_leaf16,bailian,leaf16,descriptive,W,D_rand_consistent_loss,5,22,24,,,0,
+reading4_calibration_half,bailian,leaf16,descriptive,W1->W2,S_hcal_on_W2_at_most_0.10,17,22,24,,,13,min_S_W2 at most 0.10: 18
+reading1_transplant_leaf16,bailian,leaf16,descriptive,full,S_hstar_at_most_0.10,7,22,24,,,0,
+6_grid_leaf16,bailian,leaf16,context,full,min_h_S_h_at_most_0.10,18,22,24,16,,13,
+reading2_direction_of_failure_leaf16,bailian,leaf16,descriptive,full,longer/shorter,12/0,15,24,longer > shorter,,0,over the 15 evaluable cells with S_h* > 0.10; h_best equal to h* in 3
+reading2_classification,bailian,leaf16,descriptive,full,cells per class,24,22,24,,,0,transplant_suffices 7; retuned_grid_point_suffices 11; none_in_grid 4; no_headroom 2
+reading2_monotonicity_leaf16,bailian,leaf16,descriptive,full,traces with h_best nondecreasing in L2,4,4,4,,,4,not assessable: 
+reading3_random_order_leaf16,bailian,leaf16,descriptive,full,D_rand_consistent_loss,8,22,24,,,0,
+7_order_beyond_bit_separated,bailian,leaf16_vs_all16,prediction,W,Delta_hstar_separated (h* < 600 s),8,16,16,10,False,0,
+reading7_order_beyond_bit_h_star,bailian,leaf16_vs_all16,descriptive,W,separated / reversed,8/0,22,24,,,0,"all16 consistent_gain 16, consistent_loss 0, mixed 6; leaf16 consistent_gain 16, consistent_loss 0, mixed 6"
+reading7_order_beyond_bit_600,bailian,leaf16_vs_all16,descriptive,W,separated / reversed,8/0,22,24,,,0,"all16 consistent_gain 10, consistent_loss 0, mixed 12; leaf16 consistent_gain 9, consistent_loss 0, mixed 13"
+7_order_beyond_bit_separated,bailian,leaf16_vs_all16,context,full,Delta_hstar_separated (h* < 600 s),8,16,16,10,,0,
+reading7_order_beyond_bit_h_star,bailian,leaf16_vs_all16,descriptive,full,separated / reversed,8/0,22,24,,,0,"all16 consistent_gain 15, consistent_loss 0, mixed 7; leaf16 consistent_gain 16, consistent_loss 0, mixed 6"
+reading7_order_beyond_bit_600,bailian,leaf16_vs_all16,descriptive,full,separated / reversed,7/0,22,24,,,0,"all16 consistent_gain 9, consistent_loss 0, mixed 13; leaf16 consistent_gain 9, consistent_loss 0, mixed 13"
+reading7_order_beyond_bit_h_star,mooncake,leaf16_vs_all16,context,full,separated / reversed,8/6,12,12,,,0,"all16 consistent_gain 1, consistent_loss 6, mixed 5; leaf16 consistent_gain 8, consistent_loss 0, mixed 4; published rows, no evaluable rule applied"
+reading7_order_beyond_bit_600,mooncake,leaf16_vs_all16,context,full,separated / reversed,0/0,4,12,,,0,"all16 consistent_gain 8, consistent_loss 0, mixed 4; leaf16 consistent_gain 0, consistent_loss 0, mixed 4; published rows, no evaluable rule applied"

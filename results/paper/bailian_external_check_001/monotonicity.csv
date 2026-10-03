@@ -1,0 +1,17 @@
+trace,mechanism,window,h_best_L2_0.25pct,h_best_L2_1pct,h_best_L2_2pct,h_best_L2_4pct,h_best_L2_8pct,evaluable_levels,assessable,nondecreasing,rests_on_1200,sequence
+bailian_coder_trace,all16,W,60.0,300.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:300;2%:600;4%:1200;8%:1200
+bailian_coder_trace,all16,full,60.0,300.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:300;2%:600;4%:1200;8%:1200
+bailian_coder_trace,leaf16,W,60.0,300.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:300;2%:1200;4%:1200;8%:1200
+bailian_coder_trace,leaf16,full,60.0,300.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:300;2%:1200;4%:1200;8%:1200
+bailian_thinking_trace,all16,W,150.0,1200.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:150;1%:1200;2%:1200;4%:1200;8%:1200
+bailian_thinking_trace,all16,full,150.0,1200.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:150;1%:1200;2%:1200;4%:1200;8%:1200
+bailian_thinking_trace,leaf16,W,150.0,1200.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:150;1%:1200;2%:1200;4%:1200;8%:1200
+bailian_thinking_trace,leaf16,full,300.0,1200.0,1200.0,1200.0,1200.0,5,True,True,True,0.25%:300;1%:1200;2%:1200;4%:1200;8%:1200
+bailian_tob_trace,all16,W,600.0,1200.0,1200.0,1200.0,,4,True,True,True,0.25%:600;1%:1200;2%:1200;4%:1200
+bailian_tob_trace,all16,full,600.0,1200.0,1200.0,1200.0,,4,True,True,True,0.25%:600;1%:1200;2%:1200;4%:1200
+bailian_tob_trace,leaf16,W,600.0,1200.0,1200.0,,,3,True,True,True,0.25%:600;1%:1200;2%:1200
+bailian_tob_trace,leaf16,full,600.0,1200.0,1200.0,,,3,True,True,True,0.25%:600;1%:1200;2%:1200
+bailian_toc_trace,all16,W,60.0,150.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:150;2%:600;4%:1200;8%:1200
+bailian_toc_trace,all16,full,60.0,150.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:150;2%:600;4%:1200;8%:1200
+bailian_toc_trace,leaf16,W,60.0,150.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:150;2%:600;4%:1200;8%:1200
+bailian_toc_trace,leaf16,full,60.0,150.0,600.0,1200.0,1200.0,5,True,True,True,0.25%:60;1%:150;2%:600;4%:1200;8%:1200

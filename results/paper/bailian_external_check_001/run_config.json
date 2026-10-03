@@ -1,0 +1,758 @@
+{
+  "phase": "bailian_external_check",
+  "mode": "main",
+  "code_commit": "a33b9c0b73c7401027969a107145c3a640ac28f3",
+  "plan_commit": "3ce935d3b48a90d3350d9c63085c2aecde038219",
+  "plan": "docs/bailian-external-check-plan.md",
+  "git_dirty_at_start": false,
+  "source_manifest": {
+    "files": {
+      "scripts/run_bailian_external_check.py": "be21013fab6aa874fe1a9b412b0005d8cdead08ae9a70ec963b9c5e0951ef6f4",
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_leaf_matched_horizon.py": "30ed129e8a2f2fd605932ea382e0aa1fc81af54746f8ca7a25c4d9c9b95ce81e",
+      "scripts/run_matched_class_order.py": "fbe3e69b5f6c14b3db4338fee58807fe04d843d782587d184fb5db7d0219389d",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/bailiancheck.py": "5b572e372854b9463984ce216e4181b3d1b002bdcc08420eec343a7e8460c16a",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/classmix.py": "0c5eea68dd644ce4b02241c738a24970fe489febc6c88962bb1e4caf968c6689",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/leafmatched.py": "953e390137e4e6a304160b4441b651a3bb87d594868fce033709a8651d3b33b9",
+      "src/persistent_kv_admission/matcheddiag.py": "1ce2d06111a53069fae4f34c0d13a7614552b4644279ab6f010b90d633b7958d",
+      "src/persistent_kv_admission/matchedorder.py": "8f29c28bd1ec0b3897d5a2f48d40657e751c7c5ec2004ad29b6e4acf90c53081",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/tailwindow.py": "8f3afeeb454431abe0826eb36721a2b4cfd37d5870a2f963c0c11871c3e1b2d4",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "539cd01cf2af14e11b78dbdfb997d8833aa33fe5b64a342ad2a3739c06241e66"
+  },
+  "anchor": {
+    "paths": {
+      "results/paper/bailian_external_check_001/anchor.csv": "2f69db611a4e9df9c24ee87c585eb77ae8f6bc057819464d0d32b79343f4535b",
+      "results/paper/bailian_external_check_001/anchor_config.json": "ad44cf492a8e91e6b0257f78552096113100e81d06d76e2f41d28b8e0767328f"
+    },
+    "replays": 70,
+    "reproduced": 70,
+    "code_commit": "e6e702ec86244ed8a9f2c349d225da5ea2aad3af"
+  },
+  "smoke": {
+    "paths": {
+      "results/paper/bailian_external_check_001/smoke.csv": "c26340d9abf799e58c83545ccb8e1ee0d6e6df7603a9749d387ac2ee51de4f5a",
+      "results/paper/bailian_external_check_001/smoke_config.json": "f923f60eca759906a1f13c508692fba99cd9ac9ccdca50004cdb1fb6bbd7301f"
+    },
+    "verdict_512": {
+      "replays": 16,
+      "max_seconds": 28.322479248046875,
+      "max_rss_mib": 567.2109375,
+      "max_seconds_allowed": 900.0,
+      "max_rss_mib_allowed": 3072.0,
+      "integrity_ok": true,
+      "within_limits": true,
+      "start": true
+    }
+  },
+  "registered_design": true,
+  "design": {
+    "traces": [
+      "bailian_toc_trace",
+      "bailian_tob_trace",
+      "bailian_thinking_trace",
+      "bailian_coder_trace"
+    ],
+    "cells": [
+      [
+        0.0025,
+        1.0
+      ],
+      [
+        0.0025,
+        4.0
+      ],
+      [
+        0.01,
+        1.0
+      ],
+      [
+        0.01,
+        4.0
+      ],
+      [
+        0.02,
+        1.0
+      ],
+      [
+        0.02,
+        4.0
+      ]
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mechanisms": [
+      "all16",
+      "leaf16"
+    ],
+    "grid_seconds": [
+      6.0,
+      15.0,
+      60.0,
+      150.0,
+      300.0,
+      600.0,
+      1200.0
+    ],
+    "h_star": {
+      "0.0025x1": 60.0,
+      "0.0025x4": 150.0,
+      "0.01x1": 150.0,
+      "0.01x4": 600.0,
+      "0.02x1": 300.0,
+      "0.02x4": 600.0
+    }
+  },
+  "trace_files": {
+    "bailian_toc_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_toc_trace.jsonl",
+      "sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_toc_trace.manifest.json",
+        "sha256": "6b3d41aa14d5e86401ef88b4a86926d613d5e9cb6212223c47c5db0325d07699",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_toc_trace.jsonl",
+          "output_blocks": 120177,
+          "output_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "records": 43058,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceA_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_tob_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_tob_trace.jsonl",
+      "sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_tob_trace.manifest.json",
+        "sha256": "af08eff0c800cc0f749c3f7fcd429d065ab5bec71e4e2f19d95de26962b8d734",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_tob_trace.jsonl",
+          "output_blocks": 290486,
+          "output_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "records": 172800,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceB_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_thinking_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_thinking_trace.jsonl",
+      "sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_thinking_trace.manifest.json",
+        "sha256": "9ae290046dea8a82a44be39a22ad1e6a29020607ff2c4c301046a7ebc8e5229b",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_thinking_trace.jsonl",
+          "output_blocks": 62077,
+          "output_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "records": 10812,
+          "records_moved_by_sort": 0,
+          "source": "qwen_thinking_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_coder_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_coder_trace.jsonl",
+      "sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_coder_trace.manifest.json",
+        "sha256": "5cab3e60060596f05473e7cef410246c7d02c7fb4119a2cee2917cb62d3a1aca",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_coder_trace.jsonl",
+          "output_blocks": 199350,
+          "output_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "records": 43011,
+          "records_moved_by_sort": 0,
+          "source": "qwen_coder_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "timestamp_unit": "ms"
+        }
+      }
+    }
+  },
+  "inputs": {
+    "bailian_toc_trace": {
+      "name": "bailian_toc_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_toc_trace.jsonl",
+      "block_size": 512,
+      "sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319678.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7199464.0,
+      "requests": 43058,
+      "states": 120177,
+      "working_set_bytes": 102480951296,
+      "load_seconds": 0.7023015022277832,
+      "windows": {
+        "split_ms": 4319678.399999999,
+        "primary_end_ms": 5999464.0,
+        "mid_ms": 5159571.199999999,
+        "second_start_ms": 5159571.2,
+        "end_ms": 7199464.0,
+        "full_seconds": 2879.7856000000006,
+        "primary_seconds": 1679.7856000000006,
+        "first_half_seconds": 839.8927999999999,
+        "second_half_seconds": 839.8928000000008
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_toc_trace.manifest.json",
+        "sha256": "6b3d41aa14d5e86401ef88b4a86926d613d5e9cb6212223c47c5db0325d07699",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_toc_trace.jsonl",
+          "output_blocks": 120177,
+          "output_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "records": 43058,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceA_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_tob_trace": {
+      "name": "bailian_tob_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_tob_trace.jsonl",
+      "block_size": 512,
+      "sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319982.0,
+      "start_ms": 0.0,
+      "end_ms": 7199970.0,
+      "requests": 172800,
+      "states": 290486,
+      "working_set_bytes": 211049367552,
+      "load_seconds": 1.874276876449585,
+      "windows": {
+        "split_ms": 4319982.0,
+        "primary_end_ms": 5999970.0,
+        "mid_ms": 5159976.0,
+        "second_start_ms": 5159976.000000001,
+        "end_ms": 7199970.0,
+        "full_seconds": 2879.988,
+        "primary_seconds": 1679.988,
+        "first_half_seconds": 839.994,
+        "second_half_seconds": 839.994
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_tob_trace.manifest.json",
+        "sha256": "af08eff0c800cc0f749c3f7fcd429d065ab5bec71e4e2f19d95de26962b8d734",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_tob_trace.jsonl",
+          "output_blocks": 290486,
+          "output_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "records": 172800,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceB_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_thinking_trace": {
+      "name": "bailian_thinking_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_thinking_trace.jsonl",
+      "block_size": 512,
+      "sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "horizon_seconds": 600.0,
+      "split_ms": 4315040.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7191734.0,
+      "requests": 10812,
+      "states": 62077,
+      "working_set_bytes": 59610759168,
+      "load_seconds": 0.2371823787689209,
+      "windows": {
+        "split_ms": 4315040.399999999,
+        "primary_end_ms": 5991734.0,
+        "mid_ms": 5153387.199999999,
+        "second_start_ms": 5153387.2,
+        "end_ms": 7191734.0,
+        "full_seconds": 2876.6936000000005,
+        "primary_seconds": 1676.6936000000005,
+        "first_half_seconds": 838.3467999999998,
+        "second_half_seconds": 838.3468000000007
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_thinking_trace.manifest.json",
+        "sha256": "9ae290046dea8a82a44be39a22ad1e6a29020607ff2c4c301046a7ebc8e5229b",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_thinking_trace.jsonl",
+          "output_blocks": 62077,
+          "output_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "records": 10812,
+          "records_moved_by_sort": 0,
+          "source": "qwen_thinking_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "timestamp_unit": "ms"
+        }
+      }
+    },
+    "bailian_coder_trace": {
+      "name": "bailian_coder_trace",
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/qwen_bailian_512/bailian_coder_trace.jsonl",
+      "block_size": 512,
+      "sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "horizon_seconds": 600.0,
+      "split_ms": 4319327.399999999,
+      "start_ms": 0.0,
+      "end_ms": 7198879.0,
+      "requests": 43011,
+      "states": 199350,
+      "working_set_bytes": 185958426624,
+      "load_seconds": 1.3809771537780762,
+      "windows": {
+        "split_ms": 4319327.399999999,
+        "primary_end_ms": 5998879.0,
+        "mid_ms": 5159103.199999999,
+        "second_start_ms": 5159103.2,
+        "end_ms": 7198879.0,
+        "full_seconds": 2879.5516000000007,
+        "primary_seconds": 1679.5516000000005,
+        "first_half_seconds": 839.7757999999998,
+        "second_half_seconds": 839.7758000000008
+      },
+      "manifest": {
+        "path": "data/raw/qwen_bailian_512/bailian_coder_trace.manifest.json",
+        "sha256": "5cab3e60060596f05473e7cef410246c7d02c7fb4119a2cee2917cb62d3a1aca",
+        "contents": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_coder_trace.jsonl",
+          "output_blocks": 199350,
+          "output_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "records": 43011,
+          "records_moved_by_sort": 0,
+          "source": "qwen_coder_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "timestamp_unit": "ms"
+        }
+      }
+    }
+  },
+  "capacities": {
+    "bailian_toc_trace": {
+      "l1=0.0025,l2x1": {
+        "l1_capacity_bytes": 256202378,
+        "l2_capacity_bytes": 256202378
+      },
+      "l1=0.0025,l2x4": {
+        "l1_capacity_bytes": 256202378,
+        "l2_capacity_bytes": 1024809513
+      },
+      "l1=0.01,l2x1": {
+        "l1_capacity_bytes": 1024809513,
+        "l2_capacity_bytes": 1024809513
+      },
+      "l1=0.01,l2x4": {
+        "l1_capacity_bytes": 1024809513,
+        "l2_capacity_bytes": 4099238052
+      },
+      "l1=0.02,l2x1": {
+        "l1_capacity_bytes": 2049619026,
+        "l2_capacity_bytes": 2049619026
+      },
+      "l1=0.02,l2x4": {
+        "l1_capacity_bytes": 2049619026,
+        "l2_capacity_bytes": 8198476104
+      }
+    },
+    "bailian_tob_trace": {
+      "l1=0.0025,l2x1": {
+        "l1_capacity_bytes": 527623419,
+        "l2_capacity_bytes": 527623419
+      },
+      "l1=0.0025,l2x4": {
+        "l1_capacity_bytes": 527623419,
+        "l2_capacity_bytes": 2110493676
+      },
+      "l1=0.01,l2x1": {
+        "l1_capacity_bytes": 2110493676,
+        "l2_capacity_bytes": 2110493676
+      },
+      "l1=0.01,l2x4": {
+        "l1_capacity_bytes": 2110493676,
+        "l2_capacity_bytes": 8441974702
+      },
+      "l1=0.02,l2x1": {
+        "l1_capacity_bytes": 4220987351,
+        "l2_capacity_bytes": 4220987351
+      },
+      "l1=0.02,l2x4": {
+        "l1_capacity_bytes": 4220987351,
+        "l2_capacity_bytes": 16883949404
+      }
+    },
+    "bailian_thinking_trace": {
+      "l1=0.0025,l2x1": {
+        "l1_capacity_bytes": 149026898,
+        "l2_capacity_bytes": 149026898
+      },
+      "l1=0.0025,l2x4": {
+        "l1_capacity_bytes": 149026898,
+        "l2_capacity_bytes": 596107592
+      },
+      "l1=0.01,l2x1": {
+        "l1_capacity_bytes": 596107592,
+        "l2_capacity_bytes": 596107592
+      },
+      "l1=0.01,l2x4": {
+        "l1_capacity_bytes": 596107592,
+        "l2_capacity_bytes": 2384430367
+      },
+      "l1=0.02,l2x1": {
+        "l1_capacity_bytes": 1192215183,
+        "l2_capacity_bytes": 1192215183
+      },
+      "l1=0.02,l2x4": {
+        "l1_capacity_bytes": 1192215183,
+        "l2_capacity_bytes": 4768860733
+      }
+    },
+    "bailian_coder_trace": {
+      "l1=0.0025,l2x1": {
+        "l1_capacity_bytes": 464896067,
+        "l2_capacity_bytes": 464896067
+      },
+      "l1=0.0025,l2x4": {
+        "l1_capacity_bytes": 464896067,
+        "l2_capacity_bytes": 1859584266
+      },
+      "l1=0.01,l2x1": {
+        "l1_capacity_bytes": 1859584266,
+        "l2_capacity_bytes": 1859584266
+      },
+      "l1=0.01,l2x4": {
+        "l1_capacity_bytes": 1859584266,
+        "l2_capacity_bytes": 7438337065
+      },
+      "l1=0.02,l2x1": {
+        "l1_capacity_bytes": 3719168532,
+        "l2_capacity_bytes": 3719168532
+      },
+      "l1=0.02,l2x4": {
+        "l1_capacity_bytes": 3719168532,
+        "l2_capacity_bytes": 14876674130
+      }
+    }
+  },
+  "mooncake_tables": {
+    "results/paper/horizon_control_001/horizon.csv": "85919beacc8767f4b9f99a4c63811d7fa5c0158938da7d0e1c17f9f216cb71ca",
+    "results/paper/horizon_fill_001/fill.csv": "ee4223475b92deda9125f71a98b9ffc73be632150c25969e0314b7144ffcbc3b",
+    "results/paper/leaf_matched_horizon_001/horizon.csv": "e3643af217b7b6fba1a656cf5de9c16f6d4f5a2578e60b09379daaec609f1cca",
+    "results/paper/class_order_mix_001/differences.csv": "7b0ca93d11f97448d40469e7245171bc21c5312f5510b14a9ad7594c680e6f9c",
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c",
+    "results/paper/horizon_control_001/replay_seeds.csv": "0f96f1e9061c88098dda7e6693530f0223343cd3280ad3307179f532d9e555d6",
+    "results/paper/horizon_fill_001/replay_seeds.csv": "a6512fd813684a2a198d12530f11fa3d54e6cce01745133ae8b06a9371c59159",
+    "results/paper/leaf_matched_horizon_001/replay_seeds.csv": "a2503e75c1707e88b14905427d918d4ab98c6d1af678cc0ae8406bbdba09d051"
+  },
+  "windows": {
+    "tail_exclusion_seconds": 1200.0,
+    "collector": "onpolicy.LabelWindowUtilityCollector, inclusive bounds; W2 from math.nextafter(mid, inf)",
+    "bounds_ms": {
+      "bailian_toc_trace": {
+        "split_ms": 4319678.399999999,
+        "primary_end_ms": 5999464.0,
+        "mid_ms": 5159571.199999999,
+        "second_start_ms": 5159571.2,
+        "end_ms": 7199464.0,
+        "full_seconds": 2879.7856000000006,
+        "primary_seconds": 1679.7856000000006,
+        "first_half_seconds": 839.8927999999999,
+        "second_half_seconds": 839.8928000000008
+      },
+      "bailian_tob_trace": {
+        "split_ms": 4319982.0,
+        "primary_end_ms": 5999970.0,
+        "mid_ms": 5159976.0,
+        "second_start_ms": 5159976.000000001,
+        "end_ms": 7199970.0,
+        "full_seconds": 2879.988,
+        "primary_seconds": 1679.988,
+        "first_half_seconds": 839.994,
+        "second_half_seconds": 839.994
+      },
+      "bailian_thinking_trace": {
+        "split_ms": 4315040.399999999,
+        "primary_end_ms": 5991734.0,
+        "mid_ms": 5153387.199999999,
+        "second_start_ms": 5153387.2,
+        "end_ms": 7191734.0,
+        "full_seconds": 2876.6936000000005,
+        "primary_seconds": 1676.6936000000005,
+        "first_half_seconds": 838.3467999999998,
+        "second_half_seconds": 838.3468000000007
+      },
+      "bailian_coder_trace": {
+        "split_ms": 4319327.399999999,
+        "primary_end_ms": 5998879.0,
+        "mid_ms": 5159103.199999999,
+        "second_start_ms": 5159103.2,
+        "end_ms": 7198879.0,
+        "full_seconds": 2879.5516000000007,
+        "primary_seconds": 1679.5516000000005,
+        "first_half_seconds": 839.7757999999998,
+        "second_half_seconds": 839.7758000000008
+      }
+    }
+  },
+  "arm_builders": {
+    "lru/all16": "errorloc.arm_setup",
+    "lru/leaf16": "errorloc.arm_setup",
+    "label/all16": "errorloc.arm_setup",
+    "label/leaf16": "errorloc.arm_setup",
+    "label_binary_6/all16": "horizonctl.arm_setup",
+    "label_binary_6/leaf16": "horizonctl.arm_setup",
+    "label_binary_15/all16": "horizonctl.arm_setup",
+    "label_binary_15/leaf16": "horizonctl.arm_setup",
+    "label_binary_60/all16": "horizonctl.arm_setup",
+    "label_binary_60/leaf16": "horizonfill.arm_setup",
+    "label_binary_150/all16": "horizonfill.arm_setup",
+    "label_binary_150/leaf16": "horizonfill.arm_setup",
+    "label_binary_300/all16": "horizonctl.arm_setup",
+    "label_binary_300/leaf16": "horizonfill.arm_setup",
+    "label_binary_600/all16": "horizonctl.arm_setup",
+    "label_binary_600/leaf16": "horizonfill.arm_setup",
+    "label_binary_1200/all16": "ExactLabelScorer(trace, h, target='binary'), l2_policy='learned'",
+    "label_binary_1200/leaf16": "ExactLabelScorer(trace, h, target='binary'), l2_policy='learned'",
+    "label_binary_random_60/all16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_60/leaf16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_150/all16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_150/leaf16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_300/all16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_300/leaf16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_600/all16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)",
+    "label_binary_random_600/leaf16": "classmix.RandomClassScorer(ExactLabelScorer(trace, h*, target='binary'), seed, arm)"
+  },
+  "heap_references": {
+    "H_lru": "lru",
+    "H_off": "offline_next_use"
+  },
+  "random_stream": "random.Random(classmix.random_stream_seed(seed, arm)); the store's sampling stream random.Random(l2_seed) is separate",
+  "readings": {
+    "suffices_shortfall": 0.1,
+    "evaluable_points": 1.0,
+    "min_denominator_points": 1.0,
+    "predictions": {
+      "1_transplant_all16": {
+        "mechanism": "all16",
+        "counted": "S_hstar_at_most_0.10",
+        "at_least": 12,
+        "of": 24,
+        "unit": "trace x cell"
+      },
+      "2_direction_of_failure_all16": {
+        "mechanism": "all16",
+        "counted": "h_best_longer_than_h_star_minus_shorter",
+        "at_least": null,
+        "of": null,
+        "unit": "trace x cell",
+        "rule": "longer > shorter among evaluable cells where S_h* > 0.10; 0/0 when there is none"
+      },
+      "3_grid_all16": {
+        "mechanism": "all16",
+        "counted": "min_h_S_h_at_most_0.10",
+        "at_least": 20,
+        "of": 24,
+        "unit": "trace x cell"
+      },
+      "4_monotonicity_all16": {
+        "mechanism": "all16",
+        "counted": "h_best_nondecreasing_in_L2",
+        "at_least": 3,
+        "of": 4,
+        "unit": "trace"
+      },
+      "5_random_order_all16": {
+        "mechanism": "all16",
+        "counted": "D_rand_consistent_loss",
+        "at_least": 16,
+        "of": 24,
+        "unit": "trace x cell"
+      },
+      "6_grid_leaf16": {
+        "mechanism": "leaf16",
+        "counted": "min_h_S_h_at_most_0.10",
+        "at_least": 16,
+        "of": 24,
+        "unit": "trace x cell"
+      },
+      "7_order_beyond_bit_separated": {
+        "mechanism": "leaf16_vs_all16",
+        "counted": "Delta_hstar_separated_leaf16_above_all16",
+        "at_least": 10,
+        "of": 16,
+        "unit": "trace x cell",
+        "rule": "over the trace x cell with h* < 600 s evaluable under both mechanisms"
+      }
+    },
+    "classes": [
+      "transplant_suffices",
+      "retuned_grid_point_suffices",
+      "none_in_grid",
+      "no_headroom"
+    ],
+    "l2_levels": [
+      0.0025,
+      0.01,
+      0.02,
+      0.04,
+      0.08
+    ]
+  },
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "checks": [
+    {
+      "check": "counts",
+      "scope": "2,400 sampled + 48 heap",
+      "checked": 2448,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "complete",
+      "scope": "one row per task",
+      "checked": 2448,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "identifiers",
+      "scope": "every arm of a trace x cell x seed, every window; heap with its cell",
+      "checked": 120,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "windows",
+      "scope": "W <= full and W1 + W2 = W, every replay",
+      "checked": 2448,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "mechanism",
+      "scope": "eligibility, width, arm, h*, builder",
+      "checked": 2448,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "statistics",
+      "scope": "every decision seen with its final victim; label identities; no override",
+      "checked": 2400,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "leaf16_closure",
+      "scope": "no present-but-unusable token under leaf16",
+      "checked": 1200,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "phase098b",
+      "scope": "attribution identities (per replay) and no unexplained absent token",
+      "checked": 2400,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    },
+    {
+      "check": "random_stream",
+      "scope": "draws = candidates; own stream; recency-arm identifiers",
+      "checked": 240,
+      "problems": 0,
+      "passes": true,
+      "detail": ""
+    }
+  ],
+  "replays": 2448,
+  "workers": 10,
+  "replay_seconds": 9549.47284412384,
+  "wall_seconds": 9554.594826936722,
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 750.91015625,
+    "parent_peak_rss_mib": 370.015625,
+    "children_peak_rss_mib": 750.91015625,
+    "mem_available_mib_at_start": 29249.3984375
+  }
+}
