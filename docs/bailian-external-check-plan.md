@@ -1,6 +1,6 @@
 # External-workload check on the Qwen-Bailian traces: the matched horizons transplanted, and a sufficing horizon within a fixed grid
 
-Status: pre-registration **draft**, for review. No replay named below has been run; no implementation exists; nothing is fitted. Written after the [input and conversion audit](bailian-input-audit.md) and the [handoff](next-phase-handoff-20261003.md), and before any smoke. The draft becomes a pre-registration when it is agreed and committed alone; the implementation is then reviewed and committed before any replay.
+Status: pre-registration, agreed on 2026-10-03 and committed alone. No replay named below has been run; no implementation exists; nothing is fitted. Written after the [input and conversion audit](bailian-input-audit.md) and the [handoff](next-phase-handoff-20261003.md), and before any smoke. The draft (commit `a558d39`) listed five open issues; their decisions, and the corrections made when the draft became this pre-registration, are recorded [at the end](#decisions-and-corrections-at-agreement). The implementation is reviewed and committed before any replay.
 
 ## Why
 
@@ -14,12 +14,12 @@ Every result so far is on two Mooncake traces of one deployment family (about 59
 
 **R. Recency beyond the bit.** Does a uniformly random order within the reuse class lose to recency within the class, as it did on Mooncake (12/12)?
 
-Predictions, fixed before any replay, on five-seed means over the primary window, counted over the *evaluable* trace × cell (defined below; at most 24 per mechanism):
+Predictions, fixed before any replay, on five-seed means over the primary window, counted over the *evaluable* trace × cell (defined below; at most 24 per mechanism). The thresholds are absolute counts: they do not shrink if fewer than 24 cells are evaluable, and the number of evaluable cells is reported:
 
 1. **A, `all16`.** `S_h*` ≤ 0.10 in at least 12 of 24. Reasoning recorded now: at the same capacity fraction the Bailian L2 holds more seconds of input traffic than the Mooncake L2 (the audit's working set and token rate; by the ratio of working-set bytes to input tokens per second, 1.2–2.1× the conversation trace's and 1.7–3.1× the tool-agent trace's), so the transplanted horizons are expected to be short for the smaller cells; the two 600-second cells are the grid's old top. Failure of this prediction does not refute the usefulness of a reuse class on this workload and does not stop the later steps.
 2. **A, direction of failure, `all16`.** Among the cells where the transplanted `h*` does not suffice, the best grid horizon is longer than `h*` in more cells than it is shorter. (Reported as 0/0 if prediction 1 holds in 24/24.)
 3. **B, `all16`.** Some grid horizon suffices (`min_h S_h` ≤ 0.10) in at least 20 of 24.
-4. **B, monotonicity, `all16`.** Within a trace, the best grid horizon is nondecreasing in L2 bytes over the five distinct L2 levels (0.25%×1 < 0.25%×4 = 1%×1 < 2%×1 < 1%×4 = 2%×4; equal levels compared as one, taking the smaller best), in at least 3 of 4 traces.
+4. **B, monotonicity, `all16`.** Within a trace, the best grid horizon is nondecreasing in L2 bytes over the five distinct L2 levels (0.25%×1 < 0.25%×4 = 1%×1 < 2%×1 < 1%×4 < 2%×4, that is 0.25%, 1%, 2%, 4% and 8% of `W`; the two cells of the 1% level compared as one, taking the smaller best), in at least 3 of 4 traces. Cells that are not evaluable are left out; a trace with fewer than three evaluable levels is reported as not assessable and does not count toward the 3.
 5. **R, `all16`.** `D_rand = U(label_binary_random_h*) − U(label_binary_h*)` is negative in all five seeds in at least 16 of 24.
 6. **B, `leaf16`.** Some grid horizon suffices in at least 16 of 24 under `leaf16` (on Mooncake the transplanted `h*` sufficed in 9/12 under `leaf16`; no `leaf16` grid has been run).
 
@@ -42,7 +42,7 @@ Everything else below is reported without a prediction: the `leaf16` transplant 
 - Audit facts the plan takes as given: To-B has no session links (every record a root) and short inputs, with 25.8% of its input tokens in partial final 512-token blocks (To-C 10.3%, thinking 4.9%, coder 4.3%, Mooncake 2.2–2.6%); a child request almost never carries its parent's last 16-token block (93–94% of children on the three traces with sessions), so at 512 tokens a child reuses its parent's prefix only up to the previous 512-token boundary; the coarsening removes 7.8 / 19.0 / 2.8 / 3.2 points of repeatable input (To-C / To-B / thinking / coder) and enlarges the working set 1.19× / 1.41× / 1.05× / 1.09×. Simultaneous requests are rare (at most 3 per timestamp), so the no-hit-between-simultaneous-requests rule is nearly inactive, where on Mooncake every request is in a batch of up to 47.
 - Split and label horizon as every replay runner: the split at 60% of the trace span (`decisionpop.horizon_for`, label horizon 600 s, 24 snapshots), L1 `lru`, the published hit rule, sizes, store and sampled-16 eviction. Mechanisms `all16` (`l2_eligibility="all"`, width 16) and `leaf16` (`"leaf"`, 16), each with its own references. Seeds 0–4 for every sampled arm.
 - **Windows.** Every replay runs from the split to the trace end and is counted on three windows by read-only request hooks (`tailwindow.LabelWindowUtilityCollector`, one per window, chained): the **primary window** `W = [split, end − 1,200,000 ms]`, inside which every label of every grid horizon is observed without knowledge of the trace end; the **full window** `[split, end]`, the runners' published window; and the two halves of `W` by time, `W1 = [split, mid]` and `W2 = (mid, end − 1,200 s]` with `mid` the midpoint of `W`, for the calibration-half reading. Readings and predictions are on `W`; the full window is reported beside them. No window changes with the horizon, and no input is cut.
-- Utility `U` is extra avoided prefill tokens over L1 alone, reported in tokens and in points (100 × tokens / the window's input tokens), for every arm, mechanism and window. Heap references `H_off` (the heap offline `next_use` comparator) and `H_lru` (heap LRU) are run per trace × cell (deterministic, no seed; `run_decision_population`'s heap path) and reported as context, with the headroom `T = H_off − U_m(lru)`.
+- Utility `U` is extra avoided prefill tokens over L1 alone, reported in tokens and in points (100 × tokens / the window's input tokens), for every arm, mechanism and window. Heap references `H_off` (the heap offline `next_use` comparator) and `H_lru` (heap LRU) are run per trace × cell (deterministic, no seed; `run_decision_population`'s heap path) and reported as context on the same windows, with the headroom `T = H_off − U_m(lru)` and the label's share of it, `(U_m(label) − U_m(lru)) / T`, which says how strong the comparator of `S` is in that cell.
 
 ## Arms
 
@@ -75,20 +75,20 @@ The 16→512 coarsening changes which shared prefixes are representable, the sta
 ## Required checks
 
 - The [audit](bailian-input-audit.md) passes (identities equal the manifests, the conversion is reproduced byte for byte, the loader accepts every trace).
-- **Reproduction anchor on Mooncake.** Before any Bailian replay, the new runner replays `lru`, `label`, `label_binary_60` and `label_binary_600` at conversation 0.25%×1 and 1%×4 under `all16` and `leaf16` (2 cells × 2 mechanisms × 4 arms × 5 seeds = 80 replays) and must reproduce the published rows exactly: `avoided_prefill_tokens` and the counter and decision digests where published (`horizon_control_001`, `error_location_001`), every published counter column where not (`mechanism_control_001`'s `leaf16` rows). Nothing is published otherwise.
+- **Reproduction anchor on Mooncake.** Before any Bailian replay, the new runner, with its window collectors attached, replays on the conversation trace at 0.25%×1 and 1%×4: under `all16`, `lru`, `label`, `label_binary_60` and `label_binary_600` (40 replays; published in `error_location_001` and `horizon_control_001`); under `leaf16`, `lru`, `label` and the cell's `label_binary_h*` (60 s and 600 s; 30 replays; published in `mechanism_control_001` and `leaf_matched_horizon_001`). All 70 must reproduce their published rows exactly: `avoided_prefill_tokens` and the counter and decision digests where the published row carries them, every published counter column where it does not (`mechanism_control_001`'s `leaf16` `lru` rows). Nothing is published otherwise.
 - Identifiers (`l1_capacity_bytes`, `l2_capacity_bytes`, `requested_tokens`, `l1_avoided_tokens`, `absent_compulsory_tokens`) equal across every arm of a trace × cell × seed, on every window; the window counters are consistent (head at most full; the halves sum to `W`); the Phase 0.98b identities hold; under `leaf16` no replay has a present-but-unusable token; every decision is seen with its final victim; no override anywhere; the random arm's draw count equals its candidate count and its stream is its own (the sampling stream untouched: its `lru`-side identifiers equal the recency arm's).
 - Unit tests on constructed traces: the random arm with its draw replaced by a constant equals `label_binary_h*` decision by decision; three window collectors on one replay sum correctly; the 16-token path through converter and loader on a constructed file.
 - No existing replay path, runner, converter or test is changed; the existing tests pass.
 
 ## Smoke, resources and stop conditions
 
-- Smoke, after the anchor: 1 seed × 1 cell (1%×1) × `all16` × the four A arms on each Bailian trace (16 replays) and the three C arms on To-B at 16 tokens at one budget (3 replays), recording seconds and peak RSS per replay. The smoke rows are discarded.
+- Smoke, after the anchor: 1 seed × 1 cell (1%×1) × `all16` × the four A arms on each Bailian trace (16 replays) and the three C arms on To-B at 16 tokens at one budget (3 replays), recording seconds and peak RSS per replay. The smoke writes seconds, peak RSS and the integrity checks only; no utility of a smoke replay is written or read.
 - Estimate from Mooncake (18–120 s per replay at 290–410 thousand block occurrences): the Bailian traces carry 107–505 thousand occurrences at 512 tokens, so about 10–150 s per sampled replay; 2,400 replays on 10 workers ≈ 2–5 hours. C: To-B at 16 tokens carries 9.96 million occurrences (24× the tool-agent trace), so about 5–30 minutes per replay; 90 replays at 4 workers ≈ 2–12 hours. The memory of the 16-token loader is the unknown; the smoke measures it.
-- Stop conditions, fixed now: if a smoke replay exceeds 15 minutes or 3 GiB RSS at 512 tokens, the run is not started and the plan is re-issued; if only the 16-token smoke exceeds 10 minutes or 6 GiB, C is reduced as stated above; if a worker dies during the run, the run is reported as incomplete and not published in part. The run is one invocation per part (A+B together, C separately) into `results/paper/bailian_external_check_001/` and `results/paper/bailian_granularity_control_001/`, recording plan and code commits and the hashes of the traces, manifests and every table read.
+- Stop conditions, fixed now: if a smoke replay exceeds 15 minutes or 3 GiB RSS at 512 tokens, the run is not started and the plan is re-issued; if only the 16-token smoke exceeds 20 minutes per replay or 6 GiB, C is reduced as stated above, and if the reduced control is still projected above 12 hours of wall time it is not run and is reported as not run, with the smoke's measurements; if a worker dies during the run, the run is reported as incomplete and not published in part. The run is one invocation per part (A+B together, C separately) into `results/paper/bailian_external_check_001/` and `results/paper/bailian_granularity_control_001/`, recording plan and code commits and the hashes of the traces, manifests and every table read.
 
 ## What is deferred, and why
 
-- **Model transplant.** The frozen Mooncake rankers are per-trace fits (`pi0` `next_use` for `conversation_trace` and for `toolagent_trace`); applying one to a Bailian trace requires choosing which, and its features and normalisation were fixed on Mooncake. The eviction-located and class-order readings need `learned`, `evict_label` and the class arms (hybrids with the ranker's admission), about 5 arms × 240 = 1,200 further replays per mechanism. This is a separate sub-analysis, "transplant diagnostic of a fixed model", to be pre-registered after A/B with the model assignment fixed before the run; its failure would not read as "history cannot supply the bit".
+- **Model transplant.** The frozen Mooncake rankers are per-trace fits (`pi0` `next_use` for `conversation_trace` and for `toolagent_trace`); applying one to a Bailian trace requires choosing which, and its features and normalisation were fixed on Mooncake. The eviction-located and class-order readings need `learned`, `evict_label` and the class arms (hybrids with the ranker's admission), about 5 arms × 240 = 1,200 further replays per mechanism. This is a separate sub-analysis, "transplant diagnostic of a fixed model"; it does not follow A/B automatically but is pre-registered separately once their result is reported, with the model assignment fixed before its run; its failure would not read as "history cannot supply the bit".
 - **History-based fit (⑤).** No fit is run here, so no learner's result can leak into the horizon or the rule. ⑤ fixes eligibility, budget, horizon and admission/tie-break first, then asks whether a learner given past information increases avoided tokens; it must fix the mechanism, because the within-class order reading reverses between `all16` and `leaf16` on Mooncake.
 
 ## Interpretation boundaries
@@ -97,19 +97,31 @@ The 16→512 coarsening changes which shared prefixes are representable, the sta
 - 512-token blocks on a 16-token trace: the audit's losses (including the parent's last block never being reused by its child) apply to every arm equally, and C bounds the effect on the readings on To-B only, the trace most affected.
 - `h*` and `G` are Mooncake's; "transplant suffices" is a statement about this table on these traces, "re-tuned suffices" means a horizon within `G` chosen after the fact, "none in the grid" says nothing about horizons outside `G` or other rules.
 - Every arm reads the trace's future; none is a policy; the comparator is sampled-16 greedy, not an optimum.
+- The `label` comparator is the published rung, `−log1p(min(Δ, 600 s))`: states without a reuse within 600 s tie and are ordered by recency. For `h` ≤ 600 s the bit is a coarsening of that label; at `h = 1,200 s` it is not, and `S_1200` can be negative. It is reported as is, with `H_off` (which reads the next use without a cap) and the label's share of `T` beside it, and every reading that rests on the 1,200-second point is flagged as such.
 
 ## Execution order
 
-1. Review of this draft (Astra, the user); agreed → committed alone as the pre-registration, with the audit.
+1. Agreed on 2026-10-03 (the user, on the five open issues as drafted); committed alone as this pre-registration, after the audit.
 2. Implementation of a separate runner on the horizon-control / mechanism-control / tail-window replay calls, with the random arm and the three-window counting; unit tests; no change to an existing path; review and commit.
-3. The Mooncake reproduction anchor (80 replays), then the smoke (19 replays); both reported before the run.
+3. The Mooncake reproduction anchor (70 replays), then the smoke (19 replays); both reported before the run.
 4. A+B once with 10 workers; C once with at most 4 workers, after A+B.
 5. Report, including failed predictions and the classification of every cell.
 
-## Open issues for review
+## Decisions and corrections at agreement
 
-1. Grid: the handoff's candidate `{6, 15, 60, 150, 300, 600}` is extended by 1,200 s here (the Bailian L2 holds more seconds of traffic at the same fraction, so the old top may be short); keeping 6 s costs 240 replays and anchors the low end. Either change costs ±240 replays.
-2. Primary window `end − 1,200 s` (28% of the trace at 2 h) follows from the grid's top; the alternative is `end − 600 s` with the 1,200-second arm counted only where its label is observed, which breaks the common window.
-3. Prediction 1's threshold (12 of 24) is a judgement; the reasoning is recorded and the count is reported whatever the threshold.
-4. Whether the model-transplant sub-analysis follows A/B automatically or waits for their result.
-5. The evaluable rule (1.0 point of headroom) is new; the Mooncake denominators were 6–31 points.
+Decisions on the draft's five open issues (2026-10-03, the user; all as drafted):
+
+1. Grid: `G = {6, 15, 60, 150, 300, 600, 1200}` s. The 6-second point is kept and 1,200 s is added.
+2. Primary window: `[split, end − 1,200 s]`, common to every horizon, with the full window beside it. On these traces (span 7,192–7,200 s, evaluation window about 2,880 s) the primary window is about 1,680 s: 23% of the trace and 58% of the evaluation window. The draft said 28% of the trace; that figure was wrong.
+3. Prediction 1's threshold stays at 12 of 24; the count is reported whatever the threshold.
+4. The model-transplant sub-analysis waits for the A/B result and is pre-registered separately.
+5. The evaluable rule stays at 1.0 point of headroom on the primary window.
+
+Corrections and clarifications made when the draft became this pre-registration, before any implementation or replay:
+
+- Prediction 4 wrote the L2 levels as "1%×4 = 2%×4". They are 4% and 8% of `W` and differ; the five levels are 0.25%, 1% (two cells), 2%, 4% and 8%. The rule for a trace with non-evaluable cells was added.
+- The prediction thresholds are stated as absolute counts.
+- The anchor is 70 replays, not 80. Under `leaf16` only each cell's `label_binary_h*` has a published row, so the two unpublished `leaf16` arm × cell combinations (10 replays) had nothing to be compared with and were removed.
+- The 16-token smoke threshold read 10 minutes in one place and 20 in another; it is 20 minutes per replay. A 12-hour ceiling on the projected wall time of the reduced control was added.
+- The smoke writes no utility.
+- The `label` comparator's 600-second cap, and the label's share of `T` as a context column, were added. No arm, capacity, seed, window or reading was changed.
