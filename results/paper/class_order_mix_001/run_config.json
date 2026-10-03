@@ -1,0 +1,769 @@
+{
+  "phase": "class_order_mix",
+  "plan": "docs/class-order-mix-plan.md",
+  "plan_commit": "b41514dae814e59e3daea64089b3fca8561830da",
+  "code_commit": "d86533281a342dca2f293b67357b0574ef26b64d",
+  "git_dirty_at_start": false,
+  "execution_sources_differing_from_head": [],
+  "source_manifest": {
+    "files": {
+      "scripts/run_class_order_mix.py": "fd05b36c7cf275a8d1571fd286bce12910e4fa43dfbe6a30e8c701a8e9c62845",
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_matched_class_order.py": "fbe3e69b5f6c14b3db4338fee58807fe04d843d782587d184fb5db7d0219389d",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/classmix.py": "0c5eea68dd644ce4b02241c738a24970fe489febc6c88962bb1e4caf968c6689",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/leafmatched.py": "953e390137e4e6a304160b4441b651a3bb87d594868fce033709a8651d3b33b9",
+      "src/persistent_kv_admission/matcheddiag.py": "1ce2d06111a53069fae4f34c0d13a7614552b4644279ab6f010b90d633b7958d",
+      "src/persistent_kv_admission/matchedorder.py": "8f29c28bd1ec0b3897d5a2f48d40657e751c7c5ec2004ad29b6e4acf90c53081",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/tailwindow.py": "8f3afeeb454431abe0826eb36721a2b4cfd37d5870a2f963c0c11871c3e1b2d4",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "e886f780f3ca3a112787ffb81331610a7c50bbac2c3005d26d4ba979ff6f5e87"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "models": {
+    "pi0_next_use": {
+      "conversation_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/conversation_trace__next_use.json",
+        "sha256": "87c24bb2abdcdc62028405a19eaff0b24c3bffacfd8d50334fc76d76e0b2d60c"
+      },
+      "toolagent_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/toolagent_trace__next_use.json",
+        "sha256": "2696e5e55f005760cd2a8aafe376b346718f72dcd46864fe8a35217951121c4c"
+      }
+    }
+  },
+  "model_manifests": {
+    "results/onpolicy_full_feb30eb_001/canonical_model_manifest.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23",
+    "results/paper/onpolicy_learning/onpolicy_canonical_models.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23"
+  },
+  "references": {
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c",
+    "results/paper/matched_class_order_001/replay_seeds.csv": "3615e677ffe91db4d71b478adea4541dfdccb547e0373d3e6384e24070b9fd1f",
+    "results/paper/horizon_control_001/replay_seeds.csv": "0f96f1e9061c88098dda7e6693530f0223343cd3280ad3307179f532d9e555d6",
+    "results/paper/horizon_fill_001/replay_seeds.csv": "a6512fd813684a2a198d12530f11fa3d54e6cce01745133ae8b06a9371c59159"
+  },
+  "reference_rows": {
+    "learned/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_label/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_binary_60_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_60_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_150_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_150_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_300_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_300_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_600_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_binary_600_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "label_binary_60/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "label_binary_150/all16": {
+      "source": "horizon_fill_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "label_binary_300/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    },
+    "label_binary_600/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    }
+  },
+  "reference_identifiers": [
+    "l1_capacity_bytes",
+    "l2_capacity_bytes",
+    "requested_tokens",
+    "l1_avoided_tokens",
+    "absent_compulsory_tokens"
+  ],
+  "traces": [
+    "conversation_trace",
+    "toolagent_trace"
+  ],
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.0025,
+      4.0
+    ],
+    [
+      0.01,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      1.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "mechanism": {
+    "name": "all16",
+    "eligibility": "all",
+    "width": 16
+  },
+  "matched_horizon_seconds": [
+    {
+      "l1_fraction": 0.0025,
+      "l2_multiplier": 1.0,
+      "h_star": 60.0,
+      "arms": [
+        "mix_out_learned_60",
+        "mix_in_learned_60",
+        "random_within_class_60"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_60_learned",
+        "matched_recency": "evict_binary_60_recency",
+        "label_binary_hstar": "label_binary_60"
+      }
+    },
+    {
+      "l1_fraction": 0.0025,
+      "l2_multiplier": 4.0,
+      "h_star": 150.0,
+      "arms": [
+        "mix_out_learned_150",
+        "mix_in_learned_150",
+        "random_within_class_150"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_150_learned",
+        "matched_recency": "evict_binary_150_recency",
+        "label_binary_hstar": "label_binary_150"
+      }
+    },
+    {
+      "l1_fraction": 0.01,
+      "l2_multiplier": 1.0,
+      "h_star": 150.0,
+      "arms": [
+        "mix_out_learned_150",
+        "mix_in_learned_150",
+        "random_within_class_150"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_150_learned",
+        "matched_recency": "evict_binary_150_recency",
+        "label_binary_hstar": "label_binary_150"
+      }
+    },
+    {
+      "l1_fraction": 0.01,
+      "l2_multiplier": 4.0,
+      "h_star": 600.0,
+      "arms": [
+        "mix_out_learned_600",
+        "mix_in_learned_600",
+        "random_within_class_600"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_600_learned",
+        "matched_recency": "evict_binary_600_recency",
+        "label_binary_hstar": "label_binary_600"
+      }
+    },
+    {
+      "l1_fraction": 0.02,
+      "l2_multiplier": 1.0,
+      "h_star": 300.0,
+      "arms": [
+        "mix_out_learned_300",
+        "mix_in_learned_300",
+        "random_within_class_300"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_300_learned",
+        "matched_recency": "evict_binary_300_recency",
+        "label_binary_hstar": "label_binary_300"
+      }
+    },
+    {
+      "l1_fraction": 0.02,
+      "l2_multiplier": 4.0,
+      "h_star": 600.0,
+      "arms": [
+        "mix_out_learned_600",
+        "mix_in_learned_600",
+        "random_within_class_600"
+      ],
+      "references": {
+        "matched_learned": "evict_binary_600_learned",
+        "matched_recency": "evict_binary_600_recency",
+        "label_binary_hstar": "label_binary_600"
+      }
+    }
+  ],
+  "arms": {
+    "mix_out_learned_60": {
+      "h_star": 60.0,
+      "kind": "mix_out_learned",
+      "learned_class": 0
+    },
+    "mix_in_learned_60": {
+      "h_star": 60.0,
+      "kind": "mix_in_learned",
+      "learned_class": 1
+    },
+    "random_within_class_60": {
+      "h_star": 60.0,
+      "kind": "random_within_class",
+      "learned_class": ""
+    },
+    "mix_out_learned_150": {
+      "h_star": 150.0,
+      "kind": "mix_out_learned",
+      "learned_class": 0
+    },
+    "mix_in_learned_150": {
+      "h_star": 150.0,
+      "kind": "mix_in_learned",
+      "learned_class": 1
+    },
+    "random_within_class_150": {
+      "h_star": 150.0,
+      "kind": "random_within_class",
+      "learned_class": ""
+    },
+    "mix_out_learned_300": {
+      "h_star": 300.0,
+      "kind": "mix_out_learned",
+      "learned_class": 0
+    },
+    "mix_in_learned_300": {
+      "h_star": 300.0,
+      "kind": "mix_in_learned",
+      "learned_class": 1
+    },
+    "random_within_class_300": {
+      "h_star": 300.0,
+      "kind": "random_within_class",
+      "learned_class": ""
+    },
+    "mix_out_learned_600": {
+      "h_star": 600.0,
+      "kind": "mix_out_learned",
+      "learned_class": 0
+    },
+    "mix_in_learned_600": {
+      "h_star": 600.0,
+      "kind": "mix_in_learned",
+      "learned_class": 1
+    },
+    "random_within_class_600": {
+      "h_star": 600.0,
+      "kind": "random_within_class",
+      "learned_class": ""
+    }
+  },
+  "random_stream": {
+    "tag": "class_order_mix/random_within_class",
+    "rule": "random.Random(s).random() once per candidate per decision, in the order the store scores the candidates; s = int.from_bytes(blake2b((tag, str(seed), arm) joined by '\\x1f', utf-8; digest_size=8), 'big') (classmix.random_stream_seed = errorloc.hash_bits(tag, seed, arm))",
+    "store_sampling_stream": "random.Random(l2_seed) inside the store, unchanged and never read by the random arm's scorer",
+    "stream_seeds": {
+      "random_within_class_60": {
+        "0": 1867889172270102400,
+        "1": 8246508116238771980,
+        "2": 12691572220051659087,
+        "3": 15854086331252605865,
+        "4": 3383346973426079675
+      },
+      "random_within_class_150": {
+        "0": 567790247353957452,
+        "1": 16099666953533674176,
+        "2": 2537711162607178783,
+        "3": 11258066514114885573,
+        "4": 7822586485835830052
+      },
+      "random_within_class_300": {
+        "0": 5072614509755714670,
+        "1": 15767324592489984955,
+        "2": 8143563383327522738,
+        "3": 3382342628855005438,
+        "4": 2245154225994390681
+      },
+      "random_within_class_600": {
+        "0": 16018244621521624095,
+        "1": 6780930387305815952,
+        "2": 8767571479477690930,
+        "3": 7319314860880898758,
+        "4": 17596692984460932833
+      }
+    }
+  },
+  "differences": {
+    "D_out": {
+      "later": "mix_out_learned",
+      "earlier": "matched_recency"
+    },
+    "D_in": {
+      "later": "mix_in_learned",
+      "earlier": "matched_recency"
+    },
+    "D_rand": {
+      "later": "random_within_class",
+      "earlier": "matched_recency"
+    },
+    "D_learned": {
+      "later": "matched_learned",
+      "earlier": "matched_recency"
+    },
+    "random_minus_learned": {
+      "later": "random_within_class",
+      "earlier": "matched_learned"
+    }
+  },
+  "readings": {
+    "prediction_1": "D_in < 0 and D_out > D_in in each of the 8 named trace x cell",
+    "prediction_1_cells": [
+      [
+        "conversation_trace",
+        0.0025,
+        1.0
+      ],
+      [
+        "conversation_trace",
+        0.0025,
+        4.0
+      ],
+      [
+        "conversation_trace",
+        0.01,
+        1.0
+      ],
+      [
+        "conversation_trace",
+        0.02,
+        1.0
+      ],
+      [
+        "toolagent_trace",
+        0.0025,
+        1.0
+      ],
+      [
+        "toolagent_trace",
+        0.01,
+        1.0
+      ],
+      [
+        "toolagent_trace",
+        0.01,
+        4.0
+      ],
+      [
+        "toolagent_trace",
+        0.02,
+        1.0
+      ]
+    ],
+    "prediction_2": "D_rand consistent_loss in at least 8 of 12 trace x cell",
+    "prediction_2_minimum": 8,
+    "additivity": "D_in + D_out (five-seed means) within D_learned mean -/+ its 95% t half-width, bounds included",
+    "sign_readings": [
+      "consistent_gain",
+      "consistent_loss",
+      "mixed"
+    ]
+  },
+  "named_cells_equal_published_consistent_losses": true,
+  "label_horizon_seconds": 600.0,
+  "statistics_horizon_seconds": {
+    "decision_statistics": "trace label horizon (600 s)",
+    "class_statistics": "h* of the cell"
+  },
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "arrival_protection": "none",
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "checks": {
+    "identifier_pairs_compared": 900,
+    "identifier_problems": 0,
+    "statistics_problems": 0,
+    "class_problems": 0,
+    "class_violations": 0,
+    "class_overridden_outside_admission": 0,
+    "random_problems": 0,
+    "random_draws": 207742418,
+    "invariant_groups": 60,
+    "invariant_violations": 0,
+    "invariant_columns": [
+      "l1_avoided_tokens",
+      "requested_tokens",
+      "absent_compulsory_tokens"
+    ],
+    "unexplained_absent_tokens": 0,
+    "attribution_identities": "checked per replay (AttributionCollector.check_against)"
+  },
+  "replays": 180,
+  "workers": 10,
+  "replay_seconds": 1434.6317336559296,
+  "wall_seconds": 1437.2507791519165,
+  "seconds_by_arm": [
+    {
+      "arm": "mix_out_learned_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 95.71449928283691,
+      "max_seconds": 120.73878836631775,
+      "total_seconds": 957.1449928283691
+    },
+    {
+      "arm": "mix_in_learned_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 90.5929566860199,
+      "max_seconds": 142.87564969062805,
+      "total_seconds": 905.929566860199
+    },
+    {
+      "arm": "random_within_class_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 60.5604932308197,
+      "max_seconds": 65.55569863319397,
+      "total_seconds": 605.604932308197
+    },
+    {
+      "arm": "mix_out_learned_150",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 85.62247844934464,
+      "max_seconds": 136.13231682777405,
+      "total_seconds": 1712.4495689868927
+    },
+    {
+      "arm": "mix_in_learned_150",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 85.80246109962464,
+      "max_seconds": 127.59198117256165,
+      "total_seconds": 1716.0492219924927
+    },
+    {
+      "arm": "random_within_class_150",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 62.27955203056335,
+      "max_seconds": 102.06312823295593,
+      "total_seconds": 1245.591040611267
+    },
+    {
+      "arm": "mix_out_learned_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 75.25369846820831,
+      "max_seconds": 84.62089848518372,
+      "total_seconds": 752.5369846820831
+    },
+    {
+      "arm": "mix_in_learned_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 79.66234538555145,
+      "max_seconds": 125.1719560623169,
+      "total_seconds": 796.6234538555145
+    },
+    {
+      "arm": "random_within_class_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 62.58678867816925,
+      "max_seconds": 96.54107999801636,
+      "total_seconds": 625.8678867816925
+    },
+    {
+      "arm": "mix_out_learned_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 86.92352776527405,
+      "max_seconds": 144.40050840377808,
+      "total_seconds": 1738.470555305481
+    },
+    {
+      "arm": "mix_in_learned_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 77.49471999406815,
+      "max_seconds": 121.33676099777222,
+      "total_seconds": 1549.894399881363
+    },
+    {
+      "arm": "random_within_class_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 69.19562047719955,
+      "max_seconds": 95.28814196586609,
+      "total_seconds": 1383.912409543991
+    }
+  ],
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 1275.58203125,
+    "children_peak_rss_mib": 1275.58203125,
+    "max_worker_pss_mib_at_replay_end": 1021.064453125,
+    "parent_peak_rss_mib": 522.6171875,
+    "mem_available_mib_at_start": 23938.76953125
+  },
+  "note": "Descriptive follow-up of the matched class-order control: which reuse class at h* carries the learned order's loss, and whether recency within a class carries information beyond the exact bit. h* is the best of grids run on these traces, read after the fact. Nothing is fitted; every arm reads the trace's future on purpose and none is a policy. References are published rows, not reruns. Seed intervals describe sampling-seed and random-stream variability together."
+}

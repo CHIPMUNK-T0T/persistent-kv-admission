@@ -1,0 +1,12 @@
+reading,scope,cells,D_in_negative,D_out_above_D_in,both,additive,consistent_gain,consistent_loss,mixed,prediction,prediction_holds
+1_which_class,prediction_cells,8,1,0,0,,,,,D_in < 0 and D_out > D_in in each of the 8 named trace x cell,False
+1_which_class,all,12,1,2,0,,,,,,
+1_additivity,all,12,,,,5,,,,,
+1_D_in_seed_signs,prediction_cells,8,,,,,5,0,3,,
+1_D_in_seed_signs,all,12,,,,,6,0,6,,
+1_D_out_seed_signs,prediction_cells,8,,,,,0,8,0,,
+1_D_out_seed_signs,all,12,,,,,2,9,1,,
+2_D_rand_seed_signs,all,12,,,,,0,12,0,D_rand consistent_loss in at least 8 of 12 trace x cell,True
+2_random_minus_learned_seed_signs,all,12,,,,,1,8,3,,
+context_D_learned_seed_signs,prediction_cells,8,,,,,0,8,0,,
+context_D_learned_seed_signs,all,12,,,,,2,8,2,,
