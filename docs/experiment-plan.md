@@ -5,8 +5,11 @@ the repository; **current** marks an experiment in progress when one exists;
 the rest is planned.
 
 Current navigation: [research status](research-status.md), the completed
-[matched-horizon checks](matched-horizon-checks-findings.md) and the
-[2026-10-03 next-phase handoff](next-phase-handoff-20261003.md). The fixed
+[matched-horizon checks](matched-horizon-checks-findings.md), the completed
+[Bailian external-workload check](bailian-external-check-findings.md) and the
+[2026-10-03 next-phase handoff](next-phase-handoff-20261003.md). The
+experimental phase ended with the Bailian check (2026-10-04); no further run is
+planned and the next work is the paper from the existing results. The fixed
 objective is to increase avoided prefill tokens by selecting states for a
 finite persistent lower-tier KV cache. The latest controls specify how useful
 future information depends on horizon, resident selection and eligibility;
@@ -450,10 +453,31 @@ the learned class-order recovery remains at least 0.9 in the same 10/12, but
 the learned-versus-recency order comparison reverses. Useful reuse information
 and the rule that uses it therefore need joint evaluation through avoided
 prefill tokens. `h*` is selected after inspecting the same traces; causal
-prediction, a horizon fixed before test results and independent-workload
-validation remain open. Detailed registered outcomes follow below. The
-[next-phase handoff](next-phase-handoff-20261003.md) proposes the next planning
-step; no new run is registered by this summary.
+prediction and a horizon fixed before test results remain open. Detailed
+registered outcomes follow below. The
+[next-phase handoff](next-phase-handoff-20261003.md) proposed the planning
+step that became the Bailian check.
+
+The [Bailian external-workload check](bailian-external-check-findings.md)
+([pre-registration](bailian-external-check-plan.md), 2,448 replays on four
+Qwen-Bailian traces at 512-token blocks, no model) is **done** and closes the
+experimental phase. Five of seven registered predictions hold. Under `all16`
+some grid horizon of the exact reuse bit with recency reaches the capped label
+in 23/23 evaluable cells (the comparison has content in 8; in 15 the label and
+the 600-second bit coincide) and a random within-class order loses in 23/23;
+the Mooncake `h*` suffices in 11/23 against a threshold of 12 and fails toward
+longer horizons in 12/12, with the best horizon nondecreasing in L2 bytes in
+4/4 traces and on the grid's 1,200-second ceiling in 13 cells. Exact order
+beyond the bit is worth more under `leaf16` in 8/16 against a threshold of 10,
+with no sign reversal. A post-hoc, unregistered accounting on both workloads
+finds that this difference between mechanisms corresponds to the requested
+tokens left present but unusable under `all16` (mean absolute residual 0.13
+and 0.17 point, at most 0.66); it contains the relation `P = U + pu`, its
+residual leans negative, and it identifies no cause. The 16-token control was
+not run under its registered stop condition. Open points (an intervention on
+the unusable tokens, the learned order against the same counter, horizons
+above 600 s, prediction from history, 16-token granularity) are carried as
+limits, not as planned runs.
 
 The later [fixed three-update on-policy study](onpolicy-learning-findings.md)
 reported complete held-out replay gains in some cells without passing its

@@ -113,7 +113,10 @@ the counts of the seven registered predictions in `readings.csv` (2–6 hold, 1
 and 7 do not). Every arm reads the trace's future and nothing is fitted; the
 16-token control was not run. `scripts/run_bailian_external_check.py`
 regenerates it and `scripts/tabulate_bailian_external_check.py` prints every
-table. The findings are under review.
+table. Its [findings](../../docs/bailian-external-check-findings.md) report the
+registered readings and a post-hoc accounting of requested tokens that are
+present in L2 but unusable, printed by `scripts/tabulate_bailian_closure_cost.py`
+from the published rows (descriptive; no cause is identified).
 
 ## Files
 

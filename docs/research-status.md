@@ -26,8 +26,8 @@ classをresidentに与える[class-order対照](matched-class-order-plan.md)（�
 三つの[事前登録](tail-window-check-plan.md)（[混合](class-order-mix-plan.md)、[leaf](leaf-matched-horizon-plan.md)、
 leafは実行前のaddendumで再現検査の内容を訂正）に沿って完了し、[結果](matched-horizon-checks-findings.md)を収録した。
 独立workloadでの確認に向けて、Qwen-Bailian 4 traceの[入力監査](bailian-input-audit.md)（138/138検査合格、replayなし）を終え、
-[外部workload確認の事前登録](bailian-external-check-plan.md)を2026-10-03に合意して単独でcommitした。本実行は完了し、[出力](../results/paper/bailian_external_check_001/README.md)を収録した（2,448 replay、検査はすべて合格。登録した七つの予測のうち2〜6は成立、1と7は不成立）。解析はレビュー中で、fitは行っていない。
-対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
+[外部workload確認の事前登録](bailian-external-check-plan.md)を2026-10-03に合意して単独でcommitした。本実行は完了し、[出力](../results/paper/bailian_external_check_001/README.md)を収録した（2,448 replay、検査はすべて合格。登録した七つの予測のうち2〜6は成立、1と7は不成立）。[結果](bailian-external-check-findings.md)を収録した。fitは行っていない。2026-10-04に、この確認をもって実験フェーズを終了とした。
+対象は固定Mooncake FAST'25トレースと、512-token blockへ変換したQwen-Bailianトレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
 ## 現在の問いと当初の目的（2026-10-03）
@@ -55,19 +55,53 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 
 ここで、`U`はL1単独に対する追加回避prefillのinput-token pointsである。`R = (U(class arm) − U(learned)) / (U(evict_label) − U(learned))`は、**learnedのadmissionを維持してresident選択だけをexact next-useにした改善**を分母とし、全headroomの回収率ではない。`S = (U(label) − U(bit＋recency)) / (U(label) − U(lru))`も、各機構内のgreedy比較器とsampled LRUを基準にする。機構が違えば分母も違うため、絶対Uと併記する。
 
-「h以内に再利用されない」は、hより後の再利用とtrace内で再利用されないstateを含み、永久に不要という意味ではない。class混合の介入は後続storeや候補集合も変えるので、二つのclassの差を足して損失の因果的な寄与率とはしない。leaf化はresidentだけでなくarrivalの適格性も変える。内部node退去やpresent-but-unusable tokenのcounterだけでは、順序の逆転を説明も反証もできていない。
+「h以内に再利用されない」は、hより後の再利用とtrace内で再利用されないstateを含み、永久に不要という意味ではない。class混合の介入は後続storeや候補集合も変えるので、二つのclassの差を足して損失の因果的な寄与率とはしない。leaf化はresidentだけでなくarrivalの適格性も変える。内部node退去やpresent-but-unusable tokenのcounterだけでは、学習順序の逆転を説明も反証もできていない（正確なlabelとbitの比較については、下のBailian確認でcounterとの対応を集計した）。
 
 以前の「sampling機構は凍結rankerとlabelのgap全体の主因ではない」と、今回の「class内の選択規則の優劣が適格性で変わる」は両立する。前者は全体の不足の大きさ、後者は同じ情報を使う規則と機構の相互作用を測っている。
+
+### Bailian外部workload確認で更新した読み（2026-10-04）
+
+[事前登録](bailian-external-check-plan.md)に沿って、Qwen-Bailian 4 trace（512-token block）で、Mooncakeのh*表の移植、固定grid、乱数のclass内順序、機構別の順序の価値を、学習モデルを使わずに確かめた（2,448 replay、[結果](bailian-external-check-findings.md)）。登録した七つの予測のうち五つが成立し、二つは不成立だった。
+
+- **bit＋recencyは比較器に届くが、horizonの秒数は持ち運べない。** all16では評価可能な23 cellすべてで、gridのどれかのhorizonがlabel比較器のLRU比利得の90%以上に届く。ただし15 cellではlabelと600秒bitの効用が0.05点以内で一致し、比較に中身があるのは8 cellである。Mooncakeのh*のままで十分なのは11/23（閾値12、不成立）で、うち7は効用が一致する600秒cell、それ以外では4/16。外れた12 cellはすべて長いhorizon側で、最良のgrid horizonは4/4 traceでL2容量とともに伸びる。13 cellでは最良がgrid上端の1,200秒にあり、最適値は特定していない。1,200秒のbitは、600秒で打ち切る比較器より先の未来情報も使うため、その優位を情報の粗粒度化の利益とは解釈できない。
+- **class内のrecencyの価値は適格性に依存する。** 乱数順序はall16では23/23で全seed負ける（−0.05〜−2.0点）。leaf16では全seed負けが5/22、全seed勝ちが8/22、混在が9/22で、平均は−0.48〜+0.21点である。
+- **詳細な順序の価値の機構差は一部だけ再現し、符号の逆転は再現しない。** `Δ = U(label) − U(bit＋recency)`がleaf16側へ分離するのは、h* < 600秒の16 cell中8（閾値10、不成立）。Mooncakeでは8/8で分離し、うち6で符号が逆転した（all16でbitがlabelを上回る）が、Bailianの逆転は0である。分離した8 cellは、labelと600秒bitに差がある8 cellと一致する。
+- **事後の読み（未登録）：機構間の差は、要求時に存在しても使えないtokenの差と会計上対応する。** all16で、要求されたtokenのうちL2に存在するが祖先が欠けて使えないものを`pu`とする。これは要求時のtoken計数であり、死蔵容量でもbyte×滞在時間でもない。leaf16では構成上0である。要求時にL2にあったtokenは使えた分`U`と使えなかった分`pu`に分かれるので、`Δ_leaf16 − Δ_all16 = [pu(label) − pu(bit)] + 残差`と書ける。残差の平均絶対値はBailianの22 cellで0.13点、Mooncakeの12 cellで0.17点、最大は0.66点。乱数順序の損も同じcounterに、平均絶対残差0.12点、最大0.80点で対応する。使えないtokenの差だけでは機構間差を完全には説明できず、残差には負方向への偏りが見られる。残差は集計の誤りではなく、機構ごとに異なるresident集合・軌道の差を含む。対応を支えているのはTo-C、coder、thinkingの1 cell、Mooncakeで、To-Bにはcounterの差がない。`pu`だけを動かす介入はしておらず、原因は特定していない。
+- **prefixに沿って単調なscoreは、cacheのprefix closureを保証しない。** labelは祖先を子孫より低く評価しないが、16候補のsamplingの下で、最も多くの要求tokenを使えない状態にする（Bailianで最大3.21点、Mooncakeで4.64点）。
+
+To-Bの16-token粒度対照は、登録した資源上限により実行していない。To-Bの結果は512-token表現での結果であり、To-Bがthinkingと似た型だったことは粒度の影響の検証にはならない。学習モデルは使っていないので、学習順序についての読み（上の三つの確認）はMooncakeの結果のままである。
 
 ### 未達と次の判断
 
 当初の目的に対して、選択改善余地と、そのために役立つ将来情報・resident選択・適格性の条件は具体化できた。一方、**過去だけからその情報を得て、限られた容量を有効に使うpolicyにする部分は未達**である。
 
-残る中心的な問いは、(1) 別workloadで関係が再現するか、(2) horizonと機構を結果を見る前に固定できるか、(3) その条件で必要な再利用classを履歴から学習し、実際の回避token増加へつなげられるか、の三つとする。約59分のMooncake 2 traceから時間・日単位のpersistent reuseや実機TTFTは主張しない。I/O最適化へ範囲を広げない。
+残していた中心的な問いは、(1) 別workloadで関係が再現するか、(2) horizonと機構を結果を見る前に固定できるか、(3) その条件で必要な再利用classを履歴から学習し、実際の回避token増加へつなげられるか、の三つだった。(1)はBailianで確かめ、bit＋recencyとclass内recencyの読みは再現し、h*の秒数と符号の逆転は再現しなかった。(2)と(3)は未達のまま、証拠の限界として残す。約59分のMooncake 2 traceと約2時間のBailian 4 traceから、時間・日単位のpersistent reuseや実機TTFTは主張しない。I/O最適化へ範囲を広げない。
 
-Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)を終え、[事前登録](bailian-external-check-plan.md)を合意して本実行まで終え、解析のレビュー中である（2026-10-03、未決五点は案のとおり。実装前の訂正は計画末尾に記録）。計画はMooncakeのh*表の移植（主解析）と固定grid内の存在（副解析）を分け、all16とleaf16を各機構の参照で評価し、学習モデルは使わず乱数のclass内順序を対照に加える。学習モデルの移植はA/Bの結果を報告した後に別途登録し、履歴fitも別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。引継ぎ自体は事前登録ではない。新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
+**実験フェーズの終了（2026-10-04）。** Bailian確認の解析とそのレビューをもって、実験フェーズを終了とした。新しいreplay・介入・fitは計画しない。次の作業は、既存の結果による論文の構成と原稿作成である。残る問い（使えないtokenだけを動かす介入、学習順序と同じcounterの対応、600秒を超えるhorizonの最適値、bitやhorizonを履歴から得る方法、16-token粒度でのTo-B）は、計画中の実験としてではなく、証拠の限界として記載する。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)は、Bailian確認の計画依頼の記録として残す。
+
+### 論文の中心命題（2026-10-04、Bailian確認後）
+
+Bailian確認の結果とそのレビュー（Astra、2026-10-04）を受けて、中心命題を次のとおり更新した。
+
+**中心命題。** 有限容量の階層prefix KV cacheでは、将来再利用されるstateを保存することと、その保存によってprefillを回避できることを区別する必要がある。本研究は、将来情報の時間範囲・粒度と退去候補の制約を比較し、評価したworkloadでは、機構による比較性能の変化が、要求時に存在しても利用できないtokenの差と定量的に対応することを示した。この対応は原因を一意に特定するものではない。
+
+**価値を置く点。** 相関の数字や実験の数ではなく、「どの将来情報がretentionに役立つか」という結論が、保存されたprefixの利用可能性によってどう変わるかを、学習モデルを使わない対照と外部workloadで明らかにしたことに置く。目的（将来再利用価値の高いstateを選ぶ）に対して、stateが残っていることと、計算を回避できることの間を測っている。
+
+**Bailian確認前の整理（下の節）からの変更。**
+
+| 以前の主張 | Bailian確認後の扱い |
+|---|---|
+| 事後に選んだhorizonの正確なbit＋recencyが比較器に届く | all16で再現した（23/23、比較に中身があるのは8 cell）。horizonの秒数は持ち運べず（600秒cell以外でh*のまま十分なのは4/16）、共通するのは容量とともに伸びる方向だけである。主役から一段下げ、「bit＋recencyが比較器に近づく条件と、候補制約を変えるとその結論が崩れる条件」として書く。 |
+| 正確なclassだけでは選択は終わらない（乱数順序はrecencyに負ける） | all16で再現した（23/23）。leaf16ではほぼ消える（5/22）ことが新しく分かった。 |
+| 順位情報の価値が機構で逆転する | 学習順序の逆転はMooncakeの結果のままで、Bailianでは学習モデルを使っていない。正確なlabelとbitの比較では、機構による分離は8/16、符号の逆転は0である。逆転の有無を軸にせず、機構間差と、要求時に使えないtokenとの対応を軸にする。 |
+
+**書かないこと。** 「1 bitが一般に十分である」「粗い情報の方が良い」「使えないtokenが原因である」「prefix単調性が原理である」。いずれも今回の証拠を超える。
+
+**限界として書くこと。** 512-token表現であること（To-Bの16-token対照は未実行）。同一providerのtrace群が二つであること。比較器は将来を読むgreedyで、600秒で打ち切り、最適ではないこと。最良horizonがgrid上端の1,200秒に張り付くcellが13あり、最適値を特定していないこと。対応は`P = U + pu`という会計関係を含み、残差があり、介入で確かめていないこと。学習モデルと、履歴からの予測は、この確認では扱っていないこと。
 
 ### 論文の中心命題と新規性の位置づけ（2026-10-03、Bailian確認前）
+
+この節はBailian確認前の整理であり、記録として残す。中心命題は上の節で置き換えた。「足りないもの」のうち外的妥当性はBailian確認で一部を確かめ、残りは上の節の限界に移した。
 
 三つの確認までの結果をAstraが論文の観点で整理し、Fableが表中の数値を公開CSVから再計算して照合した（[台帳](#仮説と証拠の台帳)の該当行と同じ値）。対象はMooncake実trace 2本（各3,537秒）、L1 victimを有限L2が受け取る設定である。比較器はいずれも将来を読むgreedyな参照で最適解ではなく、「90%」はそれぞれ指定した比較器との差に対する割合であって、全改善余地の回収率ではない。
 
@@ -131,6 +165,8 @@ Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)
 | all16のh*とclass内順序の読みはleaf16へそのまま移る | 一部は維持されるが、順序の読みは逆転する。h*をall16から持ち越したleaf16では、classの読み（R ≥ 0.9）は同じ10/12で保つが、1 bit＋recencyがlabelに届くcellは9/12（0.25%×1で0.20–0.21、会話2%×1で0.11不足。h* < 600秒の全cellでSが0.11–0.20増加。機構ごとに比較器・分母が異なり、絶対効用の低下を意味しない）、class内順序は逆転してrankerの順序がrecencyに11/12で一貫して勝ち、class内recencyは7/12でlabelの回復の0.9未満。admissionの差は0.05点以下（到着が候補になる判断は2.5–10%）。 | [事前登録](leaf-matched-horizon-plan.md)（実行前のaddendumで、公開行にdigestがないため再現検査を全公開counter列87列の一致に変更）、[結果](matched-horizon-checks-findings.md)。h*はall16の最良で、leaf16の最良horizonは探していない。leaf16は機構の対照であり提案ではない。 |
 | 凍結rankerは、容量に合う境界での再利用classをrecencyより見分けられない | 容量による（保存ログ上）。合う境界での「再利用されるstateを退去させ非再利用候補を残す」判断は、0.25%×1（60秒）ではrecencyの0.64倍、1%の4 cell（150秒）では2.1–2.3倍、2%×1（300秒）では1.04倍と0.90倍。600秒fitのscoreの判断内分離は、h*のbitで600秒のbitより低いcellが8中6（登録予測）、0.25%×1では600秒のbitの分離が偶然並み（0.50）で60秒のbitが上回る。 | [事前登録](matched-horizon-diagnosis-plan.md)、[結果](matched-horizon-findings.md)。凍結rankerの自身のstoreのログで、exact classが保つstoreの候補集合ではない。自身のstore上の統計は、class-kept store上の順序の価値を予測しない（0.25%×1で逆向き）。 |
 | 差がeviction側にあるのはall16の到着条件の産物である | 否定。leaf16でもeviction-locatedが12/12で、label evictionだけで差の97–100%を回復する。ただしleaf16では到着が候補になる判断が少数（0.25%×1で約半分、他は3–18%）で、「admissionは重要でない」とは区別できない。合うhorizonでのclass介入は、all16からh*を持ち越したleaf16の同じ10/12でR ≥ 0.9（上の行）。 | 同上、[三つの確認](matched-horizon-checks-findings.md)。 |
+| Mooncakeのh*表とall16の読みは別workloadへ移る | 一部。Bailian 4 trace（512-token block）のall16で、gridのどれかのhorizonがlabel比較器に届くのは23/23（比較に中身があるのは8 cellで、15 cellはlabelと600秒bitが一致）。h*のままでは11/23（閾値12、不成立。600秒cellを除くと4/16）。外れは12/12で長い側、最良horizonは4/4 traceで容量とともに非減少（13 cellはgrid上端の1,200秒）。乱数のclass内順序はall16で23/23負け、leaf16では5/22。 | [事前登録](bailian-external-check-plan.md)、[結果](bailian-external-check-findings.md)。2,448 replay、5 seed、学習モデルなし。比較器は600秒で打ち切るgreedyで、1,200秒のbitの優位は粗粒度化の利益とは読めない。To-Bの16-token対照は未実行。 |
+| 詳細な順序の価値は機構で分かれ、all16ではbitがlabelを上回る（符号の逆転） | 逆転は再現しない。`Δ = U(label) − U(bit)`のleaf16側への分離は8/16（閾値10、不成立）、逆転は0（Mooncakeは分離8/8、逆転6/8）。事後集計では、機構間差`Δ_leaf16 − Δ_all16`が、all16で要求時に存在しても使えないtokenの差と会計上対応する（平均絶対残差はBailian 0.13点、Mooncake 0.17点、最大0.66点。乱数順序の損は0.12点、最大0.80点）。 | 同上、`scripts/tabulate_bailian_closure_cost.py`。未登録の記述的集計で、`P = U + pu`の会計関係を含み、残差は負に偏る。leaf16はsample母集団と保持集合も変える。使えないtokenだけを動かす介入はなく、原因は特定していない。To-Bにはcounterの差がない。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 
 ## 数値を読むための分母
