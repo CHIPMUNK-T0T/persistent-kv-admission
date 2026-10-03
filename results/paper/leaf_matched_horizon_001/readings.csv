@@ -1,0 +1,5 @@
+reading,cells,counted,count,required,of,prediction_holds,all16_count,reuse_label_at_matched_horizon_suffices,reuse_label_at_matched_horizon_falls_short,all16_reuse_label_at_matched_horizon_suffices,all16_reuse_label_at_matched_horizon_falls_short,reuse_identification_at_matched_horizon_suffices,ranker_order_costs_at_matched_horizon,all16_reuse_identification_at_matched_horizon_suffices,all16_ranker_order_costs_at_matched_horizon,consistent_gain,consistent_loss,mixed,all16_consistent_gain,all16_consistent_loss,all16_mixed
+1_horizon_under_leaf_eligibility,12,reuse_label_at_matched_horizon_suffices,9,12,12,False,12,9,3,12,0,,,,,,,,,,
+2_class_order_under_leaf_eligibility,12,reuse_identification_at_matched_horizon_suffices,10,10,12,True,10,,,,,10,2,10,2,,,,,,
+3_order_within_matched_class,12,consistent_loss,0,8,12,False,8,,,,,,,,,11,0,1,2,8,2
+4_admission_descriptive,12,,,,,,,,,,,,,,,2,0,10,8,0,4
