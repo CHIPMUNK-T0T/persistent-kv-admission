@@ -60,6 +60,19 @@ which reproduce the published 600 s arms); their
 limits, and `scripts/tabulate_matched_horizon_diagnosis.py` and
 `scripts/tabulate_matched_class_order.py` print every cited table.
 
+The [evaluation-window output](tail_window_check_001/README.md) reruns the
+seven matched-horizon arms (420 replays, all reproducing their published rows)
+and counts each on the full window, the window with the last 600 s excluded and
+the last 600 s alone; the [class-order mix output](class_order_mix_001/README.md)
+holds the ranker's order in one reuse class at a time and a random order within
+both (180 replays); and the [leaf-eligibility output](leaf_matched_horizon_001/README.md)
+reruns the matched-horizon arms under `leaf16` (240 replays, 60 reproducing the
+published `leaf16` `label` rows in every published counter column). Their
+[findings](../../docs/matched-horizon-checks-findings.md) state the readings and
+their limits, and `scripts/tabulate_tail_window_check.py`,
+`scripts/tabulate_class_order_mix.py` and `scripts/tabulate_leaf_matched_horizon.py`
+print every cited table.
+
 ## Files
 
 - `online_policy_comparison.csv` and `online_policy_comparison.png`: causal online policies only, including 2-hit + LRU. The offline comparator is excluded.

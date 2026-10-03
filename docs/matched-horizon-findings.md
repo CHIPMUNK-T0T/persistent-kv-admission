@@ -158,5 +158,7 @@ Not established:
 - **That the horizon can be chosen before the fact.** `h*` is read from replays of the same traces; nothing here predicts it from capacity or observable state.
 - **That a learned predictor can supply the `h*`-bit.** Nothing is fitted. The published rankers were fitted to 600-second targets; their within-decision separation of the shorter bits is 0.55–0.64, above chance and far from exact. Phase 0.9 fitted single-tier rankers to 60- and 300-second binary targets with small gains ([target change](target-change-findings.md)).
 - **Why the ranker's order within the matched class loses to recency,** beyond the reading above; no feature or coefficient was examined.
+
+Three pre-registered checks of these readings — the evaluation window, the class carrying the learned order's loss, and leaf eligibility — are reported in [matched-horizon checks](matched-horizon-checks-findings.md); under `leaf16` the within-class order comparison reverses.
 - **A causal share for admission.** Reading 3 compares two arms that differ in who rejects; `R` does not contain it.
 - **Generality.** Two traces of one deployment family, one frozen linear ranker family, the published sampled mechanism with `all16` eligibility; reservoirs of 40,000 decisions on the ranker's own store for Part A.

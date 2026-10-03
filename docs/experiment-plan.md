@@ -561,3 +561,27 @@ and 81%) — and 4/4 reproduced; recency within the matched class recovers it in
 8/8 new, the ranker's order within the class is a consistent loss against
 recency in 8/12 (a gain in 9/12 at 600 s), and the label's admission is above
 the ranker's by up to 4.1 points.
+
+Outcome of the matched-horizon checks ([findings](matched-horizon-checks-findings.md);
+[evaluation-window plan](tail-window-check-plan.md), [class-order mix plan](class-order-mix-plan.md),
+[leaf-eligibility plan](leaf-matched-horizon-plan.md) with a pre-run addendum
+replacing a reproduction check that the published rows could not support):
+with the last 600 s of the trace excluded from the count, the bit at `h*`
+reaches the label in 12/12, the class reading moves in one threshold cell
+(conversation 0.25%×4, 0.903 → 0.859) and the sign of the learned order's
+loss within the class is the full window's in 12/12 and larger. Within the
+matched class under `all16`, the learned order's loss sits in the
+non-reusable class: the ranker ordering only the states reusable within `h*`
+is at or above recency in 12/12 (a consistent gain in 6), the ranker ordering
+only the states not reusable within `h*` is a consistent loss in 9/12 and in
+every cell where the full order lost; the prediction placed the loss in the
+reusable class and fails 0/8. A random order within both classes loses to
+recency in 12/12. Under `leaf16` with `h*` carried over (240 replays, 60
+reproducing the published `leaf16` `label` rows), the ranker given the class
+reaches 90% of the label's eviction gain in the same 10/12, the bit at `h*`
+with recency reaches the label in 9/12 (0.20–0.21 short at 0.25%×1; the
+prediction of 12/12 fails), and the ranker's order within the class is a
+consistent gain over recency in 11/12 (the prediction of a loss in 8/12 fails
+in the opposite direction), with recency inside the class below 0.9 of the
+label's eviction gain in 7/12. The within-class order reading of the
+follow-ups is specific to the `all16` candidate set; why is not examined.
