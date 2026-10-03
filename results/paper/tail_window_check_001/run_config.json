@@ -1,0 +1,799 @@
+{
+  "phase": "tail_window_check",
+  "plan": "docs/tail-window-check-plan.md",
+  "plan_commit": "b41514dae814e59e3daea64089b3fca8561830da",
+  "code_commit": "ec7c8028c6abb4399a3694765a40fc8e67be1046",
+  "git_dirty_at_start": false,
+  "execution_sources_differing_from_head": [],
+  "source_manifest": {
+    "files": {
+      "scripts/run_decision_population.py": "c4775bf92a116ec179550e701ae5e1b3460f76031dfa41fe84282b2cb7f65b39",
+      "scripts/run_error_location.py": "d00e052f02790ca43b500724af99bf03a320de1e3ea490a2602c528e7a3c17fb",
+      "scripts/run_horizon_control.py": "fe9c3020d7dde7a21f72f7c9ed2c5f7aa382d16b42e754eba46f9200516a0365",
+      "scripts/run_matched_class_order.py": "fbe3e69b5f6c14b3db4338fee58807fe04d843d782587d184fb5db7d0219389d",
+      "scripts/run_mechanism_control.py": "6f57b6c3435254ddd924cd1c6bc536ab85d86aa925f6aa18832cd1e3fcf1f953",
+      "scripts/run_tail_window_check.py": "032e5a8f4b08d9c3f4e7bb82dcd64aecbbdc18e5c207885537b9e5431d46289a",
+      "src/persistent_kv_admission/attribution.py": "c7eb519052ca6d75f62120741a7fa44cb15f4a3614f4a70e0a1fb8f613b86388",
+      "src/persistent_kv_admission/candidate_models.py": "dd885abb26d40087dcb43ddb9c68eca110eb10bda585e4820e36298dfa257b78",
+      "src/persistent_kv_admission/characterize.py": "9b69ebf9c0c8b480d3e93ecc2206ca6fe80108855581a4fc77c237a869d52e58",
+      "src/persistent_kv_admission/classmix.py": "0c5eea68dd644ce4b02241c738a24970fe489febc6c88962bb1e4caf968c6689",
+      "src/persistent_kv_admission/cli.py": "f5947c8311711edb1b70e596f38260bca7d9480b9ebb1aafabf2a8a5aba6e209",
+      "src/persistent_kv_admission/counterfactual.py": "3f7b976e28a67a11224ddfeae22ab5d9ef9a5ad5da8b62f407ffc1c031b2b88d",
+      "src/persistent_kv_admission/counterfactual_randomness.py": "f769baef598c9c573adff0b03b076f4e2d637599971f776b2e521c09cc573b16",
+      "src/persistent_kv_admission/counterfactual_residence.py": "8a49e52a5f1c5aaf5fb17bd3830cf997b85ddda3d0fd9cbba05b9d29c891c479",
+      "src/persistent_kv_admission/crossworkload.py": "d995d43a93bae098084bd802d886a022be7c65aa80b8f81e160aa512aebe39a4",
+      "src/persistent_kv_admission/decisionpop.py": "1e3481ffbeedc8248ca1ec66f05268b16772635b427841fed39dd999afbc4cc9",
+      "src/persistent_kv_admission/errordiag.py": "fe9888f347107c25d39a1cfe23380c82cc0ecdab6f02e3cba7c426c11426308f",
+      "src/persistent_kv_admission/errorloc.py": "a98105dd64854e1a802d67fc29ff4d477726e52daa62f560d51413eb57d69a2d",
+      "src/persistent_kv_admission/gap.py": "b9597836eab1db0ee92dd1356be9a3d9f6aa32c5a37926f39270f3a09fc4604a",
+      "src/persistent_kv_admission/horizonctl.py": "4fc6ccc05e765bab2fdf1d0567e816bc233ebac39d8c92aa19523a5032c04f4e",
+      "src/persistent_kv_admission/horizonfill.py": "ec093c8dd0a64e975d3e4d82ea3769c8b6b1e668d43e310ceb3c7154b9191207",
+      "src/persistent_kv_admission/intervention.py": "28a8f4f364b9dfda80e3ff56f151ef7370cd44b871736c4f1497094c87f35cc0",
+      "src/persistent_kv_admission/leafmatched.py": "953e390137e4e6a304160b4441b651a3bb87d594868fce033709a8651d3b33b9",
+      "src/persistent_kv_admission/matcheddiag.py": "1ce2d06111a53069fae4f34c0d13a7614552b4644279ab6f010b90d633b7958d",
+      "src/persistent_kv_admission/matchedorder.py": "8f29c28bd1ec0b3897d5a2f48d40657e751c7c5ec2004ad29b6e4acf90c53081",
+      "src/persistent_kv_admission/mechanism.py": "87513b97dbdffd9a53de6ae9a85dca14c45d7b8dc667be9f8981078307f36773",
+      "src/persistent_kv_admission/online.py": "440da45a78b6e1833909ded23be72cf39ce69442e5b8b6238b57676af4b5744d",
+      "src/persistent_kv_admission/onpolicy.py": "4eb90bdbe7edde71e527eb022151356abbd046084ecca034d10c557120520035",
+      "src/persistent_kv_admission/onpolicy_reporting.py": "9574b5c7889a6ed73b6d55fa9a2ede6a71689f34060e1592ddac610329e23e73",
+      "src/persistent_kv_admission/phase05.py": "5e2f56615167261be303ded05003dce3453c2e28ec5285a3ed75a8923b64bd91",
+      "src/persistent_kv_admission/policies.py": "d9164e840411eee977378e95bfe20be349946637b74417fcb05ea66a598af830",
+      "src/persistent_kv_admission/predictors.py": "d647d4a295091e76a6b5bdeadc1fce2d4920281d3ffef355cb4a14cc204f91ac",
+      "src/persistent_kv_admission/ranking.py": "5b50fc3872207db7386b809dccc11cfcc66fbc27fd3104ad06b74d07c2336499",
+      "src/persistent_kv_admission/replay.py": "c6351c003acd6a7bcdc6465df83a43c7691c0ab3eb347652a4373d4e3b36f5b3",
+      "src/persistent_kv_admission/reporting.py": "025503680fff9b3575e5511ed9a7b75486a7cd65d7450bca2c7d61eaf653373b",
+      "src/persistent_kv_admission/structural.py": "bc793e106363ea96a2a7e5c8b033bc6b902614ccf330d1e7149624cdeeb7a4cd",
+      "src/persistent_kv_admission/tailwindow.py": "8f3afeeb454431abe0826eb36721a2b4cfd37d5870a2f963c0c11871c3e1b2d4",
+      "src/persistent_kv_admission/temporal.py": "cc6434ea234a126c13b43bc62730601ffc475c17bcbfb1327c21d2c6a06946e1",
+      "src/persistent_kv_admission/trace.py": "25efd98c755448b0c900db09d7ffc9b9b5c074695ef0977062565c0e910f8123",
+      "src/persistent_kv_admission/twotier.py": "46ea6049fe14f4e69f0e11b299d43f89d3717da333e3d3877568723bbb84db9c",
+      "src/persistent_kv_admission/workingset.py": "fa1b8184257b2d44761f426d63e219503072d0fb1e6c7929570c4b8db0e21df0"
+    },
+    "sha256": "2efed09cd1d116c6ec4e51e14e272e24d57b81cde56ddbd79bfea58d4681e9e2"
+  },
+  "trace_files": {
+    "conversation_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/conversation_trace.jsonl",
+      "sha256": "b8cbb061a85206d729d91cdc2981f43c9e0d99209dce588d3af5f7934408b9df"
+    },
+    "toolagent_trace": {
+      "path": "/home/ubuntu/Desktop/persistent-kv-admission/data/raw/toolagent_trace.jsonl",
+      "sha256": "48a2db1a13d3bc05e6330140c64f604ba366df20d3c9e128b5c35a01c1fa5f71"
+    }
+  },
+  "models": {
+    "pi0_next_use": {
+      "conversation_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/conversation_trace__next_use.json",
+        "sha256": "87c24bb2abdcdc62028405a19eaff0b24c3bffacfd8d50334fc76d76e0b2d60c"
+      },
+      "toolagent_trace": {
+        "path": "results/onpolicy_full_feb30eb_001/models/pi0/toolagent_trace__next_use.json",
+        "sha256": "2696e5e55f005760cd2a8aafe376b346718f72dcd46864fe8a35217951121c4c"
+      }
+    }
+  },
+  "model_manifests": {
+    "results/onpolicy_full_feb30eb_001/canonical_model_manifest.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23",
+    "results/paper/onpolicy_learning/onpolicy_canonical_models.csv": "39eecfcd61f7077f6262917fff6807e22f7706276efd373820132996e6c46f23"
+  },
+  "references": {
+    "results/paper/error_location_001/replay_seeds.csv": "280790d473ce37760ec9073df2c4b6cab853d3b388ec8890ec4aca2a46559d2c",
+    "results/paper/horizon_control_001/replay_seeds.csv": "0f96f1e9061c88098dda7e6693530f0223343cd3280ad3307179f532d9e555d6",
+    "results/paper/horizon_fill_001/replay_seeds.csv": "a6512fd813684a2a198d12530f11fa3d54e6cce01745133ae8b06a9371c59159",
+    "results/paper/matched_class_order_001/replay_seeds.csv": "3615e677ffe91db4d71b478adea4541dfdccb547e0373d3e6384e24070b9fd1f"
+  },
+  "published_readings": {
+    "results/paper/horizon_control_001/horizon.csv": "85919beacc8767f4b9f99a4c63811d7fa5c0158938da7d0e1c17f9f216cb71ca",
+    "results/paper/horizon_fill_001/fill.csv": "ee4223475b92deda9125f71a98b9ffc73be632150c25969e0314b7144ffcbc3b",
+    "results/paper/matched_class_order_001/class_order.csv": "f6b5bb33f6966d179ed85652a91c5f50ca2e5615dfa321eaf8fa34ae8e4a8440",
+    "results/paper/matched_class_order_001/order.csv": "7df2a64daf99160d424a1f1b99d5342e60895d5c76bd2559c7b2e37a3cac8c7a",
+    "results/paper/matched_class_order_001/admission.csv": "fac8a6839ca41507f0a316c6d6da5fab0811bcaf49b29833adec6e14f76b8bc0"
+  },
+  "reference_rows": {
+    "lru/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "learned/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "label/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_label/all16": {
+      "source": "error_location_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ],
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ],
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          1.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "label_binary_60/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_60_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_60_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          1.0
+        ]
+      ]
+    },
+    "label_binary_150/all16": {
+      "source": "horizon_fill_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_150_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_150_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.0025,
+          4.0
+        ],
+        [
+          0.01,
+          1.0
+        ]
+      ]
+    },
+    "label_binary_600/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_binary_600_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "evict_binary_600_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.01,
+          4.0
+        ],
+        [
+          0.02,
+          4.0
+        ]
+      ]
+    },
+    "label_binary_300/all16": {
+      "source": "horizon_control_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_300_learned/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    },
+    "evict_binary_300_recency/all16": {
+      "source": "matched_class_order_001",
+      "cells": [
+        [
+          0.02,
+          1.0
+        ]
+      ]
+    }
+  },
+  "reference_identifiers": [
+    "l1_capacity_bytes",
+    "l2_capacity_bytes",
+    "requested_tokens",
+    "l1_avoided_tokens",
+    "absent_compulsory_tokens"
+  ],
+  "traces": [
+    "conversation_trace",
+    "toolagent_trace"
+  ],
+  "cells": [
+    [
+      0.0025,
+      1.0
+    ],
+    [
+      0.0025,
+      4.0
+    ],
+    [
+      0.01,
+      1.0
+    ],
+    [
+      0.01,
+      4.0
+    ],
+    [
+      0.02,
+      1.0
+    ],
+    [
+      0.02,
+      4.0
+    ]
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "mechanism": {
+    "name": "all16",
+    "eligibility": "all",
+    "width": 16
+  },
+  "matched_horizon_seconds": [
+    {
+      "l1_fraction": 0.0025,
+      "l2_multiplier": 1.0,
+      "h_star": 60.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_60",
+        "evict_binary_60_learned",
+        "evict_binary_60_recency"
+      ]
+    },
+    {
+      "l1_fraction": 0.0025,
+      "l2_multiplier": 4.0,
+      "h_star": 150.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_150",
+        "evict_binary_150_learned",
+        "evict_binary_150_recency"
+      ]
+    },
+    {
+      "l1_fraction": 0.01,
+      "l2_multiplier": 1.0,
+      "h_star": 150.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_150",
+        "evict_binary_150_learned",
+        "evict_binary_150_recency"
+      ]
+    },
+    {
+      "l1_fraction": 0.01,
+      "l2_multiplier": 4.0,
+      "h_star": 600.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_600",
+        "evict_binary_600_learned",
+        "evict_binary_600_recency"
+      ]
+    },
+    {
+      "l1_fraction": 0.02,
+      "l2_multiplier": 1.0,
+      "h_star": 300.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_300",
+        "evict_binary_300_learned",
+        "evict_binary_300_recency"
+      ]
+    },
+    {
+      "l1_fraction": 0.02,
+      "l2_multiplier": 4.0,
+      "h_star": 600.0,
+      "arms": [
+        "lru",
+        "learned",
+        "label",
+        "evict_label",
+        "label_binary_600",
+        "evict_binary_600_learned",
+        "evict_binary_600_recency"
+      ]
+    }
+  ],
+  "arm_roles": [
+    "lru",
+    "learned",
+    "label",
+    "evict_label",
+    "label_binary_h*",
+    "evict_binary_h*_learned",
+    "evict_binary_h*_recency"
+  ],
+  "windows": {
+    "names": [
+      "full",
+      "head",
+      "tail"
+    ],
+    "tail_seconds": 600.0,
+    "head": "split_ms <= t <= end_ms - 600000 (onpolicy.LabelWindowUtilityCollector)",
+    "tail": "full - head (integer counters)",
+    "bounds_ms": {
+      "conversation_trace": {
+        "split_ms": 2122199.4,
+        "head_end_ms": 2936999.0,
+        "end_ms": 3536999.0,
+        "tail_seconds": 600.0,
+        "full_seconds": 1414.7996,
+        "head_seconds": 814.7996
+      },
+      "toolagent_trace": {
+        "split_ms": 2122199.4,
+        "head_end_ms": 2936999.0,
+        "end_ms": 3536999.0,
+        "tail_seconds": 600.0,
+        "full_seconds": 1414.7996,
+        "head_seconds": 814.7996
+      }
+    }
+  },
+  "readings": {
+    "suffices_shortfall": 0.1,
+    "class_order_share": 0.9,
+    "predicted_below_cell": [
+      0.0025,
+      1.0
+    ],
+    "differences": {
+      "G": [
+        "label",
+        "learned",
+        "5"
+      ],
+      "label_minus_label_binary": [
+        "label",
+        "label_binary_h*",
+        "1"
+      ],
+      "label_minus_lru": [
+        "label",
+        "lru",
+        "1"
+      ],
+      "matched_learned_minus_learned": [
+        "evict_binary_h*_learned",
+        "learned",
+        "2"
+      ],
+      "matched_recency_minus_learned": [
+        "evict_binary_h*_recency",
+        "learned",
+        "2"
+      ],
+      "evict_label_minus_learned": [
+        "evict_label",
+        "learned",
+        "2"
+      ],
+      "learned_minus_recency": [
+        "evict_binary_h*_learned",
+        "evict_binary_h*_recency",
+        "3"
+      ],
+      "label_binary_minus_recency": [
+        "label_binary_h*",
+        "evict_binary_h*_recency",
+        "4"
+      ]
+    },
+    "sign_readings": [
+      "consistent_gain",
+      "consistent_loss",
+      "mixed"
+    ]
+  },
+  "label_horizon_seconds": 600.0,
+  "statistics_horizon_seconds": {
+    "decision_statistics": "trace label horizon (600 s)",
+    "class_statistics": "h* of the cell (class-order arms)"
+  },
+  "l1_policy": "lru",
+  "hit_model": "tree",
+  "closure": "union",
+  "arrival_protection": "none",
+  "hyperparameters": {
+    "online_horizon_seconds": 600.0,
+    "online_samples_per_group": 64,
+    "online_l2": 0.0001,
+    "online_learning_rate": 0.5,
+    "normalizer_refresh_every": 16,
+    "normalizer_sample": 512,
+    "eviction_sample_width": 16,
+    "offline_l2": 0.01,
+    "offline_model": "base2",
+    "bytes_per_token": 2048,
+    "size_model": "packed",
+    "train_fraction": 0.6
+  },
+  "horizons_seconds": {
+    "conversation_trace": 600.0,
+    "toolagent_trace": 600.0
+  },
+  "measure_from_ms": {
+    "conversation_trace": 2122199.4,
+    "toolagent_trace": 2122199.4
+  },
+  "working_set_bytes": {
+    "conversation_trace": 185744203776,
+    "toolagent_trace": 178465392640
+  },
+  "checks": {
+    "reproduction": {
+      "reference": "the published row of every arm (error_location_001, horizon_control_001, horizon_fill_001, matched_class_order_001)",
+      "expected": 420,
+      "replays": 420,
+      "matched": 420,
+      "missing": 0,
+      "mismatched": 0,
+      "decision_digests_compared": 420
+    },
+    "identifier_pairs_compared": 2940,
+    "identifier_problems": 0,
+    "window_groups": 60,
+    "window_problems": 0,
+    "head_invariant_counters": [
+      "measured_requests",
+      "requested_tokens",
+      "l1_avoided_tokens"
+    ],
+    "statistics_problems": 0,
+    "class_replays_checked": 120,
+    "class_problems": 0,
+    "class_violations": 0,
+    "class_overridden_outside_admission": 0,
+    "invariant_groups": 60,
+    "invariant_violations": 0,
+    "invariant_columns": [
+      "l1_avoided_tokens",
+      "requested_tokens",
+      "absent_compulsory_tokens"
+    ],
+    "unexplained_absent_tokens": 0,
+    "published_readings_compared": 120,
+    "published_reading_problems": 0
+  },
+  "replays": 420,
+  "workers": 10,
+  "replay_seconds": 2217.746990919113,
+  "wall_seconds": 2220.4273586273193,
+  "seconds_by_arm": [
+    {
+      "arm": "lru",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 18.724398680528004,
+      "max_seconds": 45.6299090385437,
+      "total_seconds": 1123.4639208316803
+    },
+    {
+      "arm": "learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 71.21239358981451,
+      "max_seconds": 116.06681275367737,
+      "total_seconds": 4272.74361538887
+    },
+    {
+      "arm": "label",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 25.406540191173555,
+      "max_seconds": 59.88247227668762,
+      "total_seconds": 1524.3924114704132
+    },
+    {
+      "arm": "evict_label",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 60,
+      "mean_seconds": 64.2105483452479,
+      "max_seconds": 110.14470553398132,
+      "total_seconds": 3852.6329007148743
+    },
+    {
+      "arm": "label_binary_150",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 20.16813905239105,
+      "max_seconds": 39.77668762207031,
+      "total_seconds": 403.36278104782104
+    },
+    {
+      "arm": "label_binary_300",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 22.318353414535522,
+      "max_seconds": 39.68779492378235,
+      "total_seconds": 223.18353414535522
+    },
+    {
+      "arm": "label_binary_60",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 18.70075261592865,
+      "max_seconds": 26.32945966720581,
+      "total_seconds": 187.0075261592865
+    },
+    {
+      "arm": "label_binary_600",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 27.461620330810547,
+      "max_seconds": 37.11130499839783,
+      "total_seconds": 549.2324066162109
+    },
+    {
+      "arm": "evict_binary_150_learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 103.99636570215225,
+      "max_seconds": 161.07891988754272,
+      "total_seconds": 2079.927314043045
+    },
+    {
+      "arm": "evict_binary_300_learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 91.78854999542236,
+      "max_seconds": 106.81070446968079,
+      "total_seconds": 917.8854999542236
+    },
+    {
+      "arm": "evict_binary_600_learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 98.75166400671006,
+      "max_seconds": 154.27713465690613,
+      "total_seconds": 1975.033280134201
+    },
+    {
+      "arm": "evict_binary_60_learned",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 119.69618573188782,
+      "max_seconds": 194.00096583366394,
+      "total_seconds": 1196.9618573188782
+    },
+    {
+      "arm": "evict_binary_150_recency",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 63.64606416225433,
+      "max_seconds": 106.46540641784668,
+      "total_seconds": 1272.9212832450867
+    },
+    {
+      "arm": "evict_binary_300_recency",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 59.053606915473935,
+      "max_seconds": 88.96386647224426,
+      "total_seconds": 590.5360691547394
+    },
+    {
+      "arm": "evict_binary_600_recency",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 20,
+      "mean_seconds": 61.73041177988053,
+      "max_seconds": 74.75375890731812,
+      "total_seconds": 1234.6082355976105
+    },
+    {
+      "arm": "evict_binary_60_recency",
+      "mechanism": "all16",
+      "variant": "main",
+      "n": 10,
+      "mean_seconds": 63.748909044265744,
+      "max_seconds": 80.6550407409668,
+      "total_seconds": 637.4890904426575
+    }
+  ],
+  "memory": {
+    "rss_unit": "MiB (Linux ru_maxrss KiB / 1024)",
+    "peak_worker_rss_mib": 1275.53125,
+    "children_peak_rss_mib": 1275.53125,
+    "max_worker_pss_mib_at_replay_end": 1071.0703125,
+    "parent_peak_rss_mib": 531.9296875,
+    "mem_available_mib_at_start": 25070.84765625
+  },
+  "note": "Sensitivity check of published readings: the seven arms behind the matched-horizon readings rerun (each reproducing its published row), counted on the full window, on the head window ending 600 s before the trace end, and on the tail (full - head). h* is kept, not re-chosen. A head-tail difference mixes the exact labels' knowledge of the end with any change of the workload over time. Every arm reads the trace's future and none is a policy. Seed intervals describe sampling-seed variability only."
+}
