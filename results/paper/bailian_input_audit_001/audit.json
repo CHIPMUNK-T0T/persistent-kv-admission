@@ -1,0 +1,3223 @@
+{
+  "checks": [
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "source_sha256_matches_manifest",
+      "expected": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+      "observed": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "converted_sha256_matches_manifest",
+      "expected": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "observed": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "manifest_source_is_this_file",
+      "expected": "qwen_traceA_blksz_16.jsonl",
+      "observed": "qwen_traceA_blksz_16.jsonl",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "manifest_output_is_this_file",
+      "expected": "bailian_toc_trace.jsonl",
+      "observed": "bailian_toc_trace.jsonl",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "manifest_block_tokens",
+      "expected": 512,
+      "observed": 512,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "source_lines_equal_manifest_records",
+      "expected": 43058,
+      "observed": 43058,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "converted_lines_equal_manifest_records",
+      "expected": 43058,
+      "observed": 43058,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "fresh_records_equal_manifest",
+      "expected": 43058,
+      "observed": 43058,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "fresh_output_blocks_equal_manifest",
+      "expected": 120177,
+      "observed": 120177,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "fresh_records_moved_by_sort_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "fresh_conversion_byte_identical",
+      "expected": "identical",
+      "observed": "identical",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "lfs_oid_matches_source_sha256",
+      "expected": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+      "observed": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "timestamp_decreases",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "chat_id_unique_per_record",
+      "expected": true,
+      "observed": true,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "d16_states_counted_equal_output_blocks",
+      "expected": 2656400,
+      "observed": 2656400,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "d16_input_tokens_equal_schema",
+      "expected": 100382715,
+      "observed": 100382715,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "d512_states_counted_equal_output_blocks",
+      "expected": 120177,
+      "observed": 120177,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "d512_input_tokens_equal_schema",
+      "expected": 100382715,
+      "observed": 100382715,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_loads",
+      "expected": "loaded",
+      "observed": "loaded",
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_unique_states",
+      "expected": 120177,
+      "observed": 120177,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_working_set_bytes",
+      "expected": 102480951296,
+      "observed": 102480951296,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_block_occurrences",
+      "expected": 218859,
+      "observed": 218859,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_total_input_tokens",
+      "expected": 100382715,
+      "observed": 100382715,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_window_start_ms",
+      "expected": 4319678.399999999,
+      "observed": 4319678.399999999,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeat_share",
+      "expected": 0.5015073063126455,
+      "observed": 0.5015073063126455,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeat_share_file_order",
+      "expected": 0.5015125163729632,
+      "observed": 0.5015125163729632,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40",
+      "expected": 0.5487161275845307,
+      "observed": 0.5487161275845307,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40_file_order",
+      "expected": 0.5487161275845307,
+      "observed": 0.5487161275845307,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens",
+      "expected": 50342665,
+      "observed": 50342665,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens_file_order",
+      "expected": 50343188,
+      "observed": 50343188,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_last40_requests",
+      "expected": 20565,
+      "observed": 20565,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "loader512_last40_input_tokens",
+      "expected": 52255426,
+      "observed": 52255426,
+      "pass": true,
+      "trace": "bailian_toc_trace"
+    },
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "source_sha256_matches_manifest",
+      "expected": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+      "observed": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "converted_sha256_matches_manifest",
+      "expected": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "observed": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "manifest_source_is_this_file",
+      "expected": "qwen_traceB_blksz_16.jsonl",
+      "observed": "qwen_traceB_blksz_16.jsonl",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "manifest_output_is_this_file",
+      "expected": "bailian_tob_trace.jsonl",
+      "observed": "bailian_tob_trace.jsonl",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "manifest_block_tokens",
+      "expected": 512,
+      "observed": 512,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "source_lines_equal_manifest_records",
+      "expected": 172800,
+      "observed": 172800,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "converted_lines_equal_manifest_records",
+      "expected": 172800,
+      "observed": 172800,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "fresh_records_equal_manifest",
+      "expected": 172800,
+      "observed": 172800,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "fresh_output_blocks_equal_manifest",
+      "expected": 290486,
+      "observed": 290486,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "fresh_records_moved_by_sort_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "fresh_conversion_byte_identical",
+      "expected": "identical",
+      "observed": "identical",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "lfs_oid_matches_source_sha256",
+      "expected": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+      "observed": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "timestamp_decreases",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "chat_id_unique_per_record",
+      "expected": true,
+      "observed": true,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "d16_states_counted_equal_output_blocks",
+      "expected": 4638378,
+      "observed": 4638378,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "d16_input_tokens_equal_schema",
+      "expected": 158029113,
+      "observed": 158029113,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "d512_states_counted_equal_output_blocks",
+      "expected": 290486,
+      "observed": 290486,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "d512_input_tokens_equal_schema",
+      "expected": 158029113,
+      "observed": 158029113,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_loads",
+      "expected": "loaded",
+      "observed": "loaded",
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_unique_states",
+      "expected": 290486,
+      "observed": 290486,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_working_set_bytes",
+      "expected": 211049367552,
+      "observed": 211049367552,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_block_occurrences",
+      "expected": 401630,
+      "observed": 401630,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_total_input_tokens",
+      "expected": 158029113,
+      "observed": 158029113,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_window_start_ms",
+      "expected": 4319982.0,
+      "observed": 4319982.0,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeat_share",
+      "expected": 0.3478242708354631,
+      "observed": 0.3478242708354631,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeat_share_file_order",
+      "expected": 0.347895795631024,
+      "observed": 0.347895795631024,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40",
+      "expected": 0.34786790619332597,
+      "observed": 0.34786790619332597,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40_file_order",
+      "expected": 0.3478714341897415,
+      "observed": 0.3478714341897415,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens",
+      "expected": 54966361,
+      "observed": 54966361,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens_file_order",
+      "expected": 54977664,
+      "observed": 54977664,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_last40_requests",
+      "expected": 72527,
+      "observed": 72527,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "loader512_last40_input_tokens",
+      "expected": 66893492,
+      "observed": 66893492,
+      "pass": true,
+      "trace": "bailian_tob_trace"
+    },
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "source_sha256_matches_manifest",
+      "expected": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+      "observed": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "converted_sha256_matches_manifest",
+      "expected": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "observed": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "manifest_source_is_this_file",
+      "expected": "qwen_thinking_blksz_16.jsonl",
+      "observed": "qwen_thinking_blksz_16.jsonl",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "manifest_output_is_this_file",
+      "expected": "bailian_thinking_trace.jsonl",
+      "observed": "bailian_thinking_trace.jsonl",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "manifest_block_tokens",
+      "expected": 512,
+      "observed": 512,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "source_lines_equal_manifest_records",
+      "expected": 10812,
+      "observed": 10812,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "converted_lines_equal_manifest_records",
+      "expected": 10812,
+      "observed": 10812,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "fresh_records_equal_manifest",
+      "expected": 10812,
+      "observed": 10812,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "fresh_output_blocks_equal_manifest",
+      "expected": 62077,
+      "observed": 62077,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "fresh_records_moved_by_sort_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "fresh_conversion_byte_identical",
+      "expected": "identical",
+      "observed": "identical",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "lfs_oid_matches_source_sha256",
+      "expected": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+      "observed": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "timestamp_decreases",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "chat_id_unique_per_record",
+      "expected": true,
+      "observed": true,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "d16_states_counted_equal_output_blocks",
+      "expected": 1735015,
+      "observed": 1735015,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "d16_input_tokens_equal_schema",
+      "expected": 51496311,
+      "observed": 51496311,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "d512_states_counted_equal_output_blocks",
+      "expected": 62077,
+      "observed": 62077,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "d512_input_tokens_equal_schema",
+      "expected": 51496311,
+      "observed": 51496311,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_loads",
+      "expected": "loaded",
+      "observed": "loaded",
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_unique_states",
+      "expected": 62077,
+      "observed": 62077,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_working_set_bytes",
+      "expected": 59610759168,
+      "observed": 59610759168,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_block_occurrences",
+      "expected": 106500,
+      "observed": 106500,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_total_input_tokens",
+      "expected": 51496311,
+      "observed": 51496311,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_window_start_ms",
+      "expected": 4315040.399999999,
+      "observed": 4315040.399999999,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeat_share",
+      "expected": 0.4347786193849886,
+      "observed": 0.4347786193849886,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeat_share_file_order",
+      "expected": 0.4347786193849886,
+      "observed": 0.4347786193849886,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40",
+      "expected": 0.3433479120149305,
+      "observed": 0.3433479120149305,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40_file_order",
+      "expected": 0.3433479120149305,
+      "observed": 0.3433479120149305,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens",
+      "expected": 22389495,
+      "observed": 22389495,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens_file_order",
+      "expected": 22389495,
+      "observed": 22389495,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_last40_requests",
+      "expected": 3828,
+      "observed": 3828,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "loader512_last40_input_tokens",
+      "expected": 20866313,
+      "observed": 20866313,
+      "pass": true,
+      "trace": "bailian_thinking_trace"
+    },
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "source_sha256_matches_manifest",
+      "expected": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+      "observed": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "converted_sha256_matches_manifest",
+      "expected": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "observed": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "manifest_source_is_this_file",
+      "expected": "qwen_coder_blksz_16.jsonl",
+      "observed": "qwen_coder_blksz_16.jsonl",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "manifest_output_is_this_file",
+      "expected": "bailian_coder_trace.jsonl",
+      "observed": "bailian_coder_trace.jsonl",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "manifest_block_tokens",
+      "expected": 512,
+      "observed": 512,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "source_lines_equal_manifest_records",
+      "expected": 43011,
+      "observed": 43011,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "converted_lines_equal_manifest_records",
+      "expected": 43011,
+      "observed": 43011,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "fresh_records_equal_manifest",
+      "expected": 43011,
+      "observed": 43011,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "fresh_output_blocks_equal_manifest",
+      "expected": 199350,
+      "observed": 199350,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "fresh_records_moved_by_sort_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "fresh_conversion_byte_identical",
+      "expected": "identical",
+      "observed": "identical",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "lfs_oid_matches_source_sha256",
+      "expected": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+      "observed": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "timestamp_decreases",
+      "expected": 0,
+      "observed": 0,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "chat_id_unique_per_record",
+      "expected": true,
+      "observed": true,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "d16_states_counted_equal_output_blocks",
+      "expected": 5202517,
+      "observed": 5202517,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "d16_input_tokens_equal_schema",
+      "expected": 247212429,
+      "observed": 247212429,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "d512_states_counted_equal_output_blocks",
+      "expected": 199350,
+      "observed": 199350,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "d512_input_tokens_equal_schema",
+      "expected": 247212429,
+      "observed": 247212429,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_loads",
+      "expected": "loaded",
+      "observed": "loaded",
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_unique_states",
+      "expected": 199350,
+      "observed": 199350,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_working_set_bytes",
+      "expected": 185958426624,
+      "observed": 185958426624,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_block_occurrences",
+      "expected": 505188,
+      "observed": 505188,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_total_input_tokens",
+      "expected": 247212429,
+      "observed": 247212429,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_window_start_ms",
+      "expected": 4319327.399999999,
+      "observed": 4319327.399999999,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeat_share",
+      "expected": 0.632704498850258,
+      "observed": 0.632704498850258,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeat_share_file_order",
+      "expected": 0.632704498850258,
+      "observed": 0.632704498850258,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40",
+      "expected": 0.6422537209975686,
+      "observed": 0.6422537209975686,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeat_share_last40_file_order",
+      "expected": 0.6422537209975686,
+      "observed": 0.6422537209975686,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens",
+      "expected": 156412416,
+      "observed": 156412416,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_repeated_tokens_file_order",
+      "expected": 156412416,
+      "observed": 156412416,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_last40_requests",
+      "expected": 18494,
+      "observed": 18494,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "loader512_last40_input_tokens",
+      "expected": 104039036,
+      "observed": 104039036,
+      "pass": true,
+      "trace": "bailian_coder_trace"
+    },
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "conversation_trace"
+    },
+    {
+      "check": "audit_completed",
+      "expected": "completed",
+      "observed": "completed",
+      "pass": true,
+      "trace": "toolagent_trace"
+    }
+  ],
+  "checks_failed": 0,
+  "config": {
+    "block_tokens": [
+      16,
+      512
+    ],
+    "bytes_per_token": 2048,
+    "command": ".venv/bin/python scripts/audit_bailian_inputs.py --paper-dir results/paper/bailian_input_audit_001 --work-dir /home/ubuntu/.claude/jobs/64a33413/tmp/audit_work",
+    "converted_block_tokens": 512,
+    "converted_dir": "data/raw/qwen_bailian_512",
+    "l1_fractions": [
+      0.0025,
+      0.01,
+      0.02
+    ],
+    "l2_multipliers": [
+      1,
+      4
+    ],
+    "mooncake": [
+      "data/raw/conversation_trace.jsonl",
+      "data/raw/toolagent_trace.jsonl"
+    ],
+    "only": null,
+    "repository_commit": "6f2007076eb3b978287c89fbe5282c7763c4fd58",
+    "script_git_status": "`?? scripts/audit_bailian_inputs.py`",
+    "script_sha256": "449d53e60d6ce93d20b5240fd1c9b4e9e4cfeaa7c3a264b43cb2cfcc4449e889",
+    "size_model": "packed",
+    "source_block_tokens": 16,
+    "source_dir": "data/raw/qwen_bailian",
+    "test_fraction_start": 0.6,
+    "work_dir": "/home/ubuntu/.claude/jobs/64a33413/tmp/audit_work"
+  },
+  "mooncake": {
+    "conversation_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        }
+      ],
+      "granularity": {
+        "512": {
+          "block_occurrences": 288500,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 442.8486909866333,
+              "l1_bytes": 464360509,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 442.8486909866333,
+              "l2_bytes": 464360509,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 442.8486909866333,
+              "l1_bytes": 464360509,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 1771.3947658538818,
+              "l2_bytes": 1857442038,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 1771.3947658538818,
+              "l1_bytes": 1857442038,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 1771.3947658538818,
+              "l2_bytes": 1857442038,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 1771.3947658538818,
+              "l1_bytes": 1857442038,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 7085.579062461853,
+              "l2_bytes": 7429768151,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 3542.7895317077637,
+              "l1_bytes": 3714884076,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 3542.7895317077637,
+              "l2_bytes": 3714884076,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 3542.7895317077637,
+              "l1_bytes": 3714884076,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 14171.158124923706,
+              "l2_bytes": 14859536302,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 58742117,
+          "last40_requests": 5183,
+          "records": 12031,
+          "repeat_share": 0.37358923798841887,
+          "repeat_share_file_order": 0.3736237491291324,
+          "repeat_share_last40": 0.4035177860545952,
+          "repeat_share_last40_file_order": 0.4035244082197446,
+          "repeated_tokens": 54093414,
+          "repeated_tokens_file_order": 54098411,
+          "total_input_tokens": 144793823,
+          "unique_states": 182790,
+          "window_start_ms": 2122199.4,
+          "working_set_bytes": 185744203776
+        }
+      },
+      "kind": "mooncake",
+      "peak_rss_mib": 274.96875,
+      "schema": {
+        "distinct_timestamps": 1180,
+        "input_mean": 12035.061341534369,
+        "input_median": 6909.0,
+        "input_p95": 39550.5,
+        "largest_timestamp_group": 28,
+        "multi_record_timestamp_groups": 1180,
+        "partial512_records": 12009,
+        "partial512_token_share": 0.022310558096114364,
+        "partial512_tokens": 3230431,
+        "records": 12031,
+        "records_in_multi_record_groups": 12031,
+        "span_s": 3536.999,
+        "total_input_tokens": 144793823
+      },
+      "seconds": 0.922366418002639,
+      "source": "data/raw/conversation_trace.jsonl",
+      "trace": "conversation_trace",
+      "wall_seconds": 1.1974524200013548
+    },
+    "toolagent_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        }
+      ],
+      "granularity": {
+        "512": {
+          "block_occurrences": 409616,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 425.4946537017822,
+              "l1_bytes": 446163482,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 425.4946537017822,
+              "l2_bytes": 446163482,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 425.4946537017822,
+              "l1_bytes": 446163482,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 1701.9786128997803,
+              "l2_bytes": 1784653926,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 1701.9786128997803,
+              "l1_bytes": 1784653926,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 1701.9786128997803,
+              "l2_bytes": 1784653926,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 1701.9786128997803,
+              "l1_bytes": 1784653926,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 6807.91445350647,
+              "l2_bytes": 7138615706,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 3403.957226753235,
+              "l1_bytes": 3569307853,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 3403.957226753235,
+              "l2_bytes": 3569307853,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 3403.957226753235,
+              "l1_bytes": 3569307853,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 13615.828906059265,
+              "l2_bytes": 14277231411,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 83026370,
+          "last40_requests": 9997,
+          "records": 23608,
+          "repeat_share": 0.5704783141806524,
+          "repeat_share_file_order": 0.5706057508086968,
+          "repeat_share_last40": 0.5920310137610496,
+          "repeat_share_last40_file_order": 0.5920403361004462,
+          "repeated_tokens": 115772917,
+          "repeated_tokens_file_order": 115798779,
+          "total_input_tokens": 202940084,
+          "unique_states": 183300,
+          "window_start_ms": 2122199.4,
+          "working_set_bytes": 178465392640
+        }
+      },
+      "kind": "mooncake",
+      "peak_rss_mib": 293.5859375,
+      "schema": {
+        "distinct_timestamps": 1180,
+        "input_mean": 8596.242121314808,
+        "input_median": 6346.0,
+        "input_p95": 26110.499999999978,
+        "largest_timestamp_group": 47,
+        "multi_record_timestamp_groups": 1180,
+        "partial512_records": 23575,
+        "partial512_token_share": 0.026052477636699906,
+        "partial512_tokens": 5287092,
+        "records": 23608,
+        "records_in_multi_record_groups": 23608,
+        "span_s": 3536.999,
+        "total_input_tokens": 202940084
+      },
+      "seconds": 1.181164390000049,
+      "source": "data/raw/toolagent_trace.jsonl",
+      "trace": "toolagent_trace",
+      "wall_seconds": 1.4680920210012118
+    }
+  },
+  "traces": {
+    "bailian_coder_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        },
+        {
+          "check": "source_sha256_matches_manifest",
+          "expected": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "observed": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "pass": true
+        },
+        {
+          "check": "converted_sha256_matches_manifest",
+          "expected": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "observed": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "pass": true
+        },
+        {
+          "check": "manifest_source_is_this_file",
+          "expected": "qwen_coder_blksz_16.jsonl",
+          "observed": "qwen_coder_blksz_16.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_output_is_this_file",
+          "expected": "bailian_coder_trace.jsonl",
+          "observed": "bailian_coder_trace.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_block_tokens",
+          "expected": 512,
+          "observed": 512,
+          "pass": true
+        },
+        {
+          "check": "source_lines_equal_manifest_records",
+          "expected": 43011,
+          "observed": 43011,
+          "pass": true
+        },
+        {
+          "check": "converted_lines_equal_manifest_records",
+          "expected": 43011,
+          "observed": 43011,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_equal_manifest",
+          "expected": 43011,
+          "observed": 43011,
+          "pass": true
+        },
+        {
+          "check": "fresh_output_blocks_equal_manifest",
+          "expected": 199350,
+          "observed": 199350,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_moved_by_sort_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_conversion_byte_identical",
+          "expected": "identical",
+          "observed": "identical",
+          "pass": true
+        },
+        {
+          "check": "lfs_oid_matches_source_sha256",
+          "expected": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "observed": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "pass": true
+        },
+        {
+          "check": "timestamp_decreases",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "chat_id_unique_per_record",
+          "expected": true,
+          "observed": true,
+          "pass": true
+        },
+        {
+          "check": "d16_states_counted_equal_output_blocks",
+          "expected": 5202517,
+          "observed": 5202517,
+          "pass": true
+        },
+        {
+          "check": "d16_input_tokens_equal_schema",
+          "expected": 247212429,
+          "observed": 247212429,
+          "pass": true
+        },
+        {
+          "check": "d512_states_counted_equal_output_blocks",
+          "expected": 199350,
+          "observed": 199350,
+          "pass": true
+        },
+        {
+          "check": "d512_input_tokens_equal_schema",
+          "expected": 247212429,
+          "observed": 247212429,
+          "pass": true
+        },
+        {
+          "check": "loader512_loads",
+          "expected": "loaded",
+          "observed": "loaded",
+          "pass": true
+        },
+        {
+          "check": "loader512_unique_states",
+          "expected": 199350,
+          "observed": 199350,
+          "pass": true
+        },
+        {
+          "check": "loader512_working_set_bytes",
+          "expected": 185958426624,
+          "observed": 185958426624,
+          "pass": true
+        },
+        {
+          "check": "loader512_block_occurrences",
+          "expected": 505188,
+          "observed": 505188,
+          "pass": true
+        },
+        {
+          "check": "loader512_total_input_tokens",
+          "expected": 247212429,
+          "observed": 247212429,
+          "pass": true
+        },
+        {
+          "check": "loader512_window_start_ms",
+          "expected": 4319327.399999999,
+          "observed": 4319327.399999999,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share",
+          "expected": 0.632704498850258,
+          "observed": 0.632704498850258,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_file_order",
+          "expected": 0.632704498850258,
+          "observed": 0.632704498850258,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40",
+          "expected": 0.6422537209975686,
+          "observed": 0.6422537209975686,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40_file_order",
+          "expected": 0.6422537209975686,
+          "observed": 0.6422537209975686,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens",
+          "expected": 156412416,
+          "observed": 156412416,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens_file_order",
+          "expected": 156412416,
+          "observed": 156412416,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_requests",
+          "expected": 18494,
+          "observed": 18494,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_input_tokens",
+          "expected": 104039036,
+          "observed": 104039036,
+          "pass": true
+        }
+      ],
+      "coarsening": {
+        "repeat_share_diff_16_minus_512": 0.03186351119910724,
+        "repeat_share_file_order_diff_16_minus_512": 0.03186351119910724,
+        "repeat_share_last40_diff_16_minus_512": 0.03312572023447047,
+        "repeat_share_last40_file_order_diff_16_minus_512": 0.03312572023447047,
+        "unique_states_ratio_16_over_512": 26.097401555053924,
+        "working_set_ratio_512_over_16": 1.0949924639083963
+      },
+      "converted_path": "data/raw/qwen_bailian_512/bailian_coder_trace.jsonl",
+      "granularity": {
+        "16": {
+          "block_occurrences": 15470907,
+          "block_tokens": 16,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 404.8972511291504,
+              "l1_bytes": 424565540,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 404.8972511291504,
+              "l2_bytes": 424565540,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 404.8972511291504,
+              "l1_bytes": 424565540,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 1619.5890035629272,
+              "l2_bytes": 1698262159,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 1619.5890035629272,
+              "l1_bytes": 1698262159,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 1619.5890035629272,
+              "l2_bytes": 1698262159,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 1619.5890035629272,
+              "l1_bytes": 1698262159,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 6478.356015205383,
+              "l2_bytes": 6793048637,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 3239.178008079529,
+              "l1_bytes": 3396524319,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 3239.178008079529,
+              "l2_bytes": 3396524319,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 3239.178008079529,
+              "l1_bytes": 3396524319,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 12956.712031364441,
+              "l2_bytes": 13586097275,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 104039036,
+          "last40_repeated_tokens": 70265826,
+          "last40_repeated_tokens_file_order": 70265826,
+          "last40_requests": 18494,
+          "records": 43011,
+          "repeat_share": 0.6645680100493653,
+          "repeat_share_file_order": 0.6645680100493653,
+          "repeat_share_last40": 0.6753794412320391,
+          "repeat_share_last40_file_order": 0.6753794412320391,
+          "repeated_tokens": 164289472,
+          "repeated_tokens_file_order": 164289472,
+          "states_counted": 5202517,
+          "token_variant_keys": 0,
+          "total_input_tokens": 247212429,
+          "unique_states": 5202517,
+          "window_start_ms": 4319327.399999999,
+          "working_set_bytes": 169826215936
+        },
+        "512": {
+          "block_occurrences": 505188,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 443.3594388961792,
+              "l1_bytes": 464896067,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 443.3594388961792,
+              "l2_bytes": 464896067,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 443.3594388961792,
+              "l1_bytes": 464896067,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 1773.4377536773682,
+              "l2_bytes": 1859584266,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 1773.4377536773682,
+              "l1_bytes": 1859584266,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 1773.4377536773682,
+              "l2_bytes": 1859584266,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 1773.4377536773682,
+              "l1_bytes": 1859584266,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 7093.751015663147,
+              "l2_bytes": 7438337065,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 3546.8755073547363,
+              "l1_bytes": 3719168532,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 3546.8755073547363,
+              "l2_bytes": 3719168532,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 3546.8755073547363,
+              "l1_bytes": 3719168532,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 14187.502031326294,
+              "l2_bytes": 14876674130,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 104039036,
+          "last40_repeated_tokens": 66819458,
+          "last40_repeated_tokens_file_order": 66819458,
+          "last40_requests": 18494,
+          "records": 43011,
+          "repeat_share": 0.632704498850258,
+          "repeat_share_file_order": 0.632704498850258,
+          "repeat_share_last40": 0.6422537209975686,
+          "repeat_share_last40_file_order": 0.6422537209975686,
+          "repeated_tokens": 156412416,
+          "repeated_tokens_file_order": 156412416,
+          "states_counted": 199350,
+          "token_variant_keys": 0,
+          "total_input_tokens": 247212429,
+          "unique_states": 199350,
+          "window_start_ms": 4319327.399999999,
+          "working_set_bytes": 185958426624
+        }
+      },
+      "identity": {
+        "converted": "bailian_coder_trace.jsonl",
+        "converted_lines": 43011,
+        "converted_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+        "first_differing_line": null,
+        "fresh": {
+          "block_keys_differing_only_in_tokens": 0,
+          "output_blocks": 199350,
+          "records": 43011,
+          "records_moved_by_sort": 0
+        },
+        "fresh_lines": 43011,
+        "lfs_oid": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+        "manifest": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_coder_trace.jsonl",
+          "output_blocks": 199350,
+          "output_sha256": "a6355771b1cbd4bfff047eb8bbd6872e7b86a0c336d4b7ebd062f515fcae89ff",
+          "records": 43011,
+          "records_moved_by_sort": 0,
+          "source": "qwen_coder_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+          "timestamp_unit": "ms"
+        },
+        "source": "qwen_coder_blksz_16.jsonl",
+        "source_lines": 43011,
+        "source_sha256": "3d74974cebb7bccb69b1ca6ea210a44d9a3033443c0271ed015327284dea1aff",
+        "upstream_commit": "5f7439c51ec248a0c585f7d90a41a6f57773b912"
+      },
+      "kind": "bailian",
+      "loader_crosscheck": {
+        "block_occurrences": 505188,
+        "last40_input_tokens": 104039036,
+        "last40_requests": 18494,
+        "repeat_share": 0.632704498850258,
+        "repeat_share_file_order": 0.632704498850258,
+        "repeat_share_last40": 0.6422537209975686,
+        "repeat_share_last40_file_order": 0.6422537209975686,
+        "repeated_tokens": 156412416,
+        "repeated_tokens_file_order": 156412416,
+        "total_input_tokens": 247212429,
+        "unique_states": 199350,
+        "window_start_ms": 4319327.399999999,
+        "working_set_bytes": 185958426624
+      },
+      "peak_rss_mib": 2075.140625,
+      "prefix": {
+        "children_shorter_than_parent": 0,
+        "children_with_parent": 16605,
+        "ids16_after_multiple_predecessors": 0,
+        "ids16_after_multiple_predecessors_share": 0.0,
+        "ids16_at_multiple_positions": 0,
+        "ids16_at_multiple_positions_share": 0.0,
+        "ids16_distinct": 5202517,
+        "ids16_occurrences": 15470907,
+        "ids16_occurrences_new_position": 0,
+        "ids16_occurrences_new_position_share": 0.0,
+        "ids16_occurrences_new_predecessor": 0,
+        "ids16_occurrences_new_predecessor_share": 0.0,
+        "lcp_all_but_last": 15458,
+        "lcp_all_but_last_share": 0.9309244203553146,
+        "lcp_full": 1072,
+        "lcp_full_share": 0.06455886781090033,
+        "lcp_none": 3,
+        "lcp_none_share": 0.0001806684733514002,
+        "lcp_partial": 72,
+        "lcp_partial_share": 0.004336043360433604,
+        "parents_single_block": 3
+      },
+      "schema": {
+        "chat_id_unique": true,
+        "distinct_chat_ids": 43011,
+        "distinct_timestamps": 42884,
+        "input_max": 25777,
+        "input_mean": 5747.65592522843,
+        "input_median": 4540.0,
+        "input_p95": 13406.5,
+        "largest_timestamp_group": 2,
+        "max_timestamp_decimals": 3,
+        "multi_record_timestamp_groups": 127,
+        "output_mean": 808.2571900211574,
+        "output_median": 469.0,
+        "partial16_records": 40209,
+        "partial16_tokens": 321261,
+        "partial512_records": 42919,
+        "partial512_token_share": 0.04259778135993316,
+        "partial512_tokens": 10530701,
+        "records": 43011,
+        "records_in_multi_record_groups": 254,
+        "resolvable_parent_earlier_records": 16605,
+        "resolvable_parent_records": 16605,
+        "root_records": 26406,
+        "root_share": 0.6139359698681732,
+        "span_s": 7198.879,
+        "timestamp_decreases": 0,
+        "timestamp_max_s": 7198.879,
+        "timestamp_min_s": 0.0,
+        "total_input_tokens": 247212429,
+        "turn_buckets": {
+          "1": 26406,
+          "2": 6693,
+          "3-5": 6906,
+          "6-10": 2236,
+          ">10": 770,
+          "other": 0
+        },
+        "type_counts": {
+          "coder": 43011
+        },
+        "unresolvable_parent_records": 0
+      },
+      "seconds": 19.70678349299851,
+      "section_seconds": {
+        "granularity_16": 13.91159757800051,
+        "granularity_512": 0.7465505809996102,
+        "identity": 0.7938447329979681,
+        "loader_crosscheck": 1.643692806999752,
+        "parse": 1.479719959999784,
+        "prefix_identity": 0.9882821969986253,
+        "schema": 0.06468795199907618
+      },
+      "source": "qwen_coder_blksz_16.jsonl",
+      "source_path": "data/raw/qwen_bailian/qwen_coder_blksz_16.jsonl",
+      "trace": "bailian_coder_trace",
+      "wall_seconds": 19.958706477002124
+    },
+    "bailian_thinking_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        },
+        {
+          "check": "source_sha256_matches_manifest",
+          "expected": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "observed": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "pass": true
+        },
+        {
+          "check": "converted_sha256_matches_manifest",
+          "expected": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "observed": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "pass": true
+        },
+        {
+          "check": "manifest_source_is_this_file",
+          "expected": "qwen_thinking_blksz_16.jsonl",
+          "observed": "qwen_thinking_blksz_16.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_output_is_this_file",
+          "expected": "bailian_thinking_trace.jsonl",
+          "observed": "bailian_thinking_trace.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_block_tokens",
+          "expected": 512,
+          "observed": 512,
+          "pass": true
+        },
+        {
+          "check": "source_lines_equal_manifest_records",
+          "expected": 10812,
+          "observed": 10812,
+          "pass": true
+        },
+        {
+          "check": "converted_lines_equal_manifest_records",
+          "expected": 10812,
+          "observed": 10812,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_equal_manifest",
+          "expected": 10812,
+          "observed": 10812,
+          "pass": true
+        },
+        {
+          "check": "fresh_output_blocks_equal_manifest",
+          "expected": 62077,
+          "observed": 62077,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_moved_by_sort_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_conversion_byte_identical",
+          "expected": "identical",
+          "observed": "identical",
+          "pass": true
+        },
+        {
+          "check": "lfs_oid_matches_source_sha256",
+          "expected": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "observed": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "pass": true
+        },
+        {
+          "check": "timestamp_decreases",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "chat_id_unique_per_record",
+          "expected": true,
+          "observed": true,
+          "pass": true
+        },
+        {
+          "check": "d16_states_counted_equal_output_blocks",
+          "expected": 1735015,
+          "observed": 1735015,
+          "pass": true
+        },
+        {
+          "check": "d16_input_tokens_equal_schema",
+          "expected": 51496311,
+          "observed": 51496311,
+          "pass": true
+        },
+        {
+          "check": "d512_states_counted_equal_output_blocks",
+          "expected": 62077,
+          "observed": 62077,
+          "pass": true
+        },
+        {
+          "check": "d512_input_tokens_equal_schema",
+          "expected": 51496311,
+          "observed": 51496311,
+          "pass": true
+        },
+        {
+          "check": "loader512_loads",
+          "expected": "loaded",
+          "observed": "loaded",
+          "pass": true
+        },
+        {
+          "check": "loader512_unique_states",
+          "expected": 62077,
+          "observed": 62077,
+          "pass": true
+        },
+        {
+          "check": "loader512_working_set_bytes",
+          "expected": 59610759168,
+          "observed": 59610759168,
+          "pass": true
+        },
+        {
+          "check": "loader512_block_occurrences",
+          "expected": 106500,
+          "observed": 106500,
+          "pass": true
+        },
+        {
+          "check": "loader512_total_input_tokens",
+          "expected": 51496311,
+          "observed": 51496311,
+          "pass": true
+        },
+        {
+          "check": "loader512_window_start_ms",
+          "expected": 4315040.399999999,
+          "observed": 4315040.399999999,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share",
+          "expected": 0.4347786193849886,
+          "observed": 0.4347786193849886,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_file_order",
+          "expected": 0.4347786193849886,
+          "observed": 0.4347786193849886,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40",
+          "expected": 0.3433479120149305,
+          "observed": 0.3433479120149305,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40_file_order",
+          "expected": 0.3433479120149305,
+          "observed": 0.3433479120149305,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens",
+          "expected": 22389495,
+          "observed": 22389495,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens_file_order",
+          "expected": 22389495,
+          "observed": 22389495,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_requests",
+          "expected": 3828,
+          "observed": 3828,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_input_tokens",
+          "expected": 20866313,
+          "observed": 20866313,
+          "pass": true
+        }
+      ],
+      "coarsening": {
+        "repeat_share_diff_16_minus_512": 0.02764221305095038,
+        "repeat_share_file_order_diff_16_minus_512": 0.02764998059763929,
+        "repeat_share_last40_diff_16_minus_512": 0.021266814122839983,
+        "repeat_share_last40_file_order_diff_16_minus_512": 0.021266814122839983,
+        "unique_states_ratio_16_over_512": 27.94940154968829,
+        "working_set_ratio_512_over_16": 1.0514349918852561
+      },
+      "converted_path": "data/raw/qwen_bailian_512/bailian_thinking_trace.jsonl",
+      "granularity": {
+        "16": {
+          "block_occurrences": 3223990,
+          "block_tokens": 16,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 135.1706247329712,
+              "l1_bytes": 141736673,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 135.1706247329712,
+              "l2_bytes": 141736673,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 135.1706247329712,
+              "l1_bytes": 141736673,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 540.6824998855591,
+              "l2_bytes": 566946693,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 540.6824998855591,
+              "l1_bytes": 566946693,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 540.6824998855591,
+              "l2_bytes": 566946693,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 540.6824998855591,
+              "l1_bytes": 566946693,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 2162.7299995422363,
+              "l2_bytes": 2267786772,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 1081.3649997711182,
+              "l1_bytes": 1133893386,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 1081.3649997711182,
+              "l2_bytes": 1133893386,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 1081.3649997711182,
+              "l1_bytes": 1133893386,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 4325.460000038147,
+              "l2_bytes": 4535573545,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 20866313,
+          "last40_repeated_tokens": 7608165,
+          "last40_repeated_tokens_file_order": 7608165,
+          "last40_requests": 3828,
+          "records": 10812,
+          "repeat_share": 0.46242083243593896,
+          "repeat_share_file_order": 0.46242859998262786,
+          "repeat_share_last40": 0.36461472613777046,
+          "repeat_share_last40_file_order": 0.36461472613777046,
+          "repeated_tokens": 23812967,
+          "repeated_tokens_file_order": 23813367,
+          "states_counted": 1735015,
+          "token_variant_keys": 0,
+          "total_input_tokens": 51496311,
+          "unique_states": 1735015,
+          "window_start_ms": 4315040.399999999,
+          "working_set_bytes": 56694669312
+        },
+        "512": {
+          "block_occurrences": 106500,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 142.12312507629395,
+              "l1_bytes": 149026898,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 142.12312507629395,
+              "l2_bytes": 149026898,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 142.12312507629395,
+              "l1_bytes": 149026898,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 568.4925003051758,
+              "l2_bytes": 596107592,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 568.4925003051758,
+              "l1_bytes": 596107592,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 568.4925003051758,
+              "l2_bytes": 596107592,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 568.4925003051758,
+              "l1_bytes": 596107592,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 2273.970000267029,
+              "l2_bytes": 2384430367,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 1136.9849996566772,
+              "l1_bytes": 1192215183,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 1136.9849996566772,
+              "l2_bytes": 1192215183,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 1136.9849996566772,
+              "l1_bytes": 1192215183,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 4547.939999580383,
+              "l2_bytes": 4768860733,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 20866313,
+          "last40_repeated_tokens": 7164405,
+          "last40_repeated_tokens_file_order": 7164405,
+          "last40_requests": 3828,
+          "records": 10812,
+          "repeat_share": 0.4347786193849886,
+          "repeat_share_file_order": 0.4347786193849886,
+          "repeat_share_last40": 0.3433479120149305,
+          "repeat_share_last40_file_order": 0.3433479120149305,
+          "repeated_tokens": 22389495,
+          "repeated_tokens_file_order": 22389495,
+          "states_counted": 62077,
+          "token_variant_keys": 0,
+          "total_input_tokens": 51496311,
+          "unique_states": 62077,
+          "window_start_ms": 4315040.399999999,
+          "working_set_bytes": 59610759168
+        }
+      },
+      "identity": {
+        "converted": "bailian_thinking_trace.jsonl",
+        "converted_lines": 10812,
+        "converted_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+        "first_differing_line": null,
+        "fresh": {
+          "block_keys_differing_only_in_tokens": 0,
+          "output_blocks": 62077,
+          "records": 10812,
+          "records_moved_by_sort": 0
+        },
+        "fresh_lines": 10812,
+        "lfs_oid": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+        "manifest": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_thinking_trace.jsonl",
+          "output_blocks": 62077,
+          "output_sha256": "02db3029d9cbdd700b531ca54fb0b5aa4e9b41b67ef72ac9b5a1fa5df916b712",
+          "records": 10812,
+          "records_moved_by_sort": 0,
+          "source": "qwen_thinking_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+          "timestamp_unit": "ms"
+        },
+        "source": "qwen_thinking_blksz_16.jsonl",
+        "source_lines": 10812,
+        "source_sha256": "41ac36d9d1b54d084eeb6b05e9d142ba9d02f8bf79cfc9fff418d8ab7cdee906",
+        "upstream_commit": "5f7439c51ec248a0c585f7d90a41a6f57773b912"
+      },
+      "kind": "bailian",
+      "loader_crosscheck": {
+        "block_occurrences": 106500,
+        "last40_input_tokens": 20866313,
+        "last40_requests": 3828,
+        "repeat_share": 0.4347786193849886,
+        "repeat_share_file_order": 0.4347786193849886,
+        "repeat_share_last40": 0.3433479120149305,
+        "repeat_share_last40_file_order": 0.3433479120149305,
+        "repeated_tokens": 22389495,
+        "repeated_tokens_file_order": 22389495,
+        "total_input_tokens": 51496311,
+        "unique_states": 62077,
+        "window_start_ms": 4315040.399999999,
+        "working_set_bytes": 59610759168
+      },
+      "peak_rss_mib": 716.13671875,
+      "prefix": {
+        "children_shorter_than_parent": 0,
+        "children_with_parent": 1200,
+        "ids16_after_multiple_predecessors": 0,
+        "ids16_after_multiple_predecessors_share": 0.0,
+        "ids16_at_multiple_positions": 0,
+        "ids16_at_multiple_positions_share": 0.0,
+        "ids16_distinct": 1735015,
+        "ids16_occurrences": 3223990,
+        "ids16_occurrences_new_position": 0,
+        "ids16_occurrences_new_position_share": 0.0,
+        "ids16_occurrences_new_predecessor": 0,
+        "ids16_occurrences_new_predecessor_share": 0.0,
+        "lcp_all_but_last": 1119,
+        "lcp_all_but_last_share": 0.9325,
+        "lcp_full": 34,
+        "lcp_full_share": 0.028333333333333332,
+        "lcp_none": 3,
+        "lcp_none_share": 0.0025,
+        "lcp_partial": 44,
+        "lcp_partial_share": 0.03666666666666667,
+        "parents_single_block": 3
+      },
+      "schema": {
+        "chat_id_unique": true,
+        "distinct_chat_ids": 10812,
+        "distinct_timestamps": 10769,
+        "input_max": 51622,
+        "input_mean": 4762.884850166482,
+        "input_median": 3680.0,
+        "input_p95": 16221.299999999985,
+        "largest_timestamp_group": 3,
+        "max_timestamp_decimals": 3,
+        "multi_record_timestamp_groups": 42,
+        "output_mean": 3650.7729374768774,
+        "output_median": 1665.5,
+        "partial16_records": 10132,
+        "partial16_tokens": 74583,
+        "partial512_records": 10803,
+        "partial512_token_share": 0.0485364281724957,
+        "partial512_tokens": 2499447,
+        "records": 10812,
+        "records_in_multi_record_groups": 85,
+        "resolvable_parent_earlier_records": 1200,
+        "resolvable_parent_records": 1200,
+        "root_records": 9612,
+        "root_share": 0.8890122086570478,
+        "span_s": 7191.734,
+        "timestamp_decreases": 0,
+        "timestamp_max_s": 7191.734,
+        "timestamp_min_s": 0.0,
+        "total_input_tokens": 51496311,
+        "turn_buckets": {
+          "1": 9612,
+          "2": 509,
+          "3-5": 503,
+          "6-10": 159,
+          ">10": 29,
+          "other": 0
+        },
+        "type_counts": {
+          "thinking": 10812
+        },
+        "unresolvable_parent_records": 0
+      },
+      "seconds": 4.266124013000081,
+      "section_seconds": {
+        "granularity_16": 3.0191880200000014,
+        "granularity_512": 0.1675920950001455,
+        "identity": 0.19676082099977066,
+        "loader_crosscheck": 0.28738884999984293,
+        "parse": 0.298472053000296,
+        "prefix_identity": 0.26203871899997466,
+        "schema": 0.01795350599786616
+      },
+      "source": "qwen_thinking_blksz_16.jsonl",
+      "source_path": "data/raw/qwen_bailian/qwen_thinking_blksz_16.jsonl",
+      "trace": "bailian_thinking_trace",
+      "wall_seconds": 4.507838370001991
+    },
+    "bailian_tob_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        },
+        {
+          "check": "source_sha256_matches_manifest",
+          "expected": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "observed": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "pass": true
+        },
+        {
+          "check": "converted_sha256_matches_manifest",
+          "expected": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "observed": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "pass": true
+        },
+        {
+          "check": "manifest_source_is_this_file",
+          "expected": "qwen_traceB_blksz_16.jsonl",
+          "observed": "qwen_traceB_blksz_16.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_output_is_this_file",
+          "expected": "bailian_tob_trace.jsonl",
+          "observed": "bailian_tob_trace.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_block_tokens",
+          "expected": 512,
+          "observed": 512,
+          "pass": true
+        },
+        {
+          "check": "source_lines_equal_manifest_records",
+          "expected": 172800,
+          "observed": 172800,
+          "pass": true
+        },
+        {
+          "check": "converted_lines_equal_manifest_records",
+          "expected": 172800,
+          "observed": 172800,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_equal_manifest",
+          "expected": 172800,
+          "observed": 172800,
+          "pass": true
+        },
+        {
+          "check": "fresh_output_blocks_equal_manifest",
+          "expected": 290486,
+          "observed": 290486,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_moved_by_sort_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_conversion_byte_identical",
+          "expected": "identical",
+          "observed": "identical",
+          "pass": true
+        },
+        {
+          "check": "lfs_oid_matches_source_sha256",
+          "expected": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "observed": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "pass": true
+        },
+        {
+          "check": "timestamp_decreases",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "chat_id_unique_per_record",
+          "expected": true,
+          "observed": true,
+          "pass": true
+        },
+        {
+          "check": "d16_states_counted_equal_output_blocks",
+          "expected": 4638378,
+          "observed": 4638378,
+          "pass": true
+        },
+        {
+          "check": "d16_input_tokens_equal_schema",
+          "expected": 158029113,
+          "observed": 158029113,
+          "pass": true
+        },
+        {
+          "check": "d512_states_counted_equal_output_blocks",
+          "expected": 290486,
+          "observed": 290486,
+          "pass": true
+        },
+        {
+          "check": "d512_input_tokens_equal_schema",
+          "expected": 158029113,
+          "observed": 158029113,
+          "pass": true
+        },
+        {
+          "check": "loader512_loads",
+          "expected": "loaded",
+          "observed": "loaded",
+          "pass": true
+        },
+        {
+          "check": "loader512_unique_states",
+          "expected": 290486,
+          "observed": 290486,
+          "pass": true
+        },
+        {
+          "check": "loader512_working_set_bytes",
+          "expected": 211049367552,
+          "observed": 211049367552,
+          "pass": true
+        },
+        {
+          "check": "loader512_block_occurrences",
+          "expected": 401630,
+          "observed": 401630,
+          "pass": true
+        },
+        {
+          "check": "loader512_total_input_tokens",
+          "expected": 158029113,
+          "observed": 158029113,
+          "pass": true
+        },
+        {
+          "check": "loader512_window_start_ms",
+          "expected": 4319982.0,
+          "observed": 4319982.0,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share",
+          "expected": 0.3478242708354631,
+          "observed": 0.3478242708354631,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_file_order",
+          "expected": 0.347895795631024,
+          "observed": 0.347895795631024,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40",
+          "expected": 0.34786790619332597,
+          "observed": 0.34786790619332597,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40_file_order",
+          "expected": 0.3478714341897415,
+          "observed": 0.3478714341897415,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens",
+          "expected": 54966361,
+          "observed": 54966361,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens_file_order",
+          "expected": 54977664,
+          "observed": 54977664,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_requests",
+          "expected": 72527,
+          "observed": 72527,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_input_tokens",
+          "expected": 66893492,
+          "observed": 66893492,
+          "pass": true
+        }
+      ],
+      "coarsening": {
+        "repeat_share_diff_16_minus_512": 0.1901982706186549,
+        "repeat_share_file_order_diff_16_minus_512": 0.19019776438281977,
+        "repeat_share_last40_diff_16_minus_512": 0.19111766507868955,
+        "repeat_share_last40_file_order_diff_16_minus_512": 0.19111718670629424,
+        "unique_states_ratio_16_over_512": 15.967647322074042,
+        "working_set_ratio_512_over_16": 1.4117668599479154
+      },
+      "converted_path": "data/raw/qwen_bailian_512/bailian_tob_trace.jsonl",
+      "granularity": {
+        "16": {
+          "block_occurrences": 9956137,
+          "block_tokens": 16,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 356.41926288604736,
+              "l1_bytes": 373732685,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 356.41926288604736,
+              "l2_bytes": 373732685,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 356.41926288604736,
+              "l1_bytes": 373732685,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 1425.6770505905151,
+              "l2_bytes": 1494930739,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 1425.6770505905151,
+              "l1_bytes": 1494930739,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 1425.6770505905151,
+              "l2_bytes": 1494930739,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 1425.6770505905151,
+              "l1_bytes": 1494930739,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 5702.708203315735,
+              "l2_bytes": 5979722957,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 2851.3541011810303,
+              "l1_bytes": 2989861478,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 2851.3541011810303,
+              "l2_bytes": 2989861478,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 2851.3541011810303,
+              "l1_bytes": 2989861478,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 11405.41640663147,
+              "l2_bytes": 11959445914,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 66893492,
+          "last40_repeated_tokens": 36054627,
+          "last40_repeated_tokens_file_order": 36054831,
+          "last40_requests": 72527,
+          "records": 172800,
+          "repeat_share": 0.538022541454118,
+          "repeat_share_file_order": 0.5380935600138438,
+          "repeat_share_last40": 0.5389855712720155,
+          "repeat_share_last40_file_order": 0.5389886208960357,
+          "repeated_tokens": 85023225,
+          "repeated_tokens_file_order": 85034448,
+          "states_counted": 4638378,
+          "token_variant_keys": 0,
+          "total_input_tokens": 158029113,
+          "unique_states": 4638378,
+          "window_start_ms": 4319982.0,
+          "working_set_bytes": 149493073920
+        },
+        "512": {
+          "block_occurrences": 401630,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 503.1809034347534,
+              "l1_bytes": 527623419,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 503.1809034347534,
+              "l2_bytes": 527623419,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 503.1809034347534,
+              "l1_bytes": 527623419,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 2012.7236137390137,
+              "l2_bytes": 2110493676,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 2012.7236137390137,
+              "l1_bytes": 2110493676,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 2012.7236137390137,
+              "l2_bytes": 2110493676,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 2012.7236137390137,
+              "l1_bytes": 2110493676,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 8050.894453048706,
+              "l2_bytes": 8441974702,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 4025.447226524353,
+              "l1_bytes": 4220987351,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 4025.447226524353,
+              "l2_bytes": 4220987351,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 4025.447226524353,
+              "l1_bytes": 4220987351,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 16101.788906097412,
+              "l2_bytes": 16883949404,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 66893492,
+          "last40_repeated_tokens": 23270099,
+          "last40_repeated_tokens_file_order": 23270335,
+          "last40_requests": 72527,
+          "records": 172800,
+          "repeat_share": 0.3478242708354631,
+          "repeat_share_file_order": 0.347895795631024,
+          "repeat_share_last40": 0.34786790619332597,
+          "repeat_share_last40_file_order": 0.3478714341897415,
+          "repeated_tokens": 54966361,
+          "repeated_tokens_file_order": 54977664,
+          "states_counted": 290486,
+          "token_variant_keys": 0,
+          "total_input_tokens": 158029113,
+          "unique_states": 290486,
+          "window_start_ms": 4319982.0,
+          "working_set_bytes": 211049367552
+        }
+      },
+      "identity": {
+        "converted": "bailian_tob_trace.jsonl",
+        "converted_lines": 172800,
+        "converted_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+        "first_differing_line": null,
+        "fresh": {
+          "block_keys_differing_only_in_tokens": 0,
+          "output_blocks": 290486,
+          "records": 172800,
+          "records_moved_by_sort": 0
+        },
+        "fresh_lines": 172800,
+        "lfs_oid": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+        "manifest": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_tob_trace.jsonl",
+          "output_blocks": 290486,
+          "output_sha256": "3f1d38696ec1c33ed9bf7e114652452c1aa055a8051c62da00944cddb046c037",
+          "records": 172800,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceB_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+          "timestamp_unit": "ms"
+        },
+        "source": "qwen_traceB_blksz_16.jsonl",
+        "source_lines": 172800,
+        "source_sha256": "68e3f98e2d601d60d0abf4b89bc8a3654372abab7b1cde6373a13d0054379d59",
+        "upstream_commit": "5f7439c51ec248a0c585f7d90a41a6f57773b912"
+      },
+      "kind": "bailian",
+      "loader_crosscheck": {
+        "block_occurrences": 401630,
+        "last40_input_tokens": 66893492,
+        "last40_requests": 72527,
+        "repeat_share": 0.3478242708354631,
+        "repeat_share_file_order": 0.347895795631024,
+        "repeat_share_last40": 0.34786790619332597,
+        "repeat_share_last40_file_order": 0.3478714341897415,
+        "repeated_tokens": 54966361,
+        "repeated_tokens_file_order": 54977664,
+        "total_input_tokens": 158029113,
+        "unique_states": 290486,
+        "window_start_ms": 4319982.0,
+        "working_set_bytes": 211049367552
+      },
+      "peak_rss_mib": 1848.3671875,
+      "prefix": {
+        "children_shorter_than_parent": 0,
+        "children_with_parent": 0,
+        "ids16_after_multiple_predecessors": 44869,
+        "ids16_after_multiple_predecessors_share": 0.011713950798743732,
+        "ids16_at_multiple_positions": 114101,
+        "ids16_at_multiple_positions_share": 0.02978835053349659,
+        "ids16_distinct": 3830390,
+        "ids16_occurrences": 9956137,
+        "ids16_occurrences_new_position": 602225,
+        "ids16_occurrences_new_position_share": 0.060487817714842615,
+        "ids16_occurrences_new_predecessor": 291174,
+        "ids16_occurrences_new_predecessor_share": 0.029245680327621044,
+        "lcp_all_but_last": 0,
+        "lcp_all_but_last_share": null,
+        "lcp_full": 0,
+        "lcp_full_share": null,
+        "lcp_none": 0,
+        "lcp_none_share": null,
+        "lcp_partial": 0,
+        "lcp_partial_share": null,
+        "parents_single_block": 0
+      },
+      "schema": {
+        "chat_id_unique": true,
+        "distinct_chat_ids": 172800,
+        "distinct_timestamps": 170573,
+        "input_max": 66446,
+        "input_mean": 914.5203298611111,
+        "input_median": 574.0,
+        "input_p95": 2491.0,
+        "largest_timestamp_group": 3,
+        "max_timestamp_decimals": 3,
+        "multi_record_timestamp_groups": 2207,
+        "output_mean": 91.62747685185185,
+        "output_median": 39.0,
+        "partial16_records": 161936,
+        "partial16_tokens": 1321897,
+        "partial512_records": 172646,
+        "partial512_token_share": 0.25811259853113266,
+        "partial512_tokens": 40789305,
+        "records": 172800,
+        "records_in_multi_record_groups": 4434,
+        "resolvable_parent_earlier_records": 0,
+        "resolvable_parent_records": 0,
+        "root_records": 172800,
+        "root_share": 1.0,
+        "span_s": 7199.97,
+        "timestamp_decreases": 0,
+        "timestamp_max_s": 7199.97,
+        "timestamp_min_s": 0.0,
+        "total_input_tokens": 158029113,
+        "turn_buckets": {
+          "1": 172800,
+          "2": 0,
+          "3-5": 0,
+          "6-10": 0,
+          ">10": 0,
+          "other": 0
+        },
+        "type_counts": {
+          "api": 150936,
+          "text": 21864
+        },
+        "unresolvable_parent_records": 0
+      },
+      "seconds": 15.90390925400061,
+      "section_seconds": {
+        "granularity_16": 8.840439269002673,
+        "granularity_512": 1.0709423830012383,
+        "identity": 1.0377041760002612,
+        "loader_crosscheck": 2.2624120060027053,
+        "parse": 1.6179494919997524,
+        "prefix_identity": 0.7283112830009486,
+        "schema": 0.2653020249999827
+      },
+      "source": "qwen_traceB_blksz_16.jsonl",
+      "source_path": "data/raw/qwen_bailian/qwen_traceB_blksz_16.jsonl",
+      "trace": "bailian_tob_trace",
+      "wall_seconds": 16.1572634059994
+    },
+    "bailian_toc_trace": {
+      "checks": [
+        {
+          "check": "audit_completed",
+          "expected": "completed",
+          "observed": "completed",
+          "pass": true
+        },
+        {
+          "check": "source_sha256_matches_manifest",
+          "expected": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "observed": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "pass": true
+        },
+        {
+          "check": "converted_sha256_matches_manifest",
+          "expected": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "observed": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "pass": true
+        },
+        {
+          "check": "manifest_source_is_this_file",
+          "expected": "qwen_traceA_blksz_16.jsonl",
+          "observed": "qwen_traceA_blksz_16.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_output_is_this_file",
+          "expected": "bailian_toc_trace.jsonl",
+          "observed": "bailian_toc_trace.jsonl",
+          "pass": true
+        },
+        {
+          "check": "manifest_block_tokens",
+          "expected": 512,
+          "observed": 512,
+          "pass": true
+        },
+        {
+          "check": "source_lines_equal_manifest_records",
+          "expected": 43058,
+          "observed": 43058,
+          "pass": true
+        },
+        {
+          "check": "converted_lines_equal_manifest_records",
+          "expected": 43058,
+          "observed": 43058,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_equal_manifest",
+          "expected": 43058,
+          "observed": 43058,
+          "pass": true
+        },
+        {
+          "check": "fresh_output_blocks_equal_manifest",
+          "expected": 120177,
+          "observed": 120177,
+          "pass": true
+        },
+        {
+          "check": "fresh_records_moved_by_sort_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_block_keys_differing_only_in_tokens_equal_manifest",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "fresh_conversion_byte_identical",
+          "expected": "identical",
+          "observed": "identical",
+          "pass": true
+        },
+        {
+          "check": "lfs_oid_matches_source_sha256",
+          "expected": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "observed": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "pass": true
+        },
+        {
+          "check": "timestamp_decreases",
+          "expected": 0,
+          "observed": 0,
+          "pass": true
+        },
+        {
+          "check": "chat_id_unique_per_record",
+          "expected": true,
+          "observed": true,
+          "pass": true
+        },
+        {
+          "check": "d16_states_counted_equal_output_blocks",
+          "expected": 2656400,
+          "observed": 2656400,
+          "pass": true
+        },
+        {
+          "check": "d16_input_tokens_equal_schema",
+          "expected": 100382715,
+          "observed": 100382715,
+          "pass": true
+        },
+        {
+          "check": "d512_states_counted_equal_output_blocks",
+          "expected": 120177,
+          "observed": 120177,
+          "pass": true
+        },
+        {
+          "check": "d512_input_tokens_equal_schema",
+          "expected": 100382715,
+          "observed": 100382715,
+          "pass": true
+        },
+        {
+          "check": "loader512_loads",
+          "expected": "loaded",
+          "observed": "loaded",
+          "pass": true
+        },
+        {
+          "check": "loader512_unique_states",
+          "expected": 120177,
+          "observed": 120177,
+          "pass": true
+        },
+        {
+          "check": "loader512_working_set_bytes",
+          "expected": 102480951296,
+          "observed": 102480951296,
+          "pass": true
+        },
+        {
+          "check": "loader512_block_occurrences",
+          "expected": 218859,
+          "observed": 218859,
+          "pass": true
+        },
+        {
+          "check": "loader512_total_input_tokens",
+          "expected": 100382715,
+          "observed": 100382715,
+          "pass": true
+        },
+        {
+          "check": "loader512_window_start_ms",
+          "expected": 4319678.399999999,
+          "observed": 4319678.399999999,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share",
+          "expected": 0.5015073063126455,
+          "observed": 0.5015073063126455,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_file_order",
+          "expected": 0.5015125163729632,
+          "observed": 0.5015125163729632,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40",
+          "expected": 0.5487161275845307,
+          "observed": 0.5487161275845307,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeat_share_last40_file_order",
+          "expected": 0.5487161275845307,
+          "observed": 0.5487161275845307,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens",
+          "expected": 50342665,
+          "observed": 50342665,
+          "pass": true
+        },
+        {
+          "check": "loader512_repeated_tokens_file_order",
+          "expected": 50343188,
+          "observed": 50343188,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_requests",
+          "expected": 20565,
+          "observed": 20565,
+          "pass": true
+        },
+        {
+          "check": "loader512_last40_input_tokens",
+          "expected": 52255426,
+          "observed": 52255426,
+          "pass": true
+        }
+      ],
+      "coarsening": {
+        "repeat_share_diff_16_minus_512": 0.07821984093576273,
+        "repeat_share_file_order_diff_16_minus_512": 0.07821505923604477,
+        "repeat_share_last40_diff_16_minus_512": 0.07426658429691102,
+        "repeat_share_last40_file_order_diff_16_minus_512": 0.07426658429691102,
+        "unique_states_ratio_16_over_512": 22.104063173485777,
+        "working_set_ratio_512_over_16": 1.186105617920054
+      },
+      "converted_path": "data/raw/qwen_bailian_512/bailian_toc_trace.jsonl",
+      "granularity": {
+        "16": {
+          "block_occurrences": 6293976,
+          "block_tokens": 16,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 205.9965181350708,
+              "l1_bytes": 216003005,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 205.9965181350708,
+              "l2_bytes": 216003005,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 205.9965181350708,
+              "l1_bytes": 216003005,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 823.9860744476318,
+              "l2_bytes": 864012022,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 823.9860744476318,
+              "l1_bytes": 864012022,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 823.9860744476318,
+              "l2_bytes": 864012022,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 823.9860744476318,
+              "l1_bytes": 864012022,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 3295.944296836853,
+              "l2_bytes": 3456048087,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 1647.9721488952637,
+              "l1_bytes": 1728024044,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 1647.9721488952637,
+              "l2_bytes": 1728024044,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 1647.9721488952637,
+              "l1_bytes": 1728024044,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 6591.888593673706,
+              "l2_bytes": 6912096174,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 52255426,
+          "last40_repeated_tokens": 32554227,
+          "last40_repeated_tokens_file_order": 32554227,
+          "last40_requests": 20565,
+          "records": 43058,
+          "repeat_share": 0.5797271472484082,
+          "repeat_share_file_order": 0.579727575609008,
+          "repeat_share_last40": 0.6229827118814417,
+          "repeat_share_last40_file_order": 0.6229827118814417,
+          "repeated_tokens": 58194585,
+          "repeated_tokens_file_order": 58194628,
+          "states_counted": 2656400,
+          "token_variant_keys": 0,
+          "total_input_tokens": 100382715,
+          "unique_states": 2656400,
+          "window_start_ms": 4319678.399999999,
+          "working_set_bytes": 86401202176
+        },
+        "512": {
+          "block_occurrences": 218859,
+          "block_tokens": 512,
+          "capacities": [
+            {
+              "cell": "l1=0.0025,l2x1",
+              "l1_blocks512": 244.33362770080566,
+              "l1_bytes": 256202378,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 244.33362770080566,
+              "l2_bytes": 256202378,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.0025,l2x4",
+              "l1_blocks512": 244.33362770080566,
+              "l1_bytes": 256202378,
+              "l1_fraction": 0.0025,
+              "l2_blocks512": 977.334511756897,
+              "l2_bytes": 1024809513,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.01,l2x1",
+              "l1_blocks512": 977.334511756897,
+              "l1_bytes": 1024809513,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 977.334511756897,
+              "l2_bytes": 1024809513,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.01,l2x4",
+              "l1_blocks512": 977.334511756897,
+              "l1_bytes": 1024809513,
+              "l1_fraction": 0.01,
+              "l2_blocks512": 3909.338047027588,
+              "l2_bytes": 4099238052,
+              "l2_multiplier": 4
+            },
+            {
+              "cell": "l1=0.02,l2x1",
+              "l1_blocks512": 1954.669023513794,
+              "l1_bytes": 2049619026,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 1954.669023513794,
+              "l2_bytes": 2049619026,
+              "l2_multiplier": 1
+            },
+            {
+              "cell": "l1=0.02,l2x4",
+              "l1_blocks512": 1954.669023513794,
+              "l1_bytes": 2049619026,
+              "l1_fraction": 0.02,
+              "l2_blocks512": 7818.676094055176,
+              "l2_bytes": 8198476104,
+              "l2_multiplier": 4
+            }
+          ],
+          "last40_input_tokens": 52255426,
+          "last40_repeated_tokens": 28673395,
+          "last40_repeated_tokens_file_order": 28673395,
+          "last40_requests": 20565,
+          "records": 43058,
+          "repeat_share": 0.5015073063126455,
+          "repeat_share_file_order": 0.5015125163729632,
+          "repeat_share_last40": 0.5487161275845307,
+          "repeat_share_last40_file_order": 0.5487161275845307,
+          "repeated_tokens": 50342665,
+          "repeated_tokens_file_order": 50343188,
+          "states_counted": 120177,
+          "token_variant_keys": 0,
+          "total_input_tokens": 100382715,
+          "unique_states": 120177,
+          "window_start_ms": 4319678.399999999,
+          "working_set_bytes": 102480951296
+        }
+      },
+      "identity": {
+        "converted": "bailian_toc_trace.jsonl",
+        "converted_lines": 43058,
+        "converted_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+        "first_differing_line": null,
+        "fresh": {
+          "block_keys_differing_only_in_tokens": 0,
+          "output_blocks": 120177,
+          "records": 43058,
+          "records_moved_by_sort": 0
+        },
+        "fresh_lines": 43058,
+        "lfs_oid": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+        "manifest": {
+          "block_keys_differing_only_in_tokens": 0,
+          "block_tokens": 512,
+          "output": "bailian_toc_trace.jsonl",
+          "output_blocks": 120177,
+          "output_sha256": "ea9d739ef754561e47ca8a98b82e41077e4d2b47cb56dfcb3d3e82802e9d8839",
+          "records": 43058,
+          "records_moved_by_sort": 0,
+          "source": "qwen_traceA_blksz_16.jsonl",
+          "source_block_tokens": 16,
+          "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+          "timestamp_unit": "ms"
+        },
+        "source": "qwen_traceA_blksz_16.jsonl",
+        "source_lines": 43058,
+        "source_sha256": "07cedc9ed8aff301994ac68ed4aede8123b7603673575eeba9dd677de663db17",
+        "upstream_commit": "5f7439c51ec248a0c585f7d90a41a6f57773b912"
+      },
+      "kind": "bailian",
+      "loader_crosscheck": {
+        "block_occurrences": 218859,
+        "last40_input_tokens": 52255426,
+        "last40_requests": 20565,
+        "repeat_share": 0.5015073063126455,
+        "repeat_share_file_order": 0.5015125163729632,
+        "repeat_share_last40": 0.5487161275845307,
+        "repeat_share_last40_file_order": 0.5487161275845307,
+        "repeated_tokens": 50342665,
+        "repeated_tokens_file_order": 50343188,
+        "total_input_tokens": 100382715,
+        "unique_states": 120177,
+        "window_start_ms": 4319678.399999999,
+        "working_set_bytes": 102480951296
+      },
+      "peak_rss_mib": 1095.58203125,
+      "prefix": {
+        "children_shorter_than_parent": 0,
+        "children_with_parent": 19957,
+        "ids16_after_multiple_predecessors": 16686,
+        "ids16_after_multiple_predecessors_share": 0.006594378535349244,
+        "ids16_at_multiple_positions": 52168,
+        "ids16_at_multiple_positions_share": 0.020617016626639062,
+        "ids16_distinct": 2530337,
+        "ids16_occurrences": 6293976,
+        "ids16_occurrences_new_position": 220196,
+        "ids16_occurrences_new_position_share": 0.03498519854540278,
+        "ids16_occurrences_new_predecessor": 81514,
+        "ids16_occurrences_new_predecessor_share": 0.012951113890488301,
+        "lcp_all_but_last": 18797,
+        "lcp_all_but_last_share": 0.9418750313173323,
+        "lcp_full": 1160,
+        "lcp_full_share": 0.058124968682667734,
+        "lcp_none": 0,
+        "lcp_none_share": 0.0,
+        "lcp_partial": 0,
+        "lcp_partial_share": 0.0,
+        "parents_single_block": 0
+      },
+      "schema": {
+        "chat_id_unique": true,
+        "distinct_chat_ids": 43058,
+        "distinct_timestamps": 42919,
+        "input_max": 89286,
+        "input_mean": 2331.337149890845,
+        "input_median": 1046.0,
+        "input_p95": 8808.150000000001,
+        "largest_timestamp_group": 2,
+        "max_timestamp_decimals": 3,
+        "multi_record_timestamp_groups": 139,
+        "output_mean": 430.47259510427796,
+        "output_median": 375.5,
+        "partial16_records": 40375,
+        "partial16_tokens": 325099,
+        "partial512_records": 42998,
+        "partial512_token_share": 0.10302453963314302,
+        "partial512_tokens": 10341883,
+        "records": 43058,
+        "records_in_multi_record_groups": 278,
+        "resolvable_parent_earlier_records": 19957,
+        "resolvable_parent_records": 19957,
+        "root_records": 23101,
+        "root_share": 0.5365088949788657,
+        "span_s": 7199.464,
+        "timestamp_decreases": 0,
+        "timestamp_max_s": 7199.464,
+        "timestamp_min_s": 0.0,
+        "total_input_tokens": 100382715,
+        "turn_buckets": {
+          "1": 23101,
+          "2": 9012,
+          "3-5": 8413,
+          "6-10": 2052,
+          ">10": 480,
+          "other": 0
+        },
+        "type_counts": {
+          "file": 1510,
+          "image": 1617,
+          "search": 8187,
+          "text": 31744
+        },
+        "unresolvable_parent_records": 0
+      },
+      "seconds": 8.617252887997893,
+      "section_seconds": {
+        "granularity_16": 5.659958152999025,
+        "granularity_512": 0.37759599999844795,
+        "identity": 0.3862638419996074,
+        "loader_crosscheck": 0.9009903240003041,
+        "parse": 0.7123481339986029,
+        "prefix_identity": 0.48006489600084024,
+        "schema": 0.06247489400266204
+      },
+      "source": "qwen_traceA_blksz_16.jsonl",
+      "source_path": "data/raw/qwen_bailian/qwen_traceA_blksz_16.jsonl",
+      "trace": "bailian_toc_trace",
+      "wall_seconds": 8.868621982997865
+    }
+  }
+}
