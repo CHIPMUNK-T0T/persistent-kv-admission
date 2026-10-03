@@ -119,16 +119,26 @@ class ArgumentTests(unittest.TestCase):
             paper = root / "paper"
             paper.mkdir()
             (paper / "anchor.csv").write_text("x\n")
+            # An empty publication directory for every case that does not test
+            # the paper directory itself: the defaults point at the real
+            # results/paper, whose files would refuse first ("already holds").
+            empty = root / "empty_paper"
+            empty.mkdir()
             cases = (
-                (["main", "a", "--run-dir", str(root / "r"), "--workers", "13"], "hard cap"),
-                (["main", "a", "--run-dir", str(root / "r"), "--workers", "0"], "positive"),
-                (["main", "a", "--run-dir", str(root / "exists")], "exists"),
+                (["main", "a", "--run-dir", str(root / "r"), "--paper-dir", str(empty),
+                  "--workers", "13"], "hard cap"),
+                (["main", "a", "--run-dir", str(root / "r"), "--paper-dir", str(empty),
+                  "--workers", "0"], "positive"),
+                (["main", "a", "--run-dir", str(root / "exists"), "--paper-dir", str(empty)],
+                 "exists"),
                 (["anchor", "t", "--run-dir", str(root / "r"), "--paper-dir", str(paper)],
                  "already holds"),
-                (["main", "a", "a", "--run-dir", str(root / "r")], "twice"),
-                (["smoke", "a", "--run-dir", str(root / "r"), "--workers16", "5"], "workers16"),
+                (["main", "a", "a", "--run-dir", str(root / "r"), "--paper-dir", str(empty)],
+                 "twice"),
+                (["smoke", "a", "--run-dir", str(root / "r"), "--paper-dir", str(empty),
+                  "--workers16", "5"], "workers16"),
                 (["granularity", "--trace16", "x", "--trace512", "y", "--run-dir",
-                  str(root / "r"), "--workers", "5"], "at most 4"),
+                  str(root / "r"), "--paper-dir", str(empty), "--workers", "5"], "at most 4"),
                 (["granularity", "--trace16", "x", "--trace512", "y", "--run-dir",
                   str(root / "r"), "--paper-dir", str(paper), "--main-dir", str(paper)],
                  "own directory"),
