@@ -50,6 +50,16 @@ counted separately); their [findings](../../docs/horizon-control-findings.md)
 state the readings and their limits, and `scripts/tabulate_horizon_control.py`
 and `scripts/tabulate_horizon_fill.py` print every cited table.
 
+The [matched-horizon diagnosis output](matched_horizon_diagnosis_001/README.md)
+re-reads the 120 saved `pi0` populations with the reuse boundary at 60, 150, 300
+and 600 s (no replay; the 600 s tables reproduce the ranker-error diagnosis
+exactly), and the [matched class-order output](matched_class_order_001/README.md)
+holds the class-order arms at each cell's matched horizon (120 replays, 40 of
+which reproduce the published 600 s arms); their
+[findings](../../docs/matched-horizon-findings.md) state the readings and their
+limits, and `scripts/tabulate_matched_horizon_diagnosis.py` and
+`scripts/tabulate_matched_class_order.py` print every cited table.
+
 ## Files
 
 - `online_policy_comparison.csv` and `online_policy_comparison.png`: causal online policies only, including 2-hit + LRU. The offline comparator is excluded.

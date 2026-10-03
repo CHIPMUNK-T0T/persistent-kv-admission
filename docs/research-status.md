@@ -17,6 +17,9 @@ fresh-stream実験は[事前登録](counterfactual-randomness-plan.md)に沿っ�
 [結果](ranker-error-diagnosis-findings.md)を収録した。
 exactな再利用labelの時間範囲（horizon）とclass内順序の対照も、[事前登録](horizon-control-plan.md)と、
 その結果を見てから登録した[grid補間](horizon-fill-plan.md)に沿って完了し、[結果](horizon-control-findings.md)を収録した。
+続いて、保存ログを容量に合うhorizonで再採点する[診断](matched-horizon-diagnosis-plan.md)と、合うhorizonの
+classをresidentに与える[class-order対照](matched-class-order-plan.md)（実行前のaddendumで新規cellを8と訂正）を完了し、
+[結果](matched-horizon-findings.md)を収録した。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -31,7 +34,7 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 将来のリクエスト列そのものは固定する。研究目的は一貫して有限容量でのretention価値の選択であり、
 現在は目標を変える段階ではなく、既存の選択と説明の検証を深めている。
 
-2026-10-03時点の整理。問いは「有限容量の階層KV cacheで再利用を増やすために、どの保持判断について、どの時間範囲の将来利用を、どの粒度で予測する必要があるか」に絞り、exactな将来情報で上限を測る対照を重ねている。判断はresident evictionの側にある（all16で12/12、leaf16でも12/12）。粒度は、事後にgridから選んだ容量に合うhorizonの1 bit（h秒以内に再利用されるか）とrecency tie-breakの組で、sampled-16のgreedy exact `next_use` labelに届く（登録gridで8/12、結果を見てから登録した補間gridで残り4/4、合算しない。6 cellでは上回る）。recencyという順序は使っており、比較先は最適解ではない。時間範囲はL2容量とともに伸びる（60、150、300、600秒。Phase 0.9の単層oracle sweepと同じ向き）。凍結rankerの不足については、600秒境界での誤りの99%超が再利用classの見分けであること、600秒のclassを与えると境界が合う6 cellで94–104%回復することまでが分かっている。容量に合う境界での見分けが不足の中身かは未確認で、保存ログの再採点（[計画](matched-horizon-diagnosis-plan.md)）と合うhorizonのclass-order対照（[計画](matched-class-order-plan.md)）を事前登録した。未測定は、学習器がその1 bitをどれだけ当てられるか、horizonを事前に決められるか、別traceでの再現である。
+2026-10-03時点の整理。問いは「有限容量の階層KV cacheで再利用を増やすために、どの保持判断について、どの時間範囲の将来利用を、どの粒度で予測する必要があるか」に絞り、exactな将来情報で上限を測る対照を重ねている。判断はresident evictionの側にある（all16で12/12、leaf16でも12/12）。粒度は、事後にgridから選んだ容量に合うhorizonの1 bit（h秒以内に再利用されるか）とrecency tie-breakの組で、sampled-16のgreedy exact `next_use` labelに届く（登録gridで8/12、結果を見てから登録した補間gridで残り4/4、合算しない。6 cellでは上回る）。recencyという順序は使っており、比較先は最適解ではない。時間範囲はL2容量とともに伸びる（60、150、300、600秒。Phase 0.9の単層oracle sweepと同じ向き）。凍結rankerの不足については、600秒境界での誤りの99%超が再利用classの見分けであること、600秒のclassを与えると境界が合う6 cellで94–104%回復することまでが分かっている。容量に合う境界のclassをresidentに与える対照（[結果](matched-horizon-findings.md)）では、1%の4 cellで不足の90–98%が回復し（600秒classでは45–61%）、0.25%×1では73–81%にとどまって残りはrankerのclass内順序（recencyの順序なら103–106%）、2%以上では全回復だった。合うclassの中ではrankerの順序はrecencyより悪く（8/12で一貫して損。600秒classでは9/12で得）、rankerの拒否規則はlabelの拒否より最大4.1点劣る。保存ログ上では、合う境界での誤りはrecencyより0.25%×1で少なく（0.64倍）、1%の4 cellで多い（2.1–2.3倍）。未測定は、学習器がその1 bitをどれだけ当てられるか、horizonを事前に決められるか、別traceでの再現である。
 
 ## 仮説と証拠の台帳
 
@@ -57,7 +60,8 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 | 凍結rankerの誤りは、再利用されるstateどうしの順序の誤りである | 否定（自身の判断ログ上では）。label超過の99.3%以上は、候補に再利用されないstateがあるのに600秒以内に再利用されるstateを退去させた判断から来る。全候補が再利用され順序が問題になる判断は0.3%以下。判断の69–87%は参照とtie-breakだけが違う。同じ候補集合で比べると、この種の退去をrecencyより減らせているのは9/12 cellで、小容量の会話traceの3 cellではrecencyより多い。exact labelが保つstore上では、horizon対照により、事後に選んだ容量に合うhorizonの1 bitとrecency tie-breakの組がgreedy exact `next_use` labelに届くことが12 cellすべてで示された（うち4 cellは補間gridで）。recencyという順序は使っており、比較先は最適解ではない。 |
 | 二値（600秒以内に再利用されるか）が正確に分かれば十分 | 600秒という境界に依る。exactな二値labelは1%×4と2%×4では`next_use` labelと同じ効用に届くが、残り8 cellでは下回り、最小cellではlabelのLRUに対する利得の82%を失う。この不足はworking set比と単調に対応するが、比との照合は両方の結果を見た後に行った。 |
 | 「h秒以内に再利用されるか」の1 bitは、hが容量に合えば`next_use` labelに届く | 支持（exact情報の範囲で）。登録した5点のgrid {6, 15, 60, 300, 600}秒では、labelのLRUに対する利得の90%以上に届くhがあるcellが8/12。届かなかった4 cell（L2容量1%）は、結果を見てから登録した補間（90–240秒、予測「4/4で届く」）で4/4、最小は4 cellとも150秒。合う horizon はL2容量とともに伸びる（60、150、300、600秒）。隣のgrid点では利得の6–85%を失う。6 cellでは1 bitが`next_use` labelを全seedで上回る（0.29–0.59点）。 | [事前登録](horizon-control-plan.md)、[補間の事前登録](horizon-fill-plan.md)、[結果](horizon-control-findings.md)。どのhも実行後にgridから選んだもので、容量から事前に決められることや学習器が当てられることは示していない。8/12と4/4は合算しない。 |
-| 凍結rankerの不足は、再利用classの見分けにあり、class内の順序ではない | 支持（600秒classの範囲で）。residentにexactな600秒の再利用classを与えると、その境界が合う6 cellではexact labelをevictionに使った回復分の94–104%、合わない6 cellでは33–61%を回復する。class内ではrankerのscoreがrecencyより良いcellが9/12。合わない6 cellでの不足はclass境界の誤りで、順序に帰すことはできない。 | 同上。cellごとに合う horizon のclassを与えるarmは未実行。 |
+| 凍結rankerの不足は、再利用classの見分けにあり、class内の順序ではない | 容量による。residentにexactな600秒の再利用classを与えると、その境界が合う6 cellではexact labelをevictionに使った回復分の94–104%、合わない6 cellでは33–61%を回復する。合うhorizonのclassを与えると、新規8 cellのうち6で90%以上（1%の4 cellで90–98%、2%×1で103%）、0.25%×1では73–81%で予測「8/8」は外れた。0.25%×1の残りはclass内順序で、recencyの順序なら103–106%。合うclassの中ではrankerの順序はrecencyより一貫して悪いcellが8/12（600秒classでは良いcellが9/12）。 | 同上、[合うhorizonの対照](matched-horizon-findings.md)。h*は同じtraceのgridから事後に選んだもの。新規8と再現4は合算しない。 |
+| 凍結rankerは、容量に合う境界での再利用classをrecencyより見分けられない | 容量による（保存ログ上）。合う境界での「再利用されるstateを退去させ非再利用候補を残す」判断は、0.25%×1（60秒）ではrecencyの0.64倍、1%の4 cell（150秒）では2.1–2.3倍、2%×1（300秒）では1.04倍と0.90倍。600秒fitのscoreの判断内分離は、h*のbitで600秒のbitより低いcellが8中6（登録予測）、0.25%×1では600秒のbitの分離が偶然並み（0.50）で60秒のbitが上回る。 | [事前登録](matched-horizon-diagnosis-plan.md)、[結果](matched-horizon-findings.md)。凍結rankerの自身のstoreのログで、exact classが保つstoreの候補集合ではない。自身のstore上の統計は、class-kept store上の順序の価値を予測しない（0.25%×1で逆向き）。 |
 | 差がeviction側にあるのはall16の到着条件の産物である | 否定。leaf16でもeviction-locatedが12/12で、label evictionだけで差の97–100%を回復する。ただしleaf16では到着が候補になる判断が少数（0.25%×1で約半分、他は3–18%）で、「admissionは重要でない」とは区別できない。 | 同上。 |
 | 自己再利用ゼロ候補の価値差は保持byte-secondsだけで説明できる | 同一容量1 MiBの2候補を固定して比較すると、保持byte-seconds差と実現`ΔQ600`の単純な相関はほぼゼロ。629/640ペアで後続victim差が最初のhit差より先、両候補が600秒前に除去された497ペア中491ペアで報酬差がその後も続く。単一の保持時間だけでは実現値を要約しにくい。ただし媒介効果やexpected `Q`の差を証明しない。 | [保持時間の事前登録](counterfactual-residence-plan.md)、[結果](counterfactual-residence-findings.md)。旧16 streamを再計測した機構診断であり独立sampleではない。 |
 

@@ -543,3 +543,21 @@ class its order beats recency in 9/12. Under leaf-only eligibility the gap is
 eviction-located in 12/12, with the arrival a candidate in a minority of
 decisions. Nothing predicts the horizon before the fact, and no learned
 predictor of the bit has been measured.
+
+Outcome of the matched-horizon follow-ups ([findings](matched-horizon-findings.md);
+[diagnosis plan](matched-horizon-diagnosis-plan.md), [class-order plan](matched-class-order-plan.md)
+with a pre-run addendum correcting its own count of eight new cells): on the
+frozen ranker's own logs re-read at the capacity-matched horizon `h*`, the
+label excess is avoidable reusable eviction in 24/24, and the `next_use`
+ranker makes that eviction 0.64× as often as recency at 0.25%×1 (60 s) and
+2.1–2.3× as often at the four 1% cells (150 s); its within-decision
+separation of the `h*`-bit is below that of the 600-second bit in 6/8 (the
+registered prediction), the two exceptions being 0.25%×1 where the 600-second
+separation is at chance. In replay (120 replays, 40 reproducing the published
+600-second arms exactly), the exact class at `h*` on residents with the
+ranker's admission and order recovers at least 90% of the exact label's
+eviction gain in 6/8 new cells — the prediction of 8/8 failed at 0.25%×1 (73%
+and 81%) — and 4/4 reproduced; recency within the matched class recovers it in
+8/8 new, the ranker's order within the class is a consistent loss against
+recency in 8/12 (a gain in 9/12 at 600 s), and the label's admission is above
+the ranker's by up to 4.1 points.
