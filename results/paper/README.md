@@ -104,6 +104,17 @@ Qwen-Bailian traces (138/138 checks; no cache policy is run and nothing is
 fitted); its [findings](../../docs/bailian-input-audit.md) state what the
 coarsening changes, and `scripts/audit_bailian_inputs.py` regenerates it.
 
+The [Bailian external-check output](bailian_external_check_001/README.md) holds
+the Mooncake reproduction anchor (70/70 published rows reproduced), the
+512-token smoke (no utility) and the main run of the
+[pre-registered check](../../docs/bailian-external-check-plan.md): 2,448 replays
+on the four Qwen-Bailian traces at 512-token blocks, nine checks passing, with
+the counts of the seven registered predictions in `readings.csv` (2–6 hold, 1
+and 7 do not). Every arm reads the trace's future and nothing is fitted; the
+16-token control was not run. `scripts/run_bailian_external_check.py`
+regenerates it and `scripts/tabulate_bailian_external_check.py` prints every
+table. The findings are under review.
+
 ## Files
 
 - `online_policy_comparison.csv` and `online_policy_comparison.png`: causal online policies only, including 2-hit + LRU. The offline comparator is excluded.

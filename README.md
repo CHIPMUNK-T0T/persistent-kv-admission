@@ -25,9 +25,10 @@ selection information; a deployable policy, a horizon selected before test
 results and independent-workload validation remain open. Toward that
 validation, the [Bailian input audit](docs/bailian-input-audit.md) checks the
 four Qwen-Bailian traces and their 512-token conversion (138/138 checks, no
-replay), and the [external-workload check plan](docs/bailian-external-check-plan.md)
-is pre-registered (agreed 2026-10-03); nothing has been replayed on those
-traces. The Japanese
+replay), and the pre-registered [external-workload check](docs/bailian-external-check-plan.md)
+has been run ([output](results/paper/bailian_external_check_001/README.md):
+2,448 replays, every check passes; of the seven registered predictions, 2–6
+hold and 1 and 7 do not). Its findings are under review. The Japanese
 [2026-10-03 next-phase handoff](docs/next-phase-handoff-20261003.md) sets out the
 next planning step. The earlier [2026-09-27 research handoff](docs/strategy-handoff-20260927.md)
 records the strategy at that stage. Neither handoff is a new preregistered experiment.
@@ -128,7 +129,7 @@ reports; this page states the current interpretation.
 | Residence mechanism diagnostic | [pre-registration](docs/counterfactual-residence-plan.md), [findings](docs/counterfactual-residence-findings.md), and [paper output](results/paper/counterfactual_residence_001/README.md). It instruments the same states/streams; full event logs are ignored. |
 | Sampling-mechanism control | [pre-registration](docs/mechanism-control-plan.md), [findings](docs/mechanism-control-findings.md), and [paper output](results/paper/mechanism_control_001/README.md). A fixed four-rung score ladder under all-resident / leaf-only eligibility at widths 16 / 64; nothing is fitted. |
 | Matched-horizon checks | [evaluation-window pre-registration](docs/tail-window-check-plan.md), [class-order mix pre-registration](docs/class-order-mix-plan.md), [leaf-eligibility pre-registration](docs/leaf-matched-horizon-plan.md) with its pre-run addendum, [findings](docs/matched-horizon-checks-findings.md), and paper output for the [evaluation window](results/paper/tail_window_check_001/README.md), the [class-order mix](results/paper/class_order_mix_001/README.md) and the [leaf-eligibility check](results/paper/leaf_matched_horizon_001/README.md). The seven arms counted on three windows, three within-class arms, and the matched-horizon arms under `leaf16`; 840 replays; nothing is fitted. |
-| External-workload check (Bailian) | [input audit](docs/bailian-input-audit.md) with its [paper output](results/paper/bailian_input_audit_001/README.md) (`scripts/audit_bailian_inputs.py`), and the [pre-registration](docs/bailian-external-check-plan.md), agreed 2026-10-03. No replay yet, nothing fitted. |
+| External-workload check (Bailian) | [input audit](docs/bailian-input-audit.md) with its [paper output](results/paper/bailian_input_audit_001/README.md) (`scripts/audit_bailian_inputs.py`), the [pre-registration](docs/bailian-external-check-plan.md), agreed 2026-10-03, and the [main run output](results/paper/bailian_external_check_001/README.md) (`scripts/run_bailian_external_check.py`, `scripts/tabulate_bailian_external_check.py`). Findings under review; nothing fitted. |
 | Working-set ratio check | [pre-registration](docs/working-set-ratio-plan.md) with its pre-computation addendum, [findings](docs/working-set-ratio-findings.md), and [paper output](results/paper/working_set_ratio_001/README.md). Arithmetic on the L1 offer stream and on published sign outcomes; no L2 policy is run and nothing is fitted. |
 | Error-location control | [pre-registration](docs/error-location-plan.md) with its pre-smoke addendum, [findings](docs/error-location-findings.md), and [paper output](results/paper/error_location_001/README.md). Eighteen arms under the published mechanism (hybrids by decision type, Gaussian label noise, victim swaps, the `pi3` and `binary` rankers); 1,080 replays; nothing is fitted. |
 | Ranker-error diagnosis | [pre-registration](docs/ranker-error-diagnosis-plan.md) with its pre-computation addendum, [findings](docs/ranker-error-diagnosis-findings.md), and [paper output](results/paper/ranker_error_diagnosis_001/README.md). A read-only re-scoring of 240 saved decision populations; no replay, nothing fitted. |

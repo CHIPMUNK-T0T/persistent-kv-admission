@@ -26,7 +26,7 @@ classをresidentに与える[class-order対照](matched-class-order-plan.md)（�
 三つの[事前登録](tail-window-check-plan.md)（[混合](class-order-mix-plan.md)、[leaf](leaf-matched-horizon-plan.md)、
 leafは実行前のaddendumで再現検査の内容を訂正）に沿って完了し、[結果](matched-horizon-checks-findings.md)を収録した。
 独立workloadでの確認に向けて、Qwen-Bailian 4 traceの[入力監査](bailian-input-audit.md)（138/138検査合格、replayなし）を終え、
-[外部workload確認の事前登録](bailian-external-check-plan.md)を2026-10-03に合意して単独でcommitした。replay・fitはまだ行っていない。
+[外部workload確認の事前登録](bailian-external-check-plan.md)を2026-10-03に合意して単独でcommitした。本実行は完了し、[出力](../results/paper/bailian_external_check_001/README.md)を収録した（2,448 replay、検査はすべて合格。登録した七つの予測のうち2〜6は成立、1と7は不成立）。解析はレビュー中で、fitは行っていない。
 対象は固定Mooncake FAST'25トレースの正確なprefix再利用であり、報酬は回避した
 prefill token数である。GPU時間や実運用上の速度改善は測っていない。
 
@@ -65,7 +65,7 @@ prefill token数である。GPU時間や実運用上の速度改善は測って�
 
 残る中心的な問いは、(1) 別workloadで関係が再現するか、(2) horizonと機構を結果を見る前に固定できるか、(3) その条件で必要な再利用classを履歴から学習し、実際の回避token増加へつなげられるか、の三つとする。約59分のMooncake 2 traceから時間・日単位のpersistent reuseや実機TTFTは主張しない。I/O最適化へ範囲を広げない。
 
-Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)を終え、[事前登録](bailian-external-check-plan.md)を合意した段階である（2026-10-03、未決五点は案のとおり。実装前の訂正は計画末尾に記録）。計画はMooncakeのh*表の移植（主解析）と固定grid内の存在（副解析）を分け、all16とleaf16を各機構の参照で評価し、学習モデルは使わず乱数のclass内順序を対照に加える。学習モデルの移植はA/Bの結果を報告した後に別途登録し、履歴fitも別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。引継ぎ自体は事前登録ではない。新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
+Bailianによる独立workload確認は、[入力監査](bailian-input-audit.md)を終え、[事前登録](bailian-external-check-plan.md)を合意して本実行まで終え、解析のレビュー中である（2026-10-03、未決五点は案のとおり。実装前の訂正は計画末尾に記録）。計画はMooncakeのh*表の移植（主解析）と固定grid内の存在（副解析）を分け、all16とleaf16を各機構の参照で評価し、学習モデルは使わず乱数のclass内順序を対照に加える。学習モデルの移植はA/Bの結果を報告した後に別途登録し、履歴fitも別の計画とする。[Claudeへの引継ぎ](next-phase-handoff-20261003.md)に範囲と停止点を記した。引継ぎ自体は事前登録ではない。新規fit・replayはまだ実施していない。追加実験は「何を予測し、どの候補・選択規則へ渡すべきかの判断が変わるか」で選び、Mooncake内の診断を無制限に増やさない。
 
 ### 論文の中心命題と新規性の位置づけ（2026-10-03、Bailian確認前）
 
