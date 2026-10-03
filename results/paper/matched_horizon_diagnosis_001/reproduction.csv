@@ -1,0 +1,4 @@
+table,published_path,published_sha256,published_rows,rows_at_600,key_columns,common_columns,published_columns_absent,missing_rows,extra_rows,duplicate_keys,compared_values,differing_values,first_difference,equal
+classes,results/paper/ranker_error_diagnosis_001/classes.csv,9256b9ffabdd8c88f5796412de10d433fc84560d332edd708a4d28f5b32b8153,288,288,trace;l1_fraction;l2_multiplier;target;subset;class,18,,0,0,0,5184,0,,True
+rates,results/paper/ranker_error_diagnosis_001/rates.csv,632c169705efa0fd273792daf8f141aea6a318af685bd8b1b49194e219467efa,48,48,trace;l1_fraction;l2_multiplier;target;rate,17,,0,0,0,816,0,,True
+rates_seeds,results/paper/ranker_error_diagnosis_001/rates_seeds.csv,328efa1d0bc6a4d7386675e455eac8f08bdc2bdeff476c3e7dffa0a18c1daefe,240,240,trace;l1_fraction;l2_multiplier;target;seed;rate,11,,0,0,0,2640,0,,True
