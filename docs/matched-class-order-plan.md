@@ -142,3 +142,22 @@ five seed-paired values. Every value of every arm is reported.
    code commits and the hashes of the traces and of every table read.
 5. Report the four readings next to the horizon control's, including a
    failed prediction.
+
+## Addendum, before any replay
+
+Written when the review of the implementation found a miscount above, and
+committed before any replay. The "Why" section counts six trace × cell where
+the 600-second class fell short in reading 2 of the horizon control. The
+table of `h*` puts 2%×1 at 300 s as well, so the trace × cell with `h*` <
+600 s are **eight** — 0.25%×1, 0.25%×4, 1%×1 and 2%×1 on both traces — and
+those with `h*` = 600 s are **four** (1%×4 and 2%×4 on both traces), that is
+40 reproduction replays, not 60. The table rule stands: `h*` is the
+minimiser of `S_h` on the grids run, and 2%×1 has `S_300` below `S_600`.
+
+Reading 1 is therefore counted out of 8 new and out of 4 reproduced, and the
+prediction is `R_h* ≥ 0.9` in all eight. Because 2%×1 already read
+"suffices" at 600 s (`R` 0.938 / 0.956), the prediction is easier to meet
+there; the count over the six trace × cell that read "the ranker's order
+costs" at 600 s is reported beside the eight, and the two are never merged.
+Reading 4 covers the eight trace × cell with `h*` < 600 s. The 120 replays,
+the arms, the map and the other readings are unchanged.
